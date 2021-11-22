@@ -1,0 +1,27 @@
+{
+  "name": "freescout/ljpccalendarmodule",
+  "description": "",
+  "authors": [
+    {
+      "name": "FreeScout",
+      "email": "support@freescout.net"
+    }
+  ],
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Modules\\LJPcCalendarModule\\Providers\\LJPcCalendarModuleServiceProvider"
+      ],
+      "aliases": {
+      }
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Modules\\LJPcCalendarModule\\": ""
+    }
+  },
+  "require": {
+    "ext-json": "*"
+  }
+}
