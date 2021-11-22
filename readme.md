@@ -4,14 +4,6 @@ This module adds a calendar module to FreeScout.
 
 <a href="https://www.buymeacoffee.com/Lars-" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-orange.png" alt="Buy Me A Coffee" height="60" style="height: 60px !important;width: 217px !important;" ></a>
 
-## Screenshots
-
-![Calendar card](repo/screenshot-1.jpg)
-![Settings](repo/screenshot-2.jpg)
-![Overview](repo/screenshot-3.jpg)
-![New calendar item](repo/screenshot-4.jpg)
-![Calendar item overview](repo/screenshot-5.jpg)
-
 ## Functions
 
 - You can add unlimited calendars via the settings page.
@@ -53,3 +45,11 @@ via [info@ljpc.nl](mailto:info@ljpc.nl?subject=Calendar%20module) or [www.ljpc.s
 This module took us a lot of time, but we decided to make it open source anyway. If we helped you or your business,
 please consider donating.
 [Click here](https://www.buymeacoffee.com/Lars-) to donate.
+
+## Screenshots
+
+![Calendar card](repo/screenshot-1.jpg)
+![Settings](repo/screenshot-2.jpg)
+![Overview](repo/screenshot-3.jpg)
+![New calendar item](repo/screenshot-4.jpg)
+![Calendar item overview](repo/screenshot-5.jpg)
