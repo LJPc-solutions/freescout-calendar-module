@@ -5,7 +5,6 @@ namespace Modules\LJPcCalendarModule\Providers;
 use Config;
 use Eventy;
 use Helper;
-use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Support\ServiceProvider;
 use Module;
 use Modules\LJPcCalendarModule\Console\SyncICS;
@@ -86,6 +85,17 @@ class LJPcCalendarModuleServiceProvider extends ServiceProvider {
 		Eventy::addAction( 'menu.append', function ( $mailbox ) {
 			echo View::make( 'calendar::partials/menu', [] )->render();
 		} );
+
+		Eventy::addFilter( 'menu.selected', function ( $menu ) {
+			if ( auth()->user() && auth()->user()->isAdmin() ) {
+				$menu['calendar'] = [
+					'ljpccalendarmodule.index',
+				];
+			}
+
+			return $menu;
+		} );
+
 		Eventy::addFilter( 'dashboard.after', function () {
 			$allCalendars = [];
 
@@ -100,15 +110,25 @@ class LJPcCalendarModuleServiceProvider extends ServiceProvider {
 
 			return View::make( 'calendar::partials/dash_card', [ 'calendars' => json_encode( $allCalendars ) ] )->render();
 		} );
-		Eventy::addFilter( 'menu.selected', function ( $menu ) {
-			if ( auth()->user() && auth()->user()->isAdmin() ) {
-				$menu['calendar'] = [
-					'ljpccalendarmodule.index',
-				];
-			}
 
-			return $menu;
+		//Fetch ICS every minutes
+		Eventy::addFilter( 'schedule', function ( $schedule ) {
+			$schedule->command( 'calendar:sync-ics' )->everyMinute();
+
+			return $schedule;
 		} );
+
+		Eventy::addAction( 'conversation.action_buttons', function ( $conversation, $mailbox ) {
+			$allCalendars = [];
+			foreach ( Calendar::all() as $calendar ) {
+				/* @var Calendar $calendar */
+				if ( $calendar->isVisible() && ! $calendar->isExternal() ) {
+					$allCalendars[] = $calendar;
+				}
+			}
+			echo View::make( 'calendar::partials/conversation_button', [ 'calendars' => $allCalendars, 'conversation' => $conversation ] )->render();
+		}, 10, 2 );
+
 		$this->registerSettings();
 	}
 
@@ -194,13 +214,6 @@ class LJPcCalendarModuleServiceProvider extends ServiceProvider {
 
 			return $request;
 		}, 20, 3 );
-
-		//Fetch ICS every minutes
-		Eventy::addFilter( 'schedule', function ( $schedule ) {
-			$schedule->command( 'calendar:sync-ics' )->everyMinute();
-
-			return $schedule;
-		} );
 	}
 
 	/**

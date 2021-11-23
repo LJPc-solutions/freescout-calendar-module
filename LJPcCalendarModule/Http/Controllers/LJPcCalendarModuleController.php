@@ -81,7 +81,7 @@ class LJPcCalendarModuleController extends Controller {
 		}
 		event( new CalendarUpdatedEvent() );
 
-		return Response::json( [ 'success' => true ], 200 );
+		return Response::json( [ 'status' => 'success' ], 200 );
 	}
 
 	private function createItem( array $calendar, array $schedule ) {
