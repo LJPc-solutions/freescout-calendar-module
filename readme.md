@@ -24,6 +24,15 @@ This module adds a calendar module to FreeScout.
 5. Activate the module via the Modules page in FreeScout.
 6. Add at least one calendar via the Settings page in FreeScout.
 
+## Update instructions
+
+1. Download the latest module zip file via the releases card on the right.
+2. Transfer the zip file to the server in the Modules folder of FreeScout.
+3. Remove the folder LJPcCalendarModule
+4. Unpack the zip file.
+5. Remove the zip file.
+6. Activate the module via the Modules page in FreeScout.
+
 ## The future of this module
 
 Feel free to add your own features by sending a pull request.
@@ -31,7 +40,6 @@ Feel free to add your own features by sending a pull request.
 What we would like to add in the future ourselves:
 
 - Automatic ICS file creation; add all your calendars at once to your favorite client.
-- Webhook support; automatically add calendar items via webhooks.
 - API support; add calendar items via the FreeScout API.
 - Responsiveness
 
@@ -53,3 +61,5 @@ please consider donating.
 ![Overview](repo/screenshot-3.jpg)
 ![New calendar item](repo/screenshot-4.jpg)
 ![Calendar item overview](repo/screenshot-5.jpg)
+![Add to calendar in conversation action bar](repo/screenshot-6.jpg)
+![Add to calendar modal](repo/screenshot-7.jpg)
