@@ -43,7 +43,9 @@ class SyncICS extends Command {
 			try {
 				$url = $calendar->url;
 
-				$ics    = new ICal( $url );
+				$ics            = new ICal( $url );
+				$calendar->name = $ics->calendarName();
+
 				$events = $ics->events();
 				if ( count( $events ) === 0 ) {
 					throw new Exception( 'No events in ICal, skipping...' );
@@ -71,7 +73,7 @@ class SyncICS extends Command {
 					$hashEventList[] = $calendarItem;
 				}
 
-				$dataHash = md5( serialize( $hashEventList ) );
+				$dataHash = md5( $calendar->name . serialize( $hashEventList ) );
 				if ( $dataHash === $calendar->synchronization_token ) {
 					throw new Exception( 'Calendar has not changed since last sync' );
 				}
