@@ -246,3 +246,9 @@
     text-align: center;
     color: #000;
 }
+
+.ljpc_calendar_module img.avatar {
+    width: 14px;
+    margin-right: 2px;
+    border-radius: 50%;
+}
