@@ -2,6 +2,8 @@
 
 namespace Modules\LJPcCalendarModule\Http\Controllers;
 
+use App\Conversation;
+use App\Thread;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Foundation\Application;
 use Illuminate\Routing\Controller;
@@ -73,7 +75,11 @@ class LJPcCalendarModuleController extends Controller {
 		}
 
 		if ( $data['action'] === 'create' ) {
-			$this->createItem( $data['calendar'], $data['schedule'] );
+			if ( isset( $data['conversation_id'] ) ) {
+				$this->createItem( $data['calendar'], $data['schedule'], (int) $data['conversation_id'] );
+			} else {
+				$this->createItem( $data['calendar'], $data['schedule'] );
+			}
 		} elseif ( $data['action'] === 'update' ) {
 			$this->updateItem( $data['schedule']['id'], $data['changes'] );
 		} elseif ( $data['action'] === 'delete' ) {
@@ -84,7 +90,7 @@ class LJPcCalendarModuleController extends Controller {
 		return Response::json( [ 'status' => 'success' ], 200 );
 	}
 
-	private function createItem( array $calendar, array $schedule ) {
+	private function createItem( array $calendar, array $schedule, int $conversationId = null ) {
 		$calendarItem              = new CalendarItem();
 		$calendarItem->calendar_id = $calendar['id'];
 		$calendarItem->author_id   = Auth::user()->id;
@@ -97,7 +103,32 @@ class LJPcCalendarModuleController extends Controller {
 		$calendarItem->start    = date( DATE_ATOM, $schedule['start'] );
 		$calendarItem->end      = date( DATE_ATOM, $schedule['end'] );
 
+		$calendarItem->body = __( 'empty' ) . '<br />' . __( 'Created by' ) . ': <img class="avatar" src="' . Auth::user()->getPhotoUrl() . '" alt="'. Auth::user()->getFullName() .'">' . Auth::user()->getFullName();
+
 		$calendarItem->save();
+
+		if ( $conversationId !== null ) {
+			$conversation = Conversation::find( $conversationId );
+			if ( $conversation !== null ) {
+				$action_type        = CalendarItem::ACTION_TYPE_ADD_TO_CALENDAR;
+				$created_by_user_id = auth()->user()->id;
+				Thread::create( $conversation, Thread::TYPE_LINEITEM, '', [
+					'user_id'            => $conversation->user_id,
+					'created_by_user_id' => $created_by_user_id,
+					'action_type'        => $action_type,
+					'source_via'         => Thread::PERSON_USER,
+					'source_type'        => Thread::SOURCE_TYPE_WEB,
+					'meta'               => [
+						'calendar_item_id' => $calendarItem->id,
+						'calendar_id'      => $calendar['id'],
+					],
+				] );
+
+				$calendarItem->body = __( 'empty' ) . '<br />' . __( 'Source' ) . ': <a href="' . $conversation->url() . '">#' . $conversation->number . ' '
+				                      . $conversation->subject . '</a>' . '<br />' . __( 'Created by' ) . ': ' . Auth::user()->getFullName();
+				$calendarItem->save();
+			}
+		}
 	}
 
 	private function updateItem( string $scheduleId, array $changes ) {

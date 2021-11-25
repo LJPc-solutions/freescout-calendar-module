@@ -9,6 +9,7 @@ use Illuminate\Support\ServiceProvider;
 use Module;
 use Modules\LJPcCalendarModule\Console\SyncICS;
 use Modules\LJPcCalendarModule\Entities\Calendar;
+use Modules\LJPcCalendarModule\Entities\CalendarItem;
 use Modules\LJPcCalendarModule\External\ICal\ICal;
 use View;
 
@@ -128,6 +129,28 @@ class LJPcCalendarModuleServiceProvider extends ServiceProvider {
 			}
 			echo View::make( 'calendar::partials/conversation_button', [ 'calendars' => $allCalendars, 'conversation' => $conversation ] )->render();
 		}, 10, 2 );
+
+		Eventy::addFilter( 'thread.action_text', function ( $did_this, $thread, $conversation_number, $escape ) {
+			if ( $thread->action_type !== CalendarItem::ACTION_TYPE_ADD_TO_CALENDAR ) {
+				return $did_this;
+			}
+			$meta = $thread->getMetas();
+
+			$calendar     = Calendar::find( (int) $meta['calendar_id'] );
+			$calendarItem = CalendarItem::find( (int) $meta['calendar_item_id'] );
+			$person       = $thread->getActionPerson( $conversation_number );
+
+			if ( $calendar === null ) {
+				$did_this = __( 'Added to a calendar, but the calendar has been deleted by now.' );
+			} elseif ( $calendarItem === null ) {
+				$did_this = __( 'Added to calendar ":calendar" by :person, but deleted by now.', [ 'calendar' => $calendar->name, 'person' => $person ] );
+			} else {
+				$did_this = __( 'Added to calendar ":calendar" by :person at :start.',
+					[ 'calendar' => $calendar->name, 'person' => $person, 'start' => date( __( 'd-m-Y H:i' ), strtotime( $calendarItem->start ) ) ] );
+			}
+
+			return $did_this;
+		}, 20, 4 );
 
 		$this->registerSettings();
 	}

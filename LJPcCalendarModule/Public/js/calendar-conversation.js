@@ -6,8 +6,9 @@ $(document).ready(function() {
                     fsAjax(
                         {
                             'action': 'create',
+                            'conversation_id': getGlobalAttr('conversation_id'),
                             'calendar': {
-                                'id': $('#calendar-select').val()
+                                'id': $('#calendar-select').val(),
                             },
                             'schedule': {
                                 'isAllDay': 'false',
@@ -23,8 +24,10 @@ $(document).ready(function() {
                         function(response) {
                             if(!isAjaxSuccess(response)) {
                                 showAjaxError(response);
+                            } else {
+                                window.location.reload();
                             }
-                        },true
+                        }
                     );
                     modal.modal('hide');
                     e.preventDefault();

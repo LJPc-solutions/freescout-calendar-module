@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use JsonSerializable;
 
 class CalendarItem extends Model implements JsonSerializable {
+	public const ACTION_TYPE_ADD_TO_CALENDAR = 186;
+
 	protected $table = 'calendar_items';
 	protected $fillable = [
 		'calendar_id',
@@ -50,7 +52,7 @@ class CalendarItem extends Model implements JsonSerializable {
 				'id'     => $this->author_id,
 				'name'   => $creator->getFullName(),
 				'email'  => $creator->email,
-				'avatar' => $creator->photo_url,
+				'avatar' => $creator->getPhotoUrl(),
 				'phone'  => $creator->phone,
 			];
 		}
