@@ -2,8 +2,10 @@
 
 namespace Modules\LJPcCalendarModule\Console;
 
+use DateTimeZone;
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Config;
 use Modules\LJPcCalendarModule\Entities\Calendar;
 use Modules\LJPcCalendarModule\Entities\CalendarItem;
 use Modules\LJPcCalendarModule\Events\CalendarUpdatedEvent;
@@ -33,6 +35,8 @@ class SyncICS extends Command {
 	public function handle() {
 		$this->info( "Starting ICS sync..." );
 
+		date_default_timezone_set( Config::get( 'app.timezone' ) );
+
 		$calendars = Calendar::all();
 		foreach ( $calendars as $calendar ) {
 			/* @var Calendar $calendar */
@@ -56,6 +60,8 @@ class SyncICS extends Command {
 				foreach ( $events as $event ) {
 					$start = $ics->iCalDateToDateTime( $event->dtstart_array[3] );
 					$end   = $ics->iCalDateToDateTime( $event->dtend_array[3] );
+					$start->setTimezone( new DateTimeZone( Config::get( 'app.timezone' ) ) );
+					$end->setTimezone( new DateTimeZone( Config::get( 'app.timezone' ) ) );
 
 					$calendarItem               = new stdClass();
 					$calendarItem->calendar_id  = $calendar->id;
@@ -64,7 +70,7 @@ class SyncICS extends Command {
 					$calendarItem->is_private   = false;
 					$calendarItem->is_read_only = true;
 					$calendarItem->title        = $event->summary;
-					$calendarItem->body         = $event->description ?? '';
+					$calendarItem->body         = $event->description ? html_entity_decode( $event->description ) : '';
 					$calendarItem->location     = $event->location;
 					$calendarItem->state        = __( 'Busy' );
 					$calendarItem->start        = $start;
@@ -86,6 +92,8 @@ class SyncICS extends Command {
 				foreach ( $events as $event ) {
 					$start = $ics->iCalDateToDateTime( $event->dtstart_array[3] );
 					$end   = $ics->iCalDateToDateTime( $event->dtend_array[3] );
+					$start->setTimezone( new DateTimeZone( Config::get( 'app.timezone' ) ) );
+					$end->setTimezone( new DateTimeZone( Config::get( 'app.timezone' ) ) );
 
 					$calendarItem               = new CalendarItem();
 					$calendarItem->calendar_id  = $calendar->id;
@@ -94,7 +102,9 @@ class SyncICS extends Command {
 					$calendarItem->is_private   = false;
 					$calendarItem->is_read_only = true;
 					$calendarItem->title        = $event->summary;
-					$calendarItem->body         = $event->description ?? '';
+					$calendarItem->body         =
+						( $event->description ? html_entity_decode( $event->description ) : __( 'empty' ) ) . '<br />' . __( 'Created by' ) . ': '
+						. __( 'ICS import' );
 					$calendarItem->location     = $event->location;
 					$calendarItem->state        = __( 'Busy' );
 					$calendarItem->start        = $start;
