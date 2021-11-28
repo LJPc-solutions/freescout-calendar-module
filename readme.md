@@ -39,7 +39,6 @@ Feel free to add your own features by sending a pull request.
 
 What we would like to add in the future ourselves:
 
-- Automatic ICS file creation; add all your calendars at once to your favorite client.
 - API support; add calendar items via the FreeScout API.
 - Responsiveness
 
