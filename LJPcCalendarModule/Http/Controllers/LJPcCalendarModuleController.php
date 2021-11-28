@@ -4,13 +4,17 @@ namespace Modules\LJPcCalendarModule\Http\Controllers;
 
 use App\Conversation;
 use App\Thread;
+use DateTime;
+use DateTimeZone;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Foundation\Application;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Response;
 use Illuminate\View\View;
+use Kigkonsult\Icalcreator\Vcalendar;
 use Modules\LJPcCalendarModule\Entities\Calendar;
 use Modules\LJPcCalendarModule\Entities\CalendarItem;
 use Modules\LJPcCalendarModule\Events\CalendarUpdatedEvent;
@@ -67,6 +71,58 @@ class LJPcCalendarModuleController extends Controller {
 		return Response::json( $allCalendarItems, 200 );
 	}
 
+	public function export( $id ) {
+		require __DIR__ . '/../../External/ICalCreator/boot.php';
+
+		$calendarObj = Calendar::find( $id );
+		if ( ! ( $calendarObj instanceof Calendar ) ) {
+			return response( 'Invalid calendar', 404 )
+				->header( 'Content-Type', 'text/plain' );
+		}
+
+		if ( ! isset( $_GET['key'] ) || $_GET['key'] !== md5($calendarObj->id .  $calendarObj->created_at ) ) {
+			return response( 'Forbidden', 403 )
+				->header( 'Content-Type', 'text/plain' );
+		}
+
+		$tz = Config::get( 'app.timezone' );
+
+		$calendar = new Vcalendar( [
+			Vcalendar::UNIQUE_ID => 'LJPC-FREESCOUT-' . $calendarObj->id,
+		] );
+		$calendar->setMethod( "PUBLISH" );
+		$calendar->setXprop( "x-wr-calname", $calendarObj->name );
+		$calendar->setXprop( "X-WR-CALDESC", 'Calendar created by LJPc Calendar Module in FreeScout' );
+		$calendar->setXprop( "X-WR-TIMEZONE", $tz );
+
+		$calendarItems = CalendarItem::where( 'calendar_id', $calendarObj->id )->get();
+
+		foreach ( $calendarItems as $calendarItem ) {
+			$vevent = $calendar->newVevent();
+
+			$vevent->setDtstart(
+				new DateTime( $calendarItem->start ),
+				new DateTimezone( $tz )
+			);
+			$vevent->setDtend(
+				new DateTime( $calendarItem->end ),
+				new DateTimezone( $tz )
+			);
+			if ( ! empty( $calendarItem->location ) ) {
+				$vevent->setLocation( $calendarItem->location );
+			}
+			$vevent->setSummary( $calendarItem->title );
+			$vevent->setDescription( $calendarItem->body );
+		}
+
+		$calendarString = $calendar
+			->vtimezonePopulate()
+			->createCalendar();
+
+		return response( $calendarString, 200 )
+			->header( 'Content-Type', 'text/Calendar' );
+	}
+
 	public function ajax() {
 		$data = Input::all();
 
@@ -103,7 +159,10 @@ class LJPcCalendarModuleController extends Controller {
 		$calendarItem->start    = date( DATE_ATOM, $schedule['start'] );
 		$calendarItem->end      = date( DATE_ATOM, $schedule['end'] );
 
-		$calendarItem->body = __( 'empty' ) . '<br />' . __( 'Created by' ) . ': <img class="avatar" src="' . Auth::user()->getPhotoUrl() . '" alt="'. Auth::user()->getFullName() .'">' . Auth::user()->getFullName();
+		$calendarItem->body =
+			__( 'empty' ) . '<br />' . __( 'Created by' ) . ': <img class="avatar" src="' . Auth::user()->getPhotoUrl() . '" alt="' . Auth::user()
+			                                                                                                                              ->getFullName() . '">'
+			. Auth::user()->getFullName();
 
 		$calendarItem->save();
 

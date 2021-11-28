@@ -18,6 +18,18 @@
             </button>
         </div>
     </div>
+
+    <h3 class="subheader">{{ __('Use calendars in other programs') }}</h3>
+    <p>{{__('Use the following links to import your calendars in other programs like the calendar app on MacOS')}}:</p>
+    <table>
+        @foreach(\Modules\LJPcCalendarModule\Entities\Calendar::all() as $calendar)
+            <tr>
+                <td>{{$calendar->name}}:&nbsp;</td>
+                <td>{{route('ljpccalendarmodule.external',$calendar->id . '?key=' . md5($calendar->id . $calendar->created_at))}}</td>
+            </tr>
+        @endforeach
+    </table>
+
 </form>
 
 @include('partials/editor')
