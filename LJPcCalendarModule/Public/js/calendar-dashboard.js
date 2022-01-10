@@ -44,11 +44,15 @@ $(document).ready(function() {
         $('.dash-calendar-contents').html('');
         var totalShow = 0;
         const template = `
-<div class="dash-card-list-item">
-    <small>{{title}}</small>
-    <strong class="has-value" style="text-transform:lowercase; font-weight:400; font-size: 85%; position: relative; top:3px;">{{time}}</strong><br />
-    <span class="badge" style="background-color: {{bgColor}}">{{calendar}}</span>
-    <strong class="has-value" style="text-transform:lowercase">{{relativeTime}}</strong>
+<div class="dash-card-list-item" style="display: flex; flex-direction: column; padding-bottom: 7px;">
+	<div style="display: flex; justify-content: space-between; height: 20px;">
+		<small style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;margin-right: 5px;">{{title}}</small>
+		<span class="has-value" style="text-transform:lowercase; font-weight:400; font-size: 85%; position: relative; top:3px;">{{time}}</span>
+	</div>
+	<div style="display: flex; justify-content: space-between; height: 20px;">
+		<span class="badge" style="background-color: {{bgColor}}">{{calendar}}</span>
+		<span class="has-value" style="text-transform:lowercase">{{relativeTime}}</span>
+	</div>
 </div>
 `
         for (const item of allDay) {
