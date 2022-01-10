@@ -51,7 +51,7 @@ $(document).ready(function() {
 	</div>
 	<div style="display: flex; justify-content: space-between; height: 20px;">
 		<span class="badge" style="background-color: {{bgColor}}">{{calendar}}</span>
-		<span class="has-value" style="text-transform:lowercase">{{relativeTime}}</span>
+		<span class="has-value" style="text-transform:lowercase; font-weight:700;">{{relativeTime}}</span>
 	</div>
 </div>
 `
