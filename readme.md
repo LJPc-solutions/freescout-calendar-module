@@ -33,6 +33,12 @@ This module adds a calendar module to FreeScout.
 5. Remove the zip file.
 6. Activate the module via the Modules page in FreeScout.
 
+## Translations
+- English (default)
+- Dutch
+- German (Provided by [@Servery](https://github.com/Servery))
+- French (Provided by [@freescout-helpdesk](https://github.com/freescout-helpdesk))
+
 ## The future of this module
 
 Feel free to add your own features by sending a pull request.
