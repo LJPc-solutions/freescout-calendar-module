@@ -38,6 +38,7 @@ This module adds a calendar module to FreeScout.
 - Dutch
 - German (Provided by [@Servery](https://github.com/Servery))
 - French (Provided by [@freescout-helpdesk](https://github.com/freescout-helpdesk))
+- Português Europeu (Provided by [@sainf](https://github.com/sainf))
 
 ## The future of this module
 
