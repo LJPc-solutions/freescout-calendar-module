@@ -468,14 +468,12 @@ class ICal {
 	/**
 	 * Creates the ICal object
 	 *
-	 * @param  mixed  $files
-	 * @param  array  $options
+	 * @param mixed $files
+	 * @param array $options
 	 *
 	 * @return void
 	 */
 	public function __construct( $files = false, array $options = [] ) {
-		ini_set( 'auto_detect_line_endings', '1' );
-
 		foreach ( $options as $option => $value ) {
 			if ( in_array( $option, self::$configurableOptions ) ) {
 				$this->{$option} = $value;
@@ -514,7 +512,7 @@ class ICal {
 	/**
 	 * Checks if a time zone is valid (IANA, CLDR, or Windows)
 	 *
-	 * @param  string  $timeZone
+	 * @param string $timeZone
 	 *
 	 * @return boolean
 	 */
@@ -527,7 +525,7 @@ class ICal {
 	/**
 	 * Checks if a time zone is a valid IANA time zone
 	 *
-	 * @param  string  $timeZone
+	 * @param string $timeZone
 	 *
 	 * @return boolean
 	 */
@@ -559,7 +557,7 @@ class ICal {
 	/**
 	 * Checks if a time zone is a valid CLDR time zone
 	 *
-	 * @param  string  $timeZone
+	 * @param string $timeZone
 	 *
 	 * @return boolean
 	 */
@@ -570,7 +568,7 @@ class ICal {
 	/**
 	 * Checks if a time zone is a recognised Windows (non-CLDR) time zone
 	 *
-	 * @param  string  $timeZone
+	 * @param string $timeZone
 	 *
 	 * @return boolean
 	 */
@@ -581,7 +579,7 @@ class ICal {
 	/**
 	 * Checks if a filename exists as a file or URL
 	 *
-	 * @param  string  $filename
+	 * @param string $filename
 	 *
 	 * @return boolean
 	 */
@@ -592,7 +590,7 @@ class ICal {
 	/**
 	 * Reads an entire file or URL into an array
 	 *
-	 * @param  string  $filename
+	 * @param string $filename
 	 *
 	 * @return array
 	 * @throws Exception
@@ -638,7 +636,7 @@ class ICal {
 	 * Initialises the parser using an array
 	 * containing each line of iCal content
 	 *
-	 * @param  array  $lines
+	 * @param array $lines
 	 *
 	 * @return void
 	 */
@@ -676,7 +674,7 @@ class ICal {
 					} else {
 						$values = []; // Use blank array to ignore this line
 					}
-				} elseif ( empty( $values[0] ) ) {
+				} else if ( empty( $values[0] ) ) {
 					$values = []; // Use blank array to ignore this line
 				}
 
@@ -797,7 +795,7 @@ class ICal {
 	 * Unfolds an iCal file in preparation for parsing
 	 * (https://icalendar.org/iCalendar-RFC-5545/3-1-content-lines.html)
 	 *
-	 * @param  array  $lines
+	 * @param array $lines
 	 *
 	 * @return array
 	 */
@@ -813,7 +811,7 @@ class ICal {
 	/**
 	 * Removes unprintable ASCII and UTF-8 characters
 	 *
-	 * @param  string  $data
+	 * @param string $data
 	 *
 	 * @return string
 	 */
@@ -825,7 +823,7 @@ class ICal {
 	 * Replaces curly quotes and other special characters
 	 * with their standard equivalents
 	 *
-	 * @param  string  $data
+	 * @param string $data
 	 *
 	 * @return string
 	 */
@@ -860,7 +858,7 @@ class ICal {
 	 * Provides a polyfill for PHP 7.2's `mb_chr()`, which is a multibyte safe version of `chr()`.
 	 * Multibyte safe.
 	 *
-	 * @param  integer  $code
+	 * @param integer $code
 	 *
 	 * @return string
 	 */
@@ -871,9 +869,9 @@ class ICal {
 		} else {
 			if ( ( $code %= 0x200000 ) < 0x80 ) {
 				$s = chr( $code );
-			} elseif ( $code < 0x800 ) {
+			} else if ( $code < 0x800 ) {
 				$s = chr( 0xc0 | $code >> 6 ) . chr( 0x80 | $code & 0x3f );
-			} elseif ( $code < 0x10000 ) {
+			} else if ( $code < 0x10000 ) {
 				$s = chr( 0xe0 | $code >> 12 ) . chr( 0x80 | $code >> 6 & 0x3f ) . chr( 0x80 | $code & 0x3f );
 			} else {
 				$s = chr( 0xf0 | $code >> 18 ) . chr( 0x80 | $code >> 12 & 0x3f ) . chr( 0x80 | $code >> 6 & 0x3f ) . chr( 0x80 | $code & 0x3f );
@@ -887,11 +885,11 @@ class ICal {
 	 * Replace all occurrences of the search string with the replacement string.
 	 * Multibyte safe.
 	 *
-	 * @param  string|array  $search
-	 * @param  string|array  $replace
-	 * @param  string|array  $subject
-	 * @param  string  $encoding
-	 * @param  integer  $count
+	 * @param string|array $search
+	 * @param string|array $replace
+	 * @param string|array $subject
+	 * @param string $encoding
+	 * @param integer $count
 	 *
 	 * @return array|string
 	 */
@@ -940,7 +938,7 @@ class ICal {
 	/**
 	 * Gets the key value pair from an iCal string
 	 *
-	 * @param  string  $text
+	 * @param string $text
 	 *
 	 * @return array|boolean
 	 */
@@ -951,7 +949,7 @@ class ICal {
 		$quote = strpos( $text, '"' );
 		if ( $colon === false ) {
 			$matches = [];
-		} elseif ( $quote === false || $colon < $quote ) {
+		} else if ( $quote === false || $colon < $quote ) {
 			[ $before, $after ] = explode( ':', $text, 2 );
 			$matches = [ $text, $before, $after ];
 		} else {
@@ -1061,7 +1059,7 @@ class ICal {
 	 * Determines whether the event start date is outside `$windowMinTimestamp` / `$windowMaxTimestamp`.
 	 * Returns `true` for invalid dates.
 	 *
-	 * @param  array  $event
+	 * @param array $event
 	 *
 	 * @return boolean
 	 */
@@ -1072,7 +1070,7 @@ class ICal {
 	/**
 	 * Checks if a date string is a valid date
 	 *
-	 * @param  string  $value
+	 * @param string $value
 	 *
 	 * @return boolean
 	 * @throws Exception
@@ -1094,9 +1092,9 @@ class ICal {
 	/**
 	 * Determines whether a valid iCalendar date is within a given range
 	 *
-	 * @param  string  $calendarDate
-	 * @param  integer  $minTimestamp
-	 * @param  integer  $maxTimestamp
+	 * @param string $calendarDate
+	 * @param integer $minTimestamp
+	 * @param integer $maxTimestamp
 	 *
 	 * @return boolean
 	 */
@@ -1109,9 +1107,9 @@ class ICal {
 	/**
 	 * Add one key and value pair to the `$this->cal` array
 	 *
-	 * @param  string  $component
-	 * @param  string|boolean  $keyword
-	 * @param  string  $value
+	 * @param string $component
+	 * @param string|boolean $keyword
+	 * @param string $value
 	 *
 	 * @return void
 	 */
@@ -1296,7 +1294,7 @@ class ICal {
 	 * Places double-quotes around texts that have characters not permitted
 	 * in parameter-texts, but are permitted in quoted-texts.
 	 *
-	 * @param  string  $candidateText
+	 * @param string $candidateText
 	 *
 	 * @return string
 	 */
@@ -1311,7 +1309,7 @@ class ICal {
 	/**
 	 * Returns a Unix timestamp from an iCal date time format
 	 *
-	 * @param  string  $icalDate
+	 * @param string $icalDate
 	 *
 	 * @return integer
 	 */
@@ -1322,7 +1320,7 @@ class ICal {
 	/**
 	 * Returns a `DateTime` object from an iCal date time format
 	 *
-	 * @param  string  $icalDate
+	 * @param string $icalDate
 	 *
 	 * @return DateTime
 	 * @throws Exception
@@ -1357,7 +1355,7 @@ class ICal {
 
 		if ( $date[4] === 'Z' ) {
 			$dateTimeZone = new DateTimeZone( self::TIME_ZONE_UTC );
-		} elseif ( ! empty( $date[1] ) ) {
+		} else if ( ! empty( $date[1] ) ) {
 			$dateTimeZone = $this->timeZoneStringToDateTimeZone( $date[1] );
 		} else {
 			$dateTimeZone = new DateTimeZone( $this->defaultTimeZone );
@@ -1380,7 +1378,7 @@ class ICal {
 	 * Returns a `DateTimeZone` object based on a string containing a time zone name.
 	 * Falls back to the default time zone if string passed not a recognised time zone.
 	 *
-	 * @param  string  $timeZoneString
+	 * @param string $timeZoneString
 	 *
 	 * @return DateTimeZone
 	 */
@@ -1463,7 +1461,7 @@ class ICal {
 
 						continue;
 					}
-				} elseif ( $frequency === 'YEARLY' && ! empty( $rrules['BYWEEKNO'] ) ) {
+				} else if ( $frequency === 'YEARLY' && ! empty( $rrules['BYWEEKNO'] ) ) {
 					if ( ! array_reduce( $rrules['BYDAY'], $checkByDays, true ) ) {
 						error_log( 'ICal::ProcessRecurrences: A YEARLY RRULE with a BYWEEKNO part may not contain BYDAY values with numeric prefixes' );
 
@@ -1553,7 +1551,7 @@ class ICal {
 								if ( $this->defaultWeekStart !== self::ISO_8601_WEEK_START ) {
 									$wkstTransition = array_search( $this->defaultWeekStart, array_keys( $this->weekdays ) );
 								}
-							} elseif ( $rrules['WKST'] !== self::ISO_8601_WEEK_START ) {
+							} else if ( $rrules['WKST'] !== self::ISO_8601_WEEK_START ) {
 								$wkstTransition = array_search( $rrules['WKST'], array_keys( $this->weekdays ) );
 							}
 
@@ -1606,7 +1604,7 @@ class ICal {
 									}
 								);
 							}
-						} elseif ( ! empty( $rrules['BYDAY'] ) ) {
+						} else if ( ! empty( $rrules['BYDAY'] ) ) {
 							$matchingDays = $this->getDaysOfMonthMatchingByDayRRule( $rrules['BYDAY'], $frequencyRecurringDateTime );
 						}
 
@@ -1646,7 +1644,7 @@ class ICal {
 								$monthDays = [];
 								if ( ! empty( $rrules['BYMONTHDAY'] ) ) {
 									$monthDays = $this->getDaysOfMonthMatchingByMonthDayRRule( $rrules['BYMONTHDAY'], $bymonthRecurringDatetime );
-								} elseif ( ! empty( $rrules['BYDAY'] ) ) {
+								} else if ( ! empty( $rrules['BYDAY'] ) ) {
 									$monthDays = $this->getDaysOfMonthMatchingByDayRRule( $rrules['BYDAY'], $bymonthRecurringDatetime );
 								} else {
 									$monthDays[] = $bymonthRecurringDatetime->format( 'd' );
@@ -1661,11 +1659,11 @@ class ICal {
 										)->format( 'z' ) + 1;
 								}
 							}
-						} elseif ( ! empty( $rrules['BYWEEKNO'] ) ) {
+						} else if ( ! empty( $rrules['BYWEEKNO'] ) ) {
 							$matchingDays = $this->getDaysOfYearMatchingByWeekNoRRule( $rrules['BYWEEKNO'], $frequencyRecurringDateTime );
-						} elseif ( ! empty( $rrules['BYYEARDAY'] ) ) {
+						} else if ( ! empty( $rrules['BYYEARDAY'] ) ) {
 							$matchingDays = $this->getDaysOfYearMatchingByYearDayRRule( $rrules['BYYEARDAY'], $frequencyRecurringDateTime );
-						} elseif ( ! empty( $rrules['BYMONTHDAY'] ) ) {
+						} else if ( ! empty( $rrules['BYMONTHDAY'] ) ) {
 							$matchingDays = $this->getDaysOfYearMatchingByMonthDayRRule( $rrules['BYMONTHDAY'], $frequencyRecurringDateTime );
 						}
 
@@ -1677,7 +1675,7 @@ class ICal {
 										return in_array( $yearDay, $matchingDays );
 									}
 								);
-							} elseif ( count( $matchingDays ) === 0 ) {
+							} else if ( count( $matchingDays ) === 0 ) {
 								$matchingDays = $this->getDaysOfYearMatchingByDayRRule( $rrules['BYDAY'], $frequencyRecurringDateTime );
 							}
 						}
@@ -1772,7 +1770,7 @@ class ICal {
 				$clonedDateTime = clone $initialEventDate;
 				$endDate        = $clonedDateTime->add( $anEvent['DURATION_array'][2] );
 				$eventLength    = $endDate->getTimestamp() - $anEvent['DTSTART_array'][2];
-			} elseif ( isset( $anEvent['DTEND_array'] ) ) {
+			} else if ( isset( $anEvent['DTEND_array'] ) ) {
 				$eventLength = $anEvent['DTEND_array'][2] - $anEvent['DTSTART_array'][2];
 			}
 
@@ -1831,7 +1829,7 @@ class ICal {
 	 * Parses a list of excluded dates
 	 * to be applied to an Event
 	 *
-	 * @param  array  $event
+	 * @param array $event
 	 *
 	 * @return array
 	 */
@@ -1852,7 +1850,7 @@ class ICal {
 			foreach ( array_keys( $subArray ) as $key ) {
 				if ( $key === 'TZID' ) {
 					$currentTimeZone = $this->timeZoneStringToDateTimeZone( $subArray[ $key ] );
-				} elseif ( is_numeric( $key ) ) {
+				} else if ( is_numeric( $key ) ) {
 					$icalDate = $subArray[ $key ];
 
 					if ( substr( $icalDate, - 1 ) === 'Z' ) {
@@ -1883,8 +1881,8 @@ class ICal {
 	 *   monthdaynum = ([+] || -) {ordmoday}
 	 *   ordmoday    = 1 to 31
 	 *
-	 * @param  array  $byMonthDays
-	 * @param  DateTime  $initialDateTime
+	 * @param array $byMonthDays
+	 * @param DateTime $initialDateTime
 	 *
 	 * @return array
 	 */
@@ -1897,8 +1895,8 @@ class ICal {
 	 *
 	 * For instance, if passed [1, 4, -16] and 28, this will return [1, 4, 13].
 	 *
-	 * @param  array  $indexes
-	 * @param  integer  $limit
+	 * @param array $indexes
+	 * @param integer $limit
 	 *
 	 * @return array
 	 */
@@ -1907,7 +1905,7 @@ class ICal {
 		foreach ( $indexes as $index ) {
 			if ( $index > 0 && $index <= $limit ) {
 				$matching[] = $index;
-			} elseif ( $index < 0 && - $index <= $limit ) {
+			} else if ( $index < 0 && - $index <= $limit ) {
 				$matching[] = $index + $limit + 1;
 			}
 		}
@@ -1938,8 +1936,8 @@ class ICal {
 	 *   ordwk      = 1 to 53
 	 *   weekday    = SU || MO || TU || WE || TH || FR || SA
 	 *
-	 * @param  array  $byDays
-	 * @param  DateTime  $initialDateTime
+	 * @param array $byDays
+	 * @param DateTime $initialDateTime
 	 *
 	 * @return array
 	 */
@@ -1964,7 +1962,7 @@ class ICal {
 			if ( $ordwk < 0 ) { // -ve {ordwk}
 				$bydayDateTime->modify( ( ++ $ordwk ) . ' week' );
 				$matchingDays[] = $bydayDateTime->format( 'j' );
-			} elseif ( $ordwk > 0 ) { // +ve {ordwk}
+			} else if ( $ordwk > 0 ) { // +ve {ordwk}
 				$bydayDateTime->modify( ( -- $ordwk ) . ' week' );
 				$matchingDays[] = $bydayDateTime->format( 'j' );
 			} else { // No {ordwk}
@@ -1999,8 +1997,8 @@ class ICal {
 	 *   daynum    = [+ || -] {ordday}
 	 *   ordday    = 1 to 366
 	 *
-	 * @param  array  $bySetPos
-	 * @param  array  $valuesList
+	 * @param array $bySetPos
+	 * @param array $valuesList
 	 *
 	 * @return array
 	 */
@@ -2041,8 +2039,8 @@ class ICal {
 	 *   weeknum    = ([+] || -) {ordwk}
 	 *   ordwk      = 1 to 53
 	 *
-	 * @param  array  $byWeekNums
-	 * @param  DateTime  $initialDateTime
+	 * @param array $byWeekNums
+	 * @param DateTime $initialDateTime
 	 *
 	 * @return array
 	 */
@@ -2082,8 +2080,8 @@ class ICal {
 	 *   yeardaynum  = ([+] || -) {ordyrday}
 	 *   ordyrday    = 1 to 366
 	 *
-	 * @param  array  $byYearDays
-	 * @param  DateTime  $initialDateTime
+	 * @param array $byYearDays
+	 * @param DateTime $initialDateTime
 	 *
 	 * @return array
 	 */
@@ -2105,8 +2103,8 @@ class ICal {
 	 *   monthdaynum = ([+] || -) {ordmoday}
 	 *   ordmoday    = 1 to 31
 	 *
-	 * @param  array  $byMonthDays
-	 * @param  DateTime  $initialDateTime
+	 * @param array $byMonthDays
+	 * @param DateTime $initialDateTime
 	 *
 	 * @return array
 	 */
@@ -2154,8 +2152,8 @@ class ICal {
 	 *   ordwk      = 1 to 53
 	 *   weekday    = SU || MO || TU || WE || TH || FR || SA
 	 *
-	 * @param  array  $byDays
-	 * @param  DateTime  $initialDateTime
+	 * @param array $byDays
+	 * @param DateTime $initialDateTime
 	 *
 	 * @return array
 	 */
@@ -2180,7 +2178,7 @@ class ICal {
 			if ( $ordwk < 0 ) { // -ve {ordwk}
 				$bydayDateTime->modify( ( ++ $ordwk ) . ' week' );
 				$matchingDays[] = $bydayDateTime->format( 'z' ) + 1;
-			} elseif ( $ordwk > 0 ) { // +ve {ordwk}
+			} else if ( $ordwk > 0 ) { // +ve {ordwk}
 				$bydayDateTime->modify( ( -- $ordwk ) . ' week' );
 				$matchingDays[] = $bydayDateTime->format( 'z' ) + 1;
 			} else { // No {ordwk}
@@ -2252,7 +2250,7 @@ class ICal {
 
 				if ( $this->iCalDateWithTimeZone( $anEvent, 'DTEND' ) ) {
 					$events[ $key ]['DTEND_tz'] = $this->iCalDateWithTimeZone( $anEvent, 'DTEND' );
-				} elseif ( $this->iCalDateWithTimeZone( $anEvent, 'DURATION' ) ) {
+				} else if ( $this->iCalDateWithTimeZone( $anEvent, 'DURATION' ) ) {
 					$events[ $key ]['DTEND_tz'] = $this->iCalDateWithTimeZone( $anEvent, 'DURATION' );
 				} else {
 					$events[ $key ]['DTEND_tz'] = $events[ $key ]['DTSTART_tz'];
@@ -2266,9 +2264,9 @@ class ICal {
 	/**
 	 * Returns a date adapted to the calendar time zone depending on the event `TZID`
 	 *
-	 * @param  array  $event
-	 * @param  string  $key
-	 * @param  string  $format
+	 * @param array $event
+	 * @param string $key
+	 * @param string $format
 	 *
 	 * @return string|boolean
 	 */
@@ -2299,9 +2297,9 @@ class ICal {
 	/**
 	 * Parses a duration and applies it to a date
 	 *
-	 * @param  string  $date
-	 * @param  string  $duration
-	 * @param  string  $format
+	 * @param string $date
+	 * @param string $duration
+	 * @param string $format
 	 *
 	 * @return integer|DateTime
 	 */
@@ -2316,7 +2314,7 @@ class ICal {
 
 		if ( is_null( $format ) ) {
 			$output = $dateTime;
-		} elseif ( $format === self::UNIX_FORMAT ) {
+		} else if ( $format === self::UNIX_FORMAT ) {
 			$output = $dateTime->getTimestamp();
 		} else {
 			$output = $dateTime->format( $format );
@@ -2328,14 +2326,14 @@ class ICal {
 	/**
 	 * Returns the calendar time zone
 	 *
-	 * @param  boolean  $ignoreUtc
+	 * @param boolean $ignoreUtc
 	 *
 	 * @return string
 	 */
 	public function calendarTimeZone( $ignoreUtc = false ) {
 		if ( isset( $this->cal['VCALENDAR']['X-WR-TIMEZONE'] ) ) {
 			$timeZone = $this->cal['VCALENDAR']['X-WR-TIMEZONE'];
-		} elseif ( isset( $this->cal['VTIMEZONE']['TZID'] ) ) {
+		} else if ( isset( $this->cal['VTIMEZONE']['TZID'] ) ) {
 			$timeZone = $this->cal['VTIMEZONE']['TZID'];
 		} else {
 			$timeZone = $this->defaultTimeZone;
@@ -2354,7 +2352,7 @@ class ICal {
 	/**
 	 * Initialises lines from a string
 	 *
-	 * @param  string  $string
+	 * @param string $string
 	 *
 	 * @return ICal
 	 */
@@ -2375,11 +2373,11 @@ class ICal {
 	/**
 	 * Initialises lines from a URL
 	 *
-	 * @param  string  $url
-	 * @param  string  $username
-	 * @param  string  $password
-	 * @param  string  $userAgent
-	 * @param  string  $acceptLanguage
+	 * @param string $url
+	 * @param string $username
+	 * @param string $password
+	 * @param string $userAgent
+	 * @param string $acceptLanguage
 	 *
 	 * @return ICal
 	 */
@@ -2405,7 +2403,7 @@ class ICal {
 	/**
 	 * Initialises lines from a file
 	 *
-	 * @param  string  $file
+	 * @param string $file
 	 *
 	 * @return ICal
 	 */
@@ -2488,7 +2486,7 @@ class ICal {
 	 * Returns a sorted array of the events following a given string,
 	 * or `false` if no events exist in the range.
 	 *
-	 * @param  string  $interval
+	 * @param string $interval
 	 *
 	 * @return array
 	 */
@@ -2520,8 +2518,8 @@ class ICal {
 	 * problem for events on, during, or after 29 Jan 2038.
 	 * See https://en.wikipedia.org/wiki/Unix_time#Representing_the_number
 	 *
-	 * @param  string|null  $rangeStart
-	 * @param  string|null  $rangeEnd
+	 * @param string|null $rangeStart
+	 * @param string|null $rangeEnd
 	 *
 	 * @return array
 	 * @throws Exception
@@ -2594,8 +2592,8 @@ class ICal {
 	/**
 	 * Sorts events based on a given sort order
 	 *
-	 * @param  array  $events
-	 * @param  integer  $sortOrder  Either SORT_ASC, SORT_DESC, SORT_REGULAR, SORT_NUMERIC, SORT_STRING
+	 * @param array $events
+	 * @param integer $sortOrder Either SORT_ASC, SORT_DESC, SORT_REGULAR, SORT_NUMERIC, SORT_STRING
 	 *
 	 * @return array
 	 */
