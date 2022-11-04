@@ -2,75 +2,61 @@
 /**
  * iCalcreator, the PHP class package managing iCal (rfc2445/rfc5445) calendar information.
  *
- * copyright (c) 2007-2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
- * Link      https://kigkonsult.se
- * Package   iCalcreator
- * Version   2.30
- * License   Subject matter of licence is the software iCalcreator.
- *           The above copyright, link, package and version notices,
- *           this licence notice and the invariant [rfc5545] PRODID result use
- *           as implemented and invoked in iCalcreator shall be included in
- *           all copies or substantial portions of the iCalcreator.
- *
- *           iCalcreator is free software: you can redistribute it and/or modify
- *           it under the terms of the GNU Lesser General Public License as published
- *           by the Free Software Foundation, either version 3 of the License,
- *           or (at your option) any later version.
- *
- *           iCalcreator is distributed in the hope that it will be useful,
- *           but WITHOUT ANY WARRANTY; without even the implied warranty of
- *           MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *           GNU Lesser General Public License for more details.
- *
- *           You should have received a copy of the GNU Lesser General Public License
- *           along with iCalcreator. If not, see <https://www.gnu.org/licenses/>.
- *
  * This file is a part of iCalcreator.
-*/
-
+ *
+ * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
+ * @copyright 2007-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @link      https://kigkonsult.se
+ * @license   Subject matter of licence is the software iCalcreator.
+ *            The above copyright, link, package and version notices,
+ *            this licence notice and the invariant [rfc5545] PRODID result use
+ *            as implemented and invoked in iCalcreator shall be included in
+ *            all copies or substantial portions of the iCalcreator.
+ *
+ *            iCalcreator is free software: you can redistribute it and/or modify
+ *            it under the terms of the GNU Lesser General Public License as
+ *            published by the Free Software Foundation, either version 3 of
+ *            the License, or (at your option) any later version.
+ *
+ *            iCalcreator is distributed in the hope that it will be useful,
+ *            but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *            GNU Lesser General Public License for more details.
+ *
+ *            You should have received a copy of the GNU Lesser General Public License
+ *            along with iCalcreator. If not, see <https://www.gnu.org/licenses/>.
+ */
+declare( strict_types = 1 );
 namespace Kigkonsult\Icalcreator\Traits;
 
-use Kigkonsult\Icalcreator\Util\StringFactory;
+use Kigkonsult\Icalcreator\Formatter\Property\IntProperty;
+use Kigkonsult\Icalcreator\Pc;
 use Kigkonsult\Icalcreator\Util\Util;
 use Kigkonsult\Icalcreator\Util\ParameterFactory;
-
-use function is_numeric;
 
 /**
  * SEQUENCE property functions
  *
- * @author Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @since  2.27.3 - 2018-12-22
+ * @since 2.41.55 2022-08-13
  */
 trait SEQUENCEtrait
 {
     /**
-     * @var array component property SEQUENCE value
+     * @var null|Pc component property SEQUENCE value
      */
-    protected $sequence = null;
+    protected ? Pc $sequence = null;
 
     /**
      * Return formatted output for calendar component property sequence
      *
      * @return string
      */
-    public function createSequence()
+    public function createSequence() : string
     {
-        if( empty( $this->sequence )) {
-            return null;
-        }
-        if(( ! isset( $this->sequence[Util::$LCvalue] ) ||
-                ( empty( $this->sequence[Util::$LCvalue] ) &&
-                    ! is_numeric( $this->sequence[Util::$LCvalue] ))) &&
-                ( Util::$ZERO != $this->sequence[Util::$LCvalue] )) {
-            return $this->getConfig( self::ALLOWEMPTY )
-                ? StringFactory::createElement( self::SEQUENCE )
-                : null;
-        }
-        return StringFactory::createElement(
+        return IntProperty::format(
             self::SEQUENCE,
-            ParameterFactory::createParams( $this->sequence[Util::$LCparams] ),
-            $this->sequence[Util::$LCvalue]
+            $this->sequence,
+            $this->getConfig( self::ALLOWEMPTY )
         );
     }
 
@@ -80,7 +66,7 @@ trait SEQUENCEtrait
      * @return bool
      * @since  2.27.1 - 2018-12-15
      */
-    public function deleteSequence()
+    public function deleteSequence() : bool
     {
         $this->sequence = null;
         return true;
@@ -89,41 +75,59 @@ trait SEQUENCEtrait
     /**
      * Get calendar component property sequence
      *
-     * @param bool   $inclParam
-     * @return bool|array
-     * @since  2.27.1 - 2018-12-12
+     * @param null|bool   $inclParam
+     * @return bool|int|string|Pc
+     * @since 2.41.36 2022-04-03
      */
-    public function getSequence( $inclParam = false )
+    public function getSequence( ? bool $inclParam = false ) : bool | int | string | Pc
     {
-        if( empty( $this->sequence )) {
+        if( null === $this->sequence ) {
             return false;
         }
-        return ( $inclParam ) ? $this->sequence : $this->sequence[Util::$LCvalue];
+        return $inclParam ? clone $this->sequence : $this->sequence->value;
+    }
+
+    /**
+     * Return bool true if set (and ignore empty property)
+     *
+     * @return bool
+     * @since 2.41.43 2022-04-15
+     */
+    public function isSequenceSet() : bool
+    {
+        return ( ! empty( $this->sequence->value ) ||
+            (( null !== $this->sequence ) && ( 0 === $this->sequence->value )));
     }
 
     /**
      * Set calendar component property sequence
      *
-     * @param int   $value
-     * @param array $params
+     * When a calendar component is created, its sequence number is 0.
+     * It is monotonically incremented by the "SingleProps2's" CUA
+     * each time the "SingleProps2" makes a significant revision to the calendar component.
+     * Init 0 (zero)
+     *
+     * @param null|int|string|Pc $value
+     * @param null|array $params
      * @return static
-     * @since  2.27.2 - 2019-01-04
+     * @since 2.41.36 2022-04-03
      */
-    public function setSequence( $value = null, $params = [] )
+    public function setSequence( null|int|string|Pc $value = null, ? array $params = [] ) : static
     {
-        if(( empty( $value ) && ! is_numeric( $value )) && ( Util::$ZERO != $value )) {
-            $value = ( isset( $this->sequence[Util::$LCvalue] ) &&
-                ( -1 < $this->sequence[Util::$LCvalue] ))
-                ? $this->sequence[Util::$LCvalue] + 1
-                : Util::$ZERO;
+        $value = ( $value instanceof Pc )
+            ? clone $value
+            : Pc::factory( $value, ParameterFactory::setParams( $params ));
+        if(( $value->value === null ) || ( $value->value === self::$SP0 )) {
+            $value->value = ( isset( $this->sequence->value ) &&
+                ( -1 < $this->sequence->value ))
+                ? (int) $this->sequence->value + 1
+                : 0;
         }
         else {
-            Util::assertInteger( $value, self::SEQUENCE );
+            Util::assertInteger( $value->value, self::SEQUENCE, 0 );
+            $value->value = (int) $value->value;
         }
-        $this->sequence = [
-            Util::$LCvalue  => $value,
-            Util::$LCparams => ParameterFactory::setParams( $params ),
-        ];
+        $this->sequence = $value;
         return $this;
     }
 }

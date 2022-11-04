@@ -2,75 +2,64 @@
 /**
  * iCalcreator, the PHP class package managing iCal (rfc2445/rfc5445) calendar information.
  *
- * copyright (c) 2007-2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
- * Link      https://kigkonsult.se
- * Package   iCalcreator
- * Version   2.30
- * License   Subject matter of licence is the software iCalcreator.
+ * This file is a part of iCalcreator.
+ *
+ * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
+ * @copyright 2007-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @link      https://kigkonsult.se
+ * @license   Subject matter of licence is the software iCalcreator.
  *           The above copyright, link, package and version notices,
  *           this licence notice and the invariant [rfc5545] PRODID result use
  *           as implemented and invoked in iCalcreator shall be included in
  *           all copies or substantial portions of the iCalcreator.
  *
- *           iCalcreator is free software: you can redistribute it and/or modify
- *           it under the terms of the GNU Lesser General Public License as published
- *           by the Free Software Foundation, either version 3 of the License,
- *           or (at your option) any later version.
+ *            iCalcreator is free software: you can redistribute it and/or modify
+ *            it under the terms of the GNU Lesser General Public License as
+ *            published by the Free Software Foundation, either version 3 of
+ *            the License, or (at your option) any later version.
  *
- *           iCalcreator is distributed in the hope that it will be useful,
- *           but WITHOUT ANY WARRANTY; without even the implied warranty of
- *           MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *           GNU Lesser General Public License for more details.
+ *            iCalcreator is distributed in the hope that it will be useful,
+ *            but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *            GNU Lesser General Public License for more details.
  *
- *           You should have received a copy of the GNU Lesser General Public License
- *           along with iCalcreator. If not, see <https://www.gnu.org/licenses/>.
- *
- * This file is a part of iCalcreator.
-*/
-
+ *            You should have received a copy of the GNU Lesser General Public License
+ *            along with iCalcreator. If not, see <https://www.gnu.org/licenses/>.
+ */
+declare( strict_types = 1 );
 namespace Kigkonsult\Icalcreator\Traits;
 
 use InvalidArgumentException;
+use Kigkonsult\Icalcreator\Formatter\Property\Property;
+use Kigkonsult\Icalcreator\Pc;
 use Kigkonsult\Icalcreator\Util\DateTimeZoneFactory;
 use Kigkonsult\Icalcreator\Util\ParameterFactory;
-use Kigkonsult\Icalcreator\Util\StringFactory;
-use Kigkonsult\Icalcreator\Util\Util;
-use Kigkonsult\Icalcreator\Vcalendar;
 
 use function sprintf;
 
 /**
  * TZOFFSETFROM property functions
  *
- * @author Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @since 2.27.3 2018-12-22
+ * @since 2.41.60 2022-08-24
  */
 trait TZOFFSETFROMtrait
 {
     /**
-     * @var array component property TZOFFSETFROM value
+     * @var null|Pc component property TZOFFSETFROM value
      */
-    protected $tzoffsetfrom = null;
+    protected ? Pc $tzoffsetfrom = null;
 
     /**
      * Return formatted output for calendar component property tzoffsetfrom
      *
      * @return string
      */
-    public function createTzoffsetfrom()
+    public function createTzoffsetfrom() : string
     {
-        if( empty( $this->tzoffsetfrom )) {
-            return null;
-        }
-        if( empty( $this->tzoffsetfrom[Util::$LCvalue] )) {
-            return $this->getConfig( self::ALLOWEMPTY )
-                ? StringFactory::createElement( self::TZOFFSETFROM )
-                : null;
-        }
-        return StringFactory::createElement(
+        return Property::format(
             self::TZOFFSETFROM,
-            ParameterFactory::createParams( $this->tzoffsetfrom[Util::$LCparams] ),
-            $this->tzoffsetfrom[Util::$LCvalue]
+            $this->tzoffsetfrom,
+            $this->getConfig( self::ALLOWEMPTY )
         );
     }
 
@@ -80,7 +69,7 @@ trait TZOFFSETFROMtrait
      * @return bool
      * @since  2.27.1 - 2018-12-15
      */
-    public function deleteTzoffsetfrom()
+    public function deleteTzoffsetfrom() : bool
     {
         $this->tzoffsetfrom = null;
         return true;
@@ -89,43 +78,68 @@ trait TZOFFSETFROMtrait
     /**
      * Get calendar component property tzoffsetfrom
      *
-     * @param bool   $inclParam
-     * @return bool|array
-     * @since  2.27.1 - 2018-12-13
+     * @param null|bool   $inclParam
+     * @return bool|string|Pc
+     * @since 2.41.36 2022-04-03
      */
-    public function getTzoffsetfrom( $inclParam = false )
+    public function getTzoffsetfrom( ? bool $inclParam = false ) : bool | string | Pc
     {
         if( empty( $this->tzoffsetfrom )) {
             return false;
         }
-        return ( $inclParam )
-            ? $this->tzoffsetfrom
-            : $this->tzoffsetfrom[Util::$LCvalue];
+        return $inclParam ? clone $this->tzoffsetfrom : $this->tzoffsetfrom->value;
+    }
+
+    /**
+     * Return bool true if set (and ignore empty property)
+     *
+     * @return bool
+     * @since 2.41.36 2022-04-03
+     */
+    public function isTzoffsetfromSet() : bool
+    {
+        return ! empty( $this->tzoffsetfrom->value );
     }
 
     /**
      * Set calendar component property tzoffsetfrom
      *
-     * @param string $value
-     * @param array  $params
+     * @param null|string|Pc   $value
+     * @param null|array $params
      * @return static
      * @throws InvalidArgumentException
-     * @since 2.27.3 2019-03-14
+     * @since 2.41.60 2022-08-24
      */
-    public function setTzoffsetfrom( $value = null, $params = [] ) {
-        static $ERR = 'Invalid %s offset value %s';
-        if( empty( $value )) {
-            $this->assertEmptyValue( $value, self::TZOFFSETFROM );
-            $value  = Util::$SP0;
-            $params = [];
-        }
-        elseif( ! DateTimeZoneFactory::hasOffset( $value )) {
-            throw new InvalidArgumentException( sprintf( $ERR, Vcalendar::TZOFFSETFROM, $value ));
-        }
-        $this->tzoffsetfrom = [
-            Util::$LCvalue  => $value,
-            Util::$LCparams => ParameterFactory::setParams( $params ),
-        ];
+    public function setTzoffsetfrom( null|string|Pc $value = null, ? array $params = [] ) : static
+    {
+        $this->tzoffsetfrom = $this->conformTzOffset( self::TZOFFSETFROM, $value, $params );
         return $this;
+    }
+
+    /**
+     * @param string $propName
+     * @param string|Pc|null $value
+     * @param array|null $params
+     * @return Pc
+     * @since 2.41.60 2022-08-24
+     */
+    private function conformTzOffset(
+        string $propName,
+        null|string|Pc $value = null,
+        ? array $params = []
+    ) : Pc
+    {
+        static $ERR = 'Invalid %s offset value %s';
+        $value = ( $value instanceof Pc )
+            ? clone $value
+            : Pc::factory( $value, ParameterFactory::setParams( $params ));
+        if( empty( $value->value )) {
+            $this->assertEmptyValue( $value->value, $propName );
+            $value->setEmpty();
+        }
+        elseif( ! DateTimeZoneFactory::hasOffset( $value->value )) {
+            throw new InvalidArgumentException( sprintf( $ERR,$propName, $value->value ));
+        }
+        return $value->setParams( ParameterFactory::setParams( $params ));
     }
 }

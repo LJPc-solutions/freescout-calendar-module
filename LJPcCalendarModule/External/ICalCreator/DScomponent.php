@@ -1,62 +1,53 @@
 <?php
 /**
-  * iCalcreator, the PHP class package managing iCal (rfc2445/rfc5445) calendar information.
- *
- * copyright (c) 2007-2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
- * Link      https://kigkonsult.se
- * Package   iCalcreator
- * Version   2.30
- * License   Subject matter of licence is the software iCalcreator.
- *           The above copyright, link, package and version notices,
- *           this licence notice and the invariant [rfc5545] PRODID result use
- *           as implemented and invoked in iCalcreator shall be included in
- *           all copies or substantial portions of the iCalcreator.
- *
- *           iCalcreator is free software: you can redistribute it and/or modify
- *           it under the terms of the GNU Lesser General Public License as published
- *           by the Free Software Foundation, either version 3 of the License,
- *           or (at your option) any later version.
- *
- *           iCalcreator is distributed in the hope that it will be useful,
- *           but WITHOUT ANY WARRANTY; without even the implied warranty of
- *           MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *           GNU Lesser General Public License for more details.
- *
- *           You should have received a copy of the GNU Lesser General Public License
- *           along with iCalcreator. If not, see <https://www.gnu.org/licenses/>.
+ * iCalcreator, the PHP class package managing iCal (rfc2445/rfc5445) calendar information.
  *
  * This file is a part of iCalcreator.
-*/
-
+ *
+ * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
+ * @copyright 2007-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @link      https://kigkonsult.se
+ * @license   Subject matter of licence is the software iCalcreator.
+ *            The above copyright, link, package and version notices,
+ *            this licence notice and the invariant [rfc5545] PRODID result use
+ *            as implemented and invoked in iCalcreator shall be included in
+ *            all copies or substantial portions of the iCalcreator.
+ *
+ *            iCalcreator is free software: you can redistribute it and/or modify
+ *            it under the terms of the GNU Lesser General Public License as
+ *            published by the Free Software Foundation, either version 3 of
+ *            the License, or (at your option) any later version.
+ *
+ *            iCalcreator is distributed in the hope that it will be useful,
+ *            but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *            GNU Lesser General Public License for more details.
+ *
+ *            You should have received a copy of the GNU Lesser General Public License
+ *            along with iCalcreator. If not, see <https://www.gnu.org/licenses/>.
+ */
+declare( strict_types = 1 );
 namespace Kigkonsult\Icalcreator;
-
-use Exception;
-
-use function sprintf;
-use function strtoupper;
 
 /**
  * iCalcreator (Vtimezone) Daylight/Standard base component class
  *
- * @author Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @since  2.29.11 - 2019-08-30
+ * @since 2.41.55 2022-08-13
  */
 abstract class DScomponent extends CalendarComponent
 {
-    use Traits\COMMENTtrait,
-        Traits\DTSTARTtrait,
-        Traits\RDATEtrait,
-        Traits\RRULEtrait,
-        Traits\TZNAMEtrait,
-        Traits\TZOFFSETFROMtrait,
-        Traits\TZOFFSETTOtrait;
+    use Traits\COMMENTtrait;
+    use Traits\DTSTARTtrait;
+    use Traits\RDATEtrait;
+    use Traits\RRULEtrait;
+    use Traits\TZNAMEtrait;
+    use Traits\TZOFFSETFROMtrait;
+    use Traits\TZOFFSETTOtrait;
 
     /**
      * @var string
-     * @access protected
-     * @static
      */
-    protected static $compSgn = 'ds';
+    protected static string $compSgn = 'ds';
 
     /**
      * Destructor
@@ -68,7 +59,6 @@ abstract class DScomponent extends CalendarComponent
             $this->compType,
             $this->xprop,
             $this->components,
-            $this->unparsed,
             $this->config,
             $this->propIx,
             $this->compix,
@@ -87,27 +77,5 @@ abstract class DScomponent extends CalendarComponent
             $this->tzoffsetfrom,
             $this->tzoffsetto
         );
-    }
-
-    /**
-     * Return formatted output for calendar component VTIMEZONE Daylight/Standard object instances
-     *
-     * @return string
-     * @throws Exception  (on Rdate err)
-     * @since  2.29.11 - 2019-08-30
-     */
-    public function createComponent()
-    {
-        $compType    = strtoupper( $this->getCompType());
-        $component   = sprintf( self::$FMTBEGIN, $compType );
-        $component  .= $this->createTzname();
-        $component  .= $this->createDtstart();
-        $component  .= $this->createTzoffsetfrom();
-        $component  .= $this->createTzoffsetto();
-        $component  .= $this->createRdate();
-        $component  .= $this->createRrule();
-        $component  .= $this->createComment();
-        $component  .= $this->createXprop();
-        return $component . sprintf( self::$FMTEND, $compType );
     }
 }

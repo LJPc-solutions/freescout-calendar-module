@@ -2,75 +2,64 @@
 /**
  * iCalcreator, the PHP class package managing iCal (rfc2445/rfc5445) calendar information.
  *
- * copyright (c) 2007-2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
- * Link      https://kigkonsult.se
- * Package   iCalcreator
- * Version   2.30
- * License   Subject matter of licence is the software iCalcreator.
- *           The above copyright, link, package and version notices,
- *           this licence notice and the invariant [rfc5545] PRODID result use
- *           as implemented and invoked in iCalcreator shall be included in
- *           all copies or substantial portions of the iCalcreator.
- *
- *           iCalcreator is free software: you can redistribute it and/or modify
- *           it under the terms of the GNU Lesser General Public License as published
- *           by the Free Software Foundation, either version 3 of the License,
- *           or (at your option) any later version.
- *
- *           iCalcreator is distributed in the hope that it will be useful,
- *           but WITHOUT ANY WARRANTY; without even the implied warranty of
- *           MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *           GNU Lesser General Public License for more details.
- *
- *           You should have received a copy of the GNU Lesser General Public License
- *           along with iCalcreator. If not, see <https://www.gnu.org/licenses/>.
- *
  * This file is a part of iCalcreator.
-*/
-
+ *
+ * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
+ * @copyright 2007-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @link      https://kigkonsult.se
+ * @license   Subject matter of licence is the software iCalcreator.
+ *            The above copyright, link, package and version notices,
+ *            this licence notice and the invariant [rfc5545] PRODID result use
+ *            as implemented and invoked in iCalcreator shall be included in
+ *            all copies or substantial portions of the iCalcreator.
+ *
+ *            iCalcreator is free software: you can redistribute it and/or modify
+ *            it under the terms of the GNU Lesser General Public License as
+ *            published by the Free Software Foundation, either version 3 of
+ *            the License, or (at your option) any later version.
+ *
+ *            iCalcreator is distributed in the hope that it will be useful,
+ *            but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *            GNU Lesser General Public License for more details.
+ *
+ *            You should have received a copy of the GNU Lesser General Public License
+ *            along with iCalcreator. If not, see <https://www.gnu.org/licenses/>.
+ */
+declare( strict_types = 1 );
 namespace Kigkonsult\Icalcreator\Traits;
 
-use Kigkonsult\Icalcreator\Util\StringFactory;
+use Kigkonsult\Icalcreator\Formatter\Property\IntProperty;
+use Kigkonsult\Icalcreator\Pc;
 use Kigkonsult\Icalcreator\Util\Util;
 use Kigkonsult\Icalcreator\Util\ParameterFactory;
-use InvalidArgumentException;
-
-use function is_numeric;
 
 /**
  * REPEAT property functions
  *
- * @author Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @since 2.27.3 2018-12-22
+ * @since 2.41.55 2022-08-13
  */
 trait REPEATtrait
 {
     /**
-     * @var array component property REPEAT value
+     * @var null|Pc component property REPEAT value
      */
-    protected $repeat = null;
+    protected ? Pc $repeat = null;
 
     /**
      * Return formatted output for calendar component property repeat
      *
      * @return string
      */
-    public function createRepeat()
+    public function createRepeat() : string
     {
         if( empty( $this->repeat )) {
-            return null;
+            return self::$SP0;
         }
-        if( ! isset( $this->repeat[Util::$LCvalue] ) ||
-            ( empty( $this->repeat[Util::$LCvalue] ) &&
-                ! is_numeric( $this->repeat[Util::$LCvalue] ))) {
-            return $this->getConfig( self::ALLOWEMPTY )
-                ? StringFactory::createElement( self::REPEAT )
-                : null;
-        }
-        return StringFactory::createElement(
+        return IntProperty::format(
             self::REPEAT,
-            ParameterFactory::createParams( $this->repeat[Util::$LCparams] ),
-            $this->repeat[Util::$LCvalue]
+            $this->repeat,
+            $this->getConfig( self::ALLOWEMPTY )
         );
     }
 
@@ -80,7 +69,7 @@ trait REPEATtrait
      * @return bool
      * @since  2.27.1 - 2018-12-15
      */
-    public function deleteRepeat()
+    public function deleteRepeat() : bool
     {
         $this->repeat = null;
         return true;
@@ -89,41 +78,58 @@ trait REPEATtrait
     /**
      * Get calendar component property repeat
      *
-     * @param bool   $inclParam
-     * @return bool|array
-     * @since  2.27.1 - 2018-12-13
+     * @param null|bool   $inclParam
+     * @return bool|int|string|Pc
+     * @since 2.41.36 2022-04-03
      */
-    public function getRepeat( $inclParam = false )
+    public function getRepeat( ? bool $inclParam = false ) : bool | int | string | Pc
     {
         if( empty( $this->repeat )) {
             return false;
         }
-        return ( $inclParam ) ? $this->repeat : $this->repeat[Util::$LCvalue];
+        if( ! $this->repeat->isset()) {
+            $this->repeat->value = self::$SP0;
+        }
+        return $inclParam ? clone $this->repeat : $this->repeat->value;
+    }
+
+    /**
+     * Return bool true if set (and ignore empty property)
+     *
+     * @return bool
+     * @since 2.41.36 2022-04-03
+     */
+    public function isRepeatSet() : bool
+    {
+        return ( ! empty( $this->repeat->value ) ||
+            (( null !== $this->repeat ) && ( 0 === $this->repeat->value )));
     }
 
     /**
      * Set calendar component property repeat
      *
-     * @param string $value
-     * @param array  $params
+     * .. defines the number of times an alarm should be repeated after its initial trigger.
+     * Default 0 (zero).
+     *
+     * @param null|int|string|Pc $value
+     * @param null|array $params
      * @return static
-     * @throws InvalidArgumentException
-     * @since 2.27.3 2018-12-22
+     * @since 2.41.36 2022-04-03
      */
-    public function setRepeat( $value = null, $params = [] )
+    public function setRepeat( null|int|string|Pc $value = null, ? array $params = [] ) : static
     {
-        if( empty( $value ) && ( Util::$ZERO != $value )) {
-            $this->assertEmptyValue( $value, self::REPEAT );
-            $value  = Util::$SP0;
-            $params = [];
+        $value = ( $value instanceof Pc )
+            ? clone $value
+            : Pc::factory( $value, ParameterFactory::setParams( $params ));
+        if(( $value->value === null ) || ( $value->value === self::$SP0 )) {
+            $this->assertEmptyValue( $value->value, self::REPEAT );
+            $value->setEmpty();
         }
         else {
-            Util::assertInteger( $value, self::REPEAT );
+            Util::assertInteger( $value->value, self::REPEAT, 0 );
+            $value->value = (int) $value->value;
         }
-        $this->repeat = [
-            Util::$LCvalue  => $value,
-            Util::$LCparams => ParameterFactory::setParams( $params ),
-        ];
+        $this->repeat = $value;
         return $this;
     }
 }

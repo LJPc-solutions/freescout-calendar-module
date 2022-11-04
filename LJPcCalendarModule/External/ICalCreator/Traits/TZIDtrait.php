@@ -2,34 +2,35 @@
 /**
  * iCalcreator, the PHP class package managing iCal (rfc2445/rfc5445) calendar information.
  *
- * copyright (c) 2007-2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
- * Link      https://kigkonsult.se
- * Package   iCalcreator
- * Version   2.30
- * License   Subject matter of licence is the software iCalcreator.
- *           The above copyright, link, package and version notices,
- *           this licence notice and the invariant [rfc5545] PRODID result use
- *           as implemented and invoked in iCalcreator shall be included in
- *           all copies or substantial portions of the iCalcreator.
- *
- *           iCalcreator is free software: you can redistribute it and/or modify
- *           it under the terms of the GNU Lesser General Public License as published
- *           by the Free Software Foundation, either version 3 of the License,
- *           or (at your option) any later version.
- *
- *           iCalcreator is distributed in the hope that it will be useful,
- *           but WITHOUT ANY WARRANTY; without even the implied warranty of
- *           MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *           GNU Lesser General Public License for more details.
- *
- *           You should have received a copy of the GNU Lesser General Public License
- *           along with iCalcreator. If not, see <https://www.gnu.org/licenses/>.
- *
  * This file is a part of iCalcreator.
-*/
-
+ *
+ * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
+ * @copyright 2007-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @link      https://kigkonsult.se
+ * @license   Subject matter of licence is the software iCalcreator.
+ *            The above copyright, link, package and version notices,
+ *            this licence notice and the invariant [rfc5545] PRODID result use
+ *            as implemented and invoked in iCalcreator shall be included in
+ *            all copies or substantial portions of the iCalcreator.
+ *
+ *            iCalcreator is free software: you can redistribute it and/or modify
+ *            it under the terms of the GNU Lesser General Public License as
+ *            published by the Free Software Foundation, either version 3 of
+ *            the License, or (at your option) any later version.
+ *
+ *            iCalcreator is distributed in the hope that it will be useful,
+ *            but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *            GNU Lesser General Public License for more details.
+ *
+ *            You should have received a copy of the GNU Lesser General Public License
+ *            along with iCalcreator. If not, see <https://www.gnu.org/licenses/>.
+ */
+declare( strict_types = 1 );
 namespace Kigkonsult\Icalcreator\Traits;
 
+use Kigkonsult\Icalcreator\Formatter\Property\SingleProps;
+use Kigkonsult\Icalcreator\Pc;
 use Kigkonsult\Icalcreator\Util\StringFactory;
 use Kigkonsult\Icalcreator\Util\Util;
 use Kigkonsult\Icalcreator\Util\ParameterFactory;
@@ -38,35 +39,26 @@ use InvalidArgumentException;
 /**
  * TZID property functions
  *
- * @author Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @since 2.27.3 2018-12-22
+ * @since 2.41.55 2022-08-13
  */
 trait TZIDtrait
 {
     /**
-     * @var array component property TZID value
+     * @var null|Pc component property TZID value
      */
-    protected $tzid = null;
+    protected ? Pc $tzid = null;
 
     /**
      * Return formatted output for calendar component property tzid
      *
      * @return string
      */
-    public function createTzid()
+    public function createTzid() : string
     {
-        if( empty( $this->tzid )) {
-            return null;
-        }
-        if( empty( $this->tzid[Util::$LCvalue] )) {
-            return $this->getConfig( self::ALLOWEMPTY )
-                ? StringFactory::createElement( self::TZID )
-                : null;
-        }
-        return StringFactory::createElement(
+        return SingleProps::format(
             self::TZID,
-            ParameterFactory::createParams( $this->tzid[Util::$LCparams] ),
-            StringFactory::strrep( $this->tzid[Util::$LCvalue] )
+            $this->tzid,
+            $this->getConfig( self::ALLOWEMPTY )
         );
     }
 
@@ -76,7 +68,7 @@ trait TZIDtrait
      * @return bool
      * @since  2.27.1 - 2018-12-15
      */
-    public function deleteTzid()
+    public function deleteTzid() : bool
     {
         $this->tzid = null;
         return true;
@@ -85,40 +77,53 @@ trait TZIDtrait
     /**
      * Get calendar component property tzid
      *
-     * @param bool   $inclParam
-     * @return bool|array
-     * @since  2.27.1 - 2018-12-13
+     * @param null|bool   $inclParam
+     * @return bool|string|Pc
+     * @since 2.41.36 2022-04-03
      */
-    public function getTzid( $inclParam = false )
+    public function getTzid( ? bool $inclParam = false ) : bool | string | Pc
     {
         if( empty( $this->tzid )) {
             return false;
         }
-        return ( $inclParam ) ? $this->tzid : $this->tzid[Util::$LCvalue];
+        return $inclParam ? clone $this->tzid : $this->tzid->value;
+    }
+
+    /**
+     * Return bool true if set (and ignore empty property)
+     *
+     * @return bool
+     * @since 2.41.36 2022-04-03
+     */
+    public function isTzidSet() : bool
+    {
+        return ! empty( $this->tzid->value );
     }
 
     /**
      * Set calendar component property tzid
      *
      * @since 2.23.12 - 2017-04-22
-     * @param string $value
-     * @param array  $params
+     * @param null|string|Pc   $value
+     * @param null|array $params
      * @return static
      * @throws InvalidArgumentException
-     * @since 2.27.3 2018-12-22
-     * @todo assert PHP timezone ?
+     * @since 2.41.36 2022-04-03
      */
-    public function setTzid( $value = null, $params = [] )
+    public function setTzid( null|string|Pc $value = null, ? array $params = [] ) : static
     {
-        if( empty( $value )) {
-            $this->assertEmptyValue( $value, self::TZID );
-            $value  = Util::$SP0;
-            $params = [];
+        $value = ( $value instanceof Pc )
+            ? clone $value
+            : Pc::factory( $value, ParameterFactory::setParams( $params ));
+        if( empty( $value->value )) {
+            $this->assertEmptyValue( $value->value, self::TZID );
+            $value->setEmpty();
         }
-        $this->tzid = [
-            Util::$LCvalue  => StringFactory::trimTrailNL( $value ),
-            Util::$LCparams => ParameterFactory::setParams( $params ),
-        ];
+        else {
+            Util::assertString( $value->value, self::TZID );
+            $value->value = StringFactory::trimTrailNL( $value->value );
+        }
+        $this->tzid = $value->setParams( ParameterFactory::setParams( $params ));
         return $this;
     }
 }

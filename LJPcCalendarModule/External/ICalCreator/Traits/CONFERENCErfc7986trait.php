@@ -2,99 +2,82 @@
 /**
  * iCalcreator, the PHP class package managing iCal (rfc2445/rfc5445) calendar information.
  *
- * copyright (c) 2007-2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
- * Link      https://kigkonsult.se
- * Package   iCalcreator
- * Version   2.30
- * License   Subject matter of licence is the software iCalcreator.
- *           The above copyright, link, package and version notices,
- *           this licence notice and the invariant [rfc5545] PRODID result use
- *           as implemented and invoked in iCalcreator shall be included in
- *           all copies or substantial portions of the iCalcreator.
- *
- *           iCalcreator is free software: you can redistribute it and/or modify
- *           it under the terms of the GNU Lesser General Public License as published
- *           by the Free Software Foundation, either version 3 of the License,
- *           or (at your option) any later version.
- *
- *           iCalcreator is distributed in the hope that it will be useful,
- *           but WITHOUT ANY WARRANTY; without even the implied warranty of
- *           MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *           GNU Lesser General Public License for more details.
- *
- *           You should have received a copy of the GNU Lesser General Public License
- *           along with iCalcreator. If not, see <https://www.gnu.org/licenses/>.
- *
  * This file is a part of iCalcreator.
-*/
-
+ *
+ * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
+ * @copyright 2007-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @link      https://kigkonsult.se
+ * @license   Subject matter of licence is the software iCalcreator.
+ *            The above copyright, link, package and version notices,
+ *            this licence notice and the invariant [rfc5545] PRODID result use
+ *            as implemented and invoked in iCalcreator shall be included in
+ *            all copies or substantial portions of the iCalcreator.
+ *
+ *            iCalcreator is free software: you can redistribute it and/or modify
+ *            it under the terms of the GNU Lesser General Public License as
+ *            published by the Free Software Foundation, either version 3 of
+ *            the License, or (at your option) any later version.
+ *
+ *            iCalcreator is distributed in the hope that it will be useful,
+ *            but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *            GNU Lesser General Public License for more details.
+ *
+ *            You should have received a copy of the GNU Lesser General Public License
+ *            along with iCalcreator. If not, see <https://www.gnu.org/licenses/>.
+ */
+declare( strict_types = 1 );
 namespace Kigkonsult\Icalcreator\Traits;
 
+use Kigkonsult\Icalcreator\Formatter\Property\MultiProps;
+use Kigkonsult\Icalcreator\Pc;
 use Kigkonsult\Icalcreator\Util\StringFactory;
-use Kigkonsult\Icalcreator\Util\Util;
-use Kigkonsult\Icalcreator\Util\ParameterFactory;
 use InvalidArgumentException;
-use function array_change_key_case;
+use Kigkonsult\Icalcreator\Util\Util;
 
 /**
  * CONFERENCE property functions
  *
- * @author Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @since 2.29.21 2019-06-17
+ * @since 2.41.55 2022-08-13
  */
 trait CONFERENCErfc7986trait
 {
     /**
-     * @var array component property CONFERENCE value
+     * @var null|Pc[] component property CONFERENCE value
      */
-    protected $conference = null;
+    protected ? array $conference = null;
 
     /**
      * Return formatted output for calendar component property conference
      *
      * @return string
      */
-    public function createConference()
+    public function createConference() : string
     {
-        if( empty( $this->conference )) {
-            return null;
-        }
-        $output = null;
-        $lang   = $this->getConfig( self::LANGUAGE );
-        foreach( $this->conference as $aix => $conferencePart ) {
-            if( ! empty( $conferencePart[Util::$LCvalue] )) {
-                $output .= StringFactory::createElement(
-                    self::CONFERENCE,
-                    ParameterFactory::createParams(
-                        $conferencePart[Util::$LCparams],
-                        [ self::FEATURE, self::LABEL, self::LANGUAGE ],
-                        $lang
-                    ),
-                    $conferencePart[Util::$LCvalue]
-                );
-            }
-            elseif( $this->getConfig( self::ALLOWEMPTY )) {
-                $output .= StringFactory::createElement( self::CONFERENCE );
-            }
-        } // end foreach
-        return $output;
+        return MultiProps::format(
+            self::CONFERENCE,
+            $this->conference ?? [],
+            $this->getConfig( self::ALLOWEMPTY ),
+            $this->getConfig( self::LANGUAGE )
+        );
     }
 
     /**
      * Delete calendar component property conference
      *
-     * @param int   $propDelIx   specific property in case of multiply occurrence
+     * @param null|int   $propDelIx   specific property in case of multiply occurrence
      * @return bool
      */
-    public function deleteConference( $propDelIx = null )
+    public function deleteConference( ? int $propDelIx = null ) : bool
     {
         if( empty( $this->conference )) {
             unset( $this->propDelIx[self::CONFERENCE] );
             return false;
         }
-        return $this->deletePropertyM(
+        return self::deletePropertyM(
             $this->conference,
             self::CONFERENCE,
+            $this,
             $propDelIx
         );
     }
@@ -102,49 +85,76 @@ trait CONFERENCErfc7986trait
     /**
      * Get calendar component property conference
      *
-     * @param int    $propIx specific property in case of multiply occurrence
-     * @param bool   $inclParam
-     * @return bool|array
+     * @param null|int    $propIx specific property in case of multiply occurrence
+     * @param null|bool   $inclParam
+     * @return bool|string|Pc
      */
-    public function getConference( $propIx = null, $inclParam = false )
+    public function getConference( ? int $propIx = null, ?bool $inclParam = false ) : bool | string | Pc
     {
         if( empty( $this->conference )) {
             unset( $this->propIx[self::CONFERENCE] );
             return false;
         }
-        return $this->getPropertyM(
+        return self::getMvalProperty(
             $this->conference,
             self::CONFERENCE,
+            $this,
             $propIx,
             $inclParam
         );
     }
 
     /**
+     * Return array, all calendar component property conference
+     *
+     * @param null|bool   $inclParam
+     * @return array|Pc[]
+     * @since 2.41.58 2022-08-24
+     */
+    public function getAllConference( ? bool $inclParam = false ) : array
+    {
+        return self::getMvalProperties( $this->conference, $inclParam );
+    }
+
+    /**
+     * Return bool true if set (and ignore empty property)
+     *
+     * @return bool
+     * @since 2.41.35 2022-03-28
+     */
+    public function isConferenceSet() : bool
+    {
+        return self::isMvalSet( $this->conference );
+    }
+
+    /**
      * Set calendar component property conference
      *
-     * @param string  $value
-     * @param array   $params
-     * @param integer $index
+     * @param null|string|Pc   $value
+     * @param null|int|array $params
+     * @param null|int      $index
      * @return static
      * @throws InvalidArgumentException
-     * @todo fix featureparam - AUDIO, CHAT, FEED, MODERATOR, PHONE, SCREEN, VIDEO, x-name, iana-token
-     * @todo fix labelparam   - LABEL
+     * @todo fix featureparam - AUDIO, CHAT, FEED, MODERATOR, PHONE, SCREEN, VIDEO, x-name, iana-token ??
+     * @todo fix labelparam   - LABEL ??
      */
-    public function setConference( $value = null, $params = [], $index = null )
+    public function setConference(
+        null|string|Pc $value = null,
+        null|int|array $params = [],
+        ? int $index = null
+    ) : static
     {
-        if( empty( $value )) {
-            $this->assertEmptyValue( $value, self::CONFERENCE );
-            $value  = Util::$SP0;
-            $params = [];
+        $value = self::marshallInputMval( $value, $params, $index );
+        if( empty( $value->value )) {
+            $this->assertEmptyValue( $value->value, self::CONFERENCE );
+            $value->setEmpty();
         }
         else {
-            $params = array_change_key_case( $params, CASE_UPPER );
-            if( ! isset( $param[self::VALUE] ) ) { // required
-                $params[self::VALUE] = self::URI;
-            }
+            $value->value = Util::assertString( $value->value, self::CONFERENCE );
+            $value->value = StringFactory::trimTrailNL( $value->value );
+            $value->addParamValue( self::URI, false ); // VALUE required
         }
-        $this->setMval( $this->conference, $value, $params, null, $index );
+         self::setMval( $this->conference, $value, $index );
         return $this;
     }
 }

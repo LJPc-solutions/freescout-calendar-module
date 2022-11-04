@@ -2,73 +2,65 @@
 /**
  * iCalcreator, the PHP class package managing iCal (rfc2445/rfc5445) calendar information.
  *
- * copyright (c) 2007-2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
- * Link      https://kigkonsult.se
- * Package   iCalcreator
- * Version   2.30
- * License   Subject matter of licence is the software iCalcreator.
- *           The above copyright, link, package and version notices,
- *           this licence notice and the invariant [rfc5545] PRODID result use
- *           as implemented and invoked in iCalcreator shall be included in
- *           all copies or substantial portions of the iCalcreator.
- *
- *           iCalcreator is free software: you can redistribute it and/or modify
- *           it under the terms of the GNU Lesser General Public License as published
- *           by the Free Software Foundation, either version 3 of the License,
- *           or (at your option) any later version.
- *
- *           iCalcreator is distributed in the hope that it will be useful,
- *           but WITHOUT ANY WARRANTY; without even the implied warranty of
- *           MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *           GNU Lesser General Public License for more details.
- *
- *           You should have received a copy of the GNU Lesser General Public License
- *           along with iCalcreator. If not, see <https://www.gnu.org/licenses/>.
- *
  * This file is a part of iCalcreator.
-*/
-
+ *
+ * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
+ * @copyright 2007-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @link      https://kigkonsult.se
+ * @license   Subject matter of licence is the software iCalcreator.
+ *            The above copyright, link, package and version notices,
+ *            this licence notice and the invariant [rfc5545] PRODID result use
+ *            as implemented and invoked in iCalcreator shall be included in
+ *            all copies or substantial portions of the iCalcreator.
+ *
+ *            iCalcreator is free software: you can redistribute it and/or modify
+ *            it under the terms of the GNU Lesser General Public License as
+ *            published by the Free Software Foundation, either version 3 of
+ *            the License, or (at your option) any later version.
+ *
+ *            iCalcreator is distributed in the hope that it will be useful,
+ *            but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *            GNU Lesser General Public License for more details.
+ *
+ *            You should have received a copy of the GNU Lesser General Public License
+ *            along with iCalcreator. If not, see <https://www.gnu.org/licenses/>.
+ */
+declare( strict_types = 1 );
 namespace Kigkonsult\Icalcreator\Traits;
 
+use Kigkonsult\Icalcreator\Formatter\Property\Property;
+use Kigkonsult\Icalcreator\Pc;
 use Kigkonsult\Icalcreator\Util\StringFactory;
-use Kigkonsult\Icalcreator\Util\Util;
 use Kigkonsult\Icalcreator\Util\ParameterFactory;
 use InvalidArgumentException;
 
+use Kigkonsult\Icalcreator\Util\Util;
 use function strtoupper;
 
 /**
  * ACTION property functions
  *
- * @author Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @since 2.29.14 2019-09-03
+ * @since 2.41.55 2022-08-13
  */
 trait ACTIONtrait
 {
     /**
-     * @var array component property ACTION value
+     * @var null|Pc component property ACTION value
      */
-    protected $action = null;
+    protected ? Pc $action = null;
 
     /**
      * Return formatted output for calendar component property action
      *
      * @return string
      */
-    public function createAction()
+    public function createAction() : string
     {
-        if( empty( $this->action )) {
-            return null;
-        }
-        if( empty( $this->action[Util::$LCvalue] )) {
-            return $this->getConfig( self::ALLOWEMPTY )
-                ? StringFactory::createElement( self::ACTION )
-                : null;
-        }
-        return StringFactory::createElement(
+        return Property::format(
             self::ACTION,
-            ParameterFactory::createParams( $this->action[Util::$LCparams] ),
-            $this->action[Util::$LCvalue]
+            $this->action,
+            $this->getConfig( self::ALLOWEMPTY )
         );
     }
 
@@ -78,7 +70,7 @@ trait ACTIONtrait
      * @return bool
      * @since  2.27.1 - 2018-12-15
      */
-    public function deleteAction()
+    public function deleteAction() : bool
     {
         $this->action = null;
         return true;
@@ -87,48 +79,59 @@ trait ACTIONtrait
     /**
      * Get calendar component property action
      *
-     * @param bool   $inclParam
-     * @return bool|array
-     * @since  2.27.1 - 2018-12-13
+     * @param null|bool  $inclParam
+     * @return bool|string|Pc
+     * @since 2.41.36 2022-04-03
      */
-    public function getAction( $inclParam = false )
+    public function getAction( ? bool $inclParam = false ) : bool | string | Pc
     {
         if( empty( $this->action )) {
             return false;
         }
-        return ( $inclParam ) ? $this->action : $this->action[Util::$LCvalue];
+        return $inclParam ? clone $this->action : $this->action->value;
+    }
+
+    /**
+     * Return bool true if set (ignore 'empty' property)
+     *
+     * @return bool
+     * @since 2.41.35 2022-03-28
+     */
+    public function isActionSet() : bool
+    {
+        return ! empty( $this->action->value );
     }
 
     /**
      * Set calendar component property action
      *
-     * @param string $value "AUDIO" / "DISPLAY" / "EMAIL" / "PROCEDURE"  / iana-token / x-name ??
-     * @param mixed  $params
+     * @param null|string|Pc   $value "AUDIO" / "DISPLAY" / "EMAIL" / "PROCEDURE"  / iana-token / x-name ??
+     * @param null|array $params
      * @return static
      * @throws InvalidArgumentException
-     * @since 2.29.14 2019-09-03
+     * @since 2.41.36 2022-04-03
      */
-    public function setAction( $value = null, $params = [] )
+    public function setAction( null|string|Pc $value = null, ? array $params = [] ) : static
     {
+        $value = ( $value instanceof Pc )
+            ? clone $value
+            : Pc::factory( $value, ParameterFactory::setParams( $params ));
         static $STDVALUES = [
             self::AUDIO,
             self::DISPLAY,
             self::EMAIL,
             self::PROCEDURE  // deprecated in rfc5545
         ];
-        if( empty( $value )) {
-            $this->assertEmptyValue( $value, self::ACTION );
-            $value  = Util::$SP0;
-            $params = [];
+        if( empty( $value->value )) {
+            $this->assertEmptyValue( $value->value, self::ACTION );
+            $value->value  = self::$SP0;
+            $value->removeParam();
         }
-        elseif( Util::isPropInList( $value, $STDVALUES )) {
-            $value = strtoupper( $value );
+        elseif( ! in_array( $value->value, $STDVALUES, true )) {
+            $value->value = Util::assertString( $value->value, self::ACTION );
+            $value->value = strtoupper( StringFactory::trimTrailNL( $value->value ));
         }
-        Util::assertString( $value, self::ACTION );
-        $this->action = [
-            Util::$LCvalue  => strtoupper( StringFactory::trimTrailNL((string) $value )),
-            Util::$LCparams => ParameterFactory::setParams( $params ),
-        ];
+        $this->action  = $value;
         return $this;
     }
 }

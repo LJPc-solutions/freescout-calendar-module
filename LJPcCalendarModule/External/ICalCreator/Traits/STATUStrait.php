@@ -2,35 +2,35 @@
 /**
  * iCalcreator, the PHP class package managing iCal (rfc2445/rfc5445) calendar information.
  *
- * copyright (c) 2007-2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
- * Link      https://kigkonsult.se
- * Package   iCalcreator
- * Version   2.30
- * License   Subject matter of licence is the software iCalcreator.
- *           The above copyright, link, package and version notices,
- *           this licence notice and the invariant [rfc5545] PRODID result use
- *           as implemented and invoked in iCalcreator shall be included in
- *           all copies or substantial portions of the iCalcreator.
- *
- *           iCalcreator is free software: you can redistribute it and/or modify
- *           it under the terms of the GNU Lesser General Public License as published
- *           by the Free Software Foundation, either version 3 of the License,
- *           or (at your option) any later version.
- *
- *           iCalcreator is distributed in the hope that it will be useful,
- *           but WITHOUT ANY WARRANTY; without even the implied warranty of
- *           MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *           GNU Lesser General Public License for more details.
- *
- *           You should have received a copy of the GNU Lesser General Public License
- *           along with iCalcreator. If not, see <https://www.gnu.org/licenses/>.
- *
  * This file is a part of iCalcreator.
-*/
-
+ *
+ * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
+ * @copyright 2007-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @link      https://kigkonsult.se
+ * @license   Subject matter of licence is the software iCalcreator.
+ *            The above copyright, link, package and version notices,
+ *            this licence notice and the invariant [rfc5545] PRODID result use
+ *            as implemented and invoked in iCalcreator shall be included in
+ *            all copies or substantial portions of the iCalcreator.
+ *
+ *            iCalcreator is free software: you can redistribute it and/or modify
+ *            it under the terms of the GNU Lesser General Public License as
+ *            published by the Free Software Foundation, either version 3 of
+ *            the License, or (at your option) any later version.
+ *
+ *            iCalcreator is distributed in the hope that it will be useful,
+ *            but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *            GNU Lesser General Public License for more details.
+ *
+ *            You should have received a copy of the GNU Lesser General Public License
+ *            along with iCalcreator. If not, see <https://www.gnu.org/licenses/>.
+ */
+declare( strict_types = 1 );
 namespace Kigkonsult\Icalcreator\Traits;
 
-use Kigkonsult\Icalcreator\Vcalendar;
+use Kigkonsult\Icalcreator\Formatter\Property\Property;
+use Kigkonsult\Icalcreator\Pc;
 use Kigkonsult\Icalcreator\Util\StringFactory;
 use Kigkonsult\Icalcreator\Util\Util;
 use Kigkonsult\Icalcreator\Util\ParameterFactory;
@@ -41,35 +41,26 @@ use function strtoupper;
 /**
  * STATUS property functions
  *
- * @author Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @since 2.27.3 2018-12-22
+ * @since 2.41.55 2022-08-13
  */
 trait STATUStrait
 {
     /**
-     * @var array component property STATUS value
+     * @var null|Pc component property STATUS value
      */
-    protected $status = null;
+    protected ? Pc $status = null;
 
     /**
      * Return formatted output for calendar component property status
      *
      * @return string
      */
-    public function createStatus()
+    public function createStatus() : string
     {
-        if( empty( $this->status )) {
-            return null;
-        }
-        if( empty( $this->status[Util::$LCvalue] )) {
-            return $this->getConfig( self::ALLOWEMPTY )
-                ? StringFactory::createElement( self::STATUS )
-                : null;
-        }
-        return StringFactory::createElement(
+        return Property::format(
             self::STATUS,
-            ParameterFactory::createParams( $this->status[Util::$LCparams] ),
-            $this->status[Util::$LCvalue]
+            $this->status,
+            $this->getConfig( self::ALLOWEMPTY )
         );
     }
 
@@ -79,7 +70,7 @@ trait STATUStrait
      * @return bool
      * @since  2.27.1 - 2018-12-15
      */
-    public function deleteStatus()
+    public function deleteStatus() : bool
     {
         $this->status = null;
         return true;
@@ -88,28 +79,39 @@ trait STATUStrait
     /**
      * Get calendar component property status
      *
-     * @param bool   $inclParam
-     * @return bool|array
-     * @since  2.27.1 - 2018-12-12
+     * @param null|bool   $inclParam
+     * @return bool|string|Pc
+     * @since 2.41.36 2022-04-03
      */
-    public function getStatus( $inclParam = false )
+    public function getStatus( ? bool $inclParam = false ) : bool | string | Pc
     {
         if( empty( $this->status )) {
             return false;
         }
-        return ( $inclParam ) ? $this->status : $this->status[Util::$LCvalue];
+        return $inclParam ? clone $this->status : $this->status->value;
+    }
+
+    /**
+     * Return bool true if set (and ignore empty property)
+     *
+     * @return bool
+     * @since 2.41.36 2022-04-03
+     */
+    public function isStatusSet() : bool
+    {
+        return ! empty( $this->status->value );
     }
 
     /**
      * Set calendar component property status
      *
-     * @param string $value
-     * @param array  $params
+     * @param null|string|Pc   $value
+     * @param null|array $params
      * @return static
      * @throws InvalidArgumentException
-     * @since 2.29.14 2019-09-03
+     * @since 2.41.36 2022-04-03
      */
-    public function setStatus( $value = null, $params = [] )
+    public function setStatus( null|string|Pc $value = null, ? array $params = [] ) : static
     {
         static $ALLOWED_VEVENT = [
             self::CONFIRMED,
@@ -127,27 +129,29 @@ trait STATUStrait
             self::DRAFT,
             self::F_NAL,
         ];
-        $value = strtoupper( StringFactory::trimTrailNL( $value ));
+        $value = ( $value instanceof Pc )
+            ? clone $value
+            : Pc::factory( $value, ParameterFactory::setParams( $params ));
+        if( ! empty( $value->value )) {
+            Util::assertString( $value->value, self::SOURCE );
+            $value->value = strtoupper( StringFactory::trimTrailNL( $value->value ));
+        }
         switch( true ) {
-            case ( empty( $value )) :
-                $this->assertEmptyValue( $value, self::STATUS );
-                $value  = Util::$SP0;
-                $params = [];
+            case ( empty( $value->value )) :
+                $this->assertEmptyValue( $value->value, self::STATUS );
+                $value->setEmpty();
                 break;
-            case ( Vcalendar::VEVENT == $this->getCompType()) :
-                Util::assertInEnumeration( $value, $ALLOWED_VEVENT, self::STATUS );
+            case (self::VEVENT === $this->getCompType()) :
+                Util::assertInEnumeration( $value->value, $ALLOWED_VEVENT, self::STATUS );
                 break;
-            case ( Vcalendar::VTODO == $this->getCompType()) :
-                Util::assertInEnumeration( $value, $ALLOWED_VTODO, self::STATUS );
+            case (self::VTODO === $this->getCompType()) :
+                Util::assertInEnumeration( $value->value, $ALLOWED_VTODO, self::STATUS );
                 break;
-            case ( Vcalendar::VJOURNAL == $this->getCompType()) :
-                Util::assertInEnumeration( $value, $ALLOWED_VJOURNAL, self::STATUS );
+            case (self::VJOURNAL === $this->getCompType()) :
+                Util::assertInEnumeration( $value->value, $ALLOWED_VJOURNAL, self::STATUS );
                 break;
         } // end switch
-        $this->status = [
-            Util::$LCvalue  => $value ,
-            Util::$LCparams => ParameterFactory::setParams( $params ),
-        ];
+        $this->status = $value;
         return $this;
     }
 }

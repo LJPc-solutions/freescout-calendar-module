@@ -2,95 +2,149 @@
 /**
  * iCalcreator, the PHP class package managing iCal (rfc2445/rfc5445) calendar information.
  *
- * copyright (c) 2007-2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
- * Link      https://kigkonsult.se
- * Package   iCalcreator
- * Version   2.30
- * License   Subject matter of licence is the software iCalcreator.
- *           The above copyright, link, package and version notices,
- *           this licence notice and the invariant [rfc5545] PRODID result use
- *           as implemented and invoked in iCalcreator shall be included in
- *           all copies or substantial portions of the iCalcreator.
- *
- *           iCalcreator is free software: you can redistribute it and/or modify
- *           it under the terms of the GNU Lesser General Public License as published
- *           by the Free Software Foundation, either version 3 of the License,
- *           or (at your option) any later version.
- *
- *           iCalcreator is distributed in the hope that it will be useful,
- *           but WITHOUT ANY WARRANTY; without even the implied warranty of
- *           MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *           GNU Lesser General Public License for more details.
- *
- *           You should have received a copy of the GNU Lesser General Public License
- *           along with iCalcreator. If not, see <https://www.gnu.org/licenses/>.
- *
  * This file is a part of iCalcreator.
-*/
-
+ *
+ * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
+ * @copyright 2007-2022 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @link      https://kigkonsult.se
+ * @license   Subject matter of licence is the software iCalcreator.
+ *            The above copyright, link, package and version notices,
+ *            this licence notice and the invariant [rfc5545] PRODID result use
+ *            as implemented and invoked in iCalcreator shall be included in
+ *            all copies or substantial portions of the iCalcreator.
+ *
+ *            iCalcreator is free software: you can redistribute it and/or modify
+ *            it under the terms of the GNU Lesser General Public License as
+ *            published by the Free Software Foundation, either version 3 of
+ *            the License, or (at your option) any later version.
+ *
+ *            iCalcreator is distributed in the hope that it will be useful,
+ *            but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *            GNU Lesser General Public License for more details.
+ *
+ *            You should have received a copy of the GNU Lesser General Public License
+ *            along with iCalcreator. If not, see <https://www.gnu.org/licenses/>.
+ */
+declare( strict_types = 1 );
 namespace Kigkonsult\Icalcreator;
 
+use DateInterval;
+use DateTimeInterface;
 use Exception;
+use InvalidArgumentException;
+use Kigkonsult\Icalcreator\Formatter\Vevent as Formatter;
 
-use function sprintf;
-use function strtoupper;
+use function array_keys;
 
 /**
  * iCalcreator VEVENT component class
  *
- * @author Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @since  2.29.9 - 2019-08-05
+ * @since  2.41.55 - 2022-08-13
  */
-final class Vevent extends VetComponent
+final class Vevent extends V3component
 {
-    use Traits\ATTACHtrait,
-        Traits\ATTENDEEtrait,
-        Traits\CATEGORIEStrait,
-        Traits\CLASStrait,
-        Traits\COLORrfc7986trait,
-        Traits\COMMENTtrait,
-        Traits\CONFERENCErfc7986trait,
-        Traits\CONTACTtrait,
-        Traits\CREATEDtrait,
-        Traits\DESCRIPTIONtrait,
-        Traits\DTENDtrait,
-        Traits\DTSTARTtrait,
-        Traits\DURATIONtrait,
-        Traits\EXDATEtrait,
-        Traits\EXRULEtrait,
-        Traits\GEOtrait,
-        Traits\IMAGErfc7986trait,
-        Traits\LAST_MODIFIEDtrait,
-        Traits\LOCATIONtrait,
-        Traits\ORGANIZERtrait,
-        Traits\PRIORITYtrait,
-        Traits\RDATEtrait,
-        Traits\RECURRENCE_IDtrait,
-        Traits\RELATED_TOtrait,
-        Traits\REQUEST_STATUStrait,
-        Traits\RESOURCEStrait,
-        Traits\RRULEtrait,
-        Traits\SEQUENCEtrait,
-        Traits\STATUStrait,
-        Traits\SUMMARYtrait,
-        Traits\TRANSPtrait,
-        Traits\UIDrfc7986trait,
-        Traits\URLtrait;
+    use Traits\ATTACHtrait;
+    use Traits\ATTENDEEtrait;
+    use Traits\CATEGORIEStrait;
+    use Traits\CLASStrait;
+    use Traits\COLORrfc7986trait;
+    use Traits\COMMENTtrait;
+    use Traits\CONFERENCErfc7986trait;
+    use Traits\CONTACTtrait;
+    use Traits\CREATEDtrait;
+    use Traits\DESCRIPTIONtrait;
+    use Traits\DTENDtrait;
+    use Traits\DTSTARTtrait;
+    use Traits\DURATIONtrait;
+    use Traits\EXDATEtrait;
+    use Traits\EXRULEtrait;
+    use Traits\GEOtrait;
+    use Traits\IMAGErfc7986trait;
+    use Traits\LAST_MODIFIEDtrait;
+    use Traits\LOCATIONtrait;
+    use Traits\ORGANIZERtrait;
+    use Traits\PRIORITYtrait;
+    use Traits\RDATEtrait;
+    use Traits\RECURRENCE_IDtrait;
+    use Traits\RELATED_TOtrait;
+    use Traits\REQUEST_STATUStrait;
+    use Traits\RESOURCEStrait;
+    use Traits\RRULEtrait;
+    use Traits\SEQUENCEtrait;
+    use Traits\STATUStrait;
+    use Traits\STRUCTURED_DATArfc9073trait;
+    use Traits\STYLED_DESCRIPTIONrfc9073trait;
+    use Traits\SUMMARYtrait;
+    use Traits\TRANSPtrait;
+    use Traits\UIDrfc7986trait;
+    use Traits\URLtrait;
 
     /**
      * @var string
      */
-    protected static $compSgn = 'e';
+    protected static string $compSgn = 'e';
+
+    /**
+     * Constructor
+     *
+     * @param null|array $config
+     * @throws Exception
+     * @since  2.41.53 - 2022-08-11
+     */
+    public function __construct( ? array $config = [] )
+    {
+        parent::__construct( $config );
+        $this->setDtstamp();
+        $this->setUid();
+    }
+
+    /**
+     * Return Vevent object instance
+     *
+     * @param null|array $config
+     * @param null|string|DateTimeInterface $dtstart
+     * @param null|string|DateTimeInterface $dtend   one of dtend or duration
+     * @param null|string|DateInterval $duration
+     * @param null|string $summary
+     * @return Vevent
+     * @throws InvalidArgumentException
+     * @throws Exception
+     * @since  2.41.53 - 2022-08-08
+     */
+    public static function factory(
+        ? array $config = [],
+        null|string|DateTimeInterface $dtstart = null,
+        null|string|DateTimeInterface $dtend = null,
+        null|string|DateInterval $duration = null,
+        ? string $summary = null
+    ) : Vevent
+    {
+        $instance = new Vevent( $config );
+        if( null !== $dtstart ) {
+            $instance->setDtstart( $dtstart );
+        }
+        if( null !== $dtend ) {
+            $instance->setDtend( $dtend );
+        }
+        elseif( null !== $duration ) {
+            $instance->setDuration( $duration );
+        }
+        if( null !== $summary ) {
+            $instance->setSummary( $summary );
+        }
+        return $instance;
+    }
 
     /**
      * Destructor
      *
-     * @since  2.29.5 - 2019-06-20
+     * @since 2.41.3 2022-01-17
      */
     public function __destruct()
     {
         if( ! empty( $this->components )) {
-            foreach( $this->components as $cix => $component ) {
+            foreach( array_keys( $this->components ) as $cix ) {
                 $this->components[$cix]->__destruct();
             }
         }
@@ -98,7 +152,6 @@ final class Vevent extends VetComponent
             $this->compType,
             $this->xprop,
             $this->components,
-            $this->unparsed,
             $this->config,
             $this->compix,
             $this->propIx,
@@ -139,6 +192,8 @@ final class Vevent extends VetComponent
             $this->rrule,
             $this->sequence,
             $this->status,
+            $this->structureddata,
+            $this->styleddescription,
             $this->summary,
             $this->transp,
             $this->uid,
@@ -151,48 +206,10 @@ final class Vevent extends VetComponent
      *
      * @return string
      * @throws Exception  (on Duration/Rdate err)
-     * @since  2.29.9 - 2019-08-05
+     * @since 2.41.55 2022-08-13
      */
-    public function createComponent()
+    public function createComponent() : string
     {
-        $compType    = strtoupper( $this->getCompType());
-        $component   = sprintf( self::$FMTBEGIN, $compType );
-        $component  .= $this->createUid();
-        $component  .= $this->createDtstamp();
-        $component  .= $this->createAttach();
-        $component  .= $this->createAttendee();
-        $component  .= $this->createCategories();
-        $component  .= $this->createClass();
-        $component  .= $this->createColor();
-        $component  .= $this->createComment();
-        $component  .= $this->createConference();
-        $component  .= $this->createContact();
-        $component  .= $this->createCreated();
-        $component  .= $this->createDescription();
-        $component  .= $this->createDtstart();
-        $component  .= $this->createDtend();
-        $component  .= $this->createDuration();
-        $component  .= $this->createExdate();
-        $component  .= $this->createExrule();
-        $component  .= $this->createImage();
-        $component  .= $this->createGeo();
-        $component  .= $this->createLastmodified();
-        $component  .= $this->createLocation();
-        $component  .= $this->createOrganizer();
-        $component  .= $this->createPriority();
-        $component  .= $this->createRdate();
-        $component  .= $this->createRrule();
-        $component  .= $this->createRelatedto();
-        $component  .= $this->createRequeststatus();
-        $component  .= $this->createRecurrenceid();
-        $component  .= $this->createResources();
-        $component  .= $this->createSequence();
-        $component  .= $this->createStatus();
-        $component  .= $this->createSummary();
-        $component  .= $this->createTransp();
-        $component  .= $this->createUrl();
-        $component  .= $this->createXprop();
-        $component  .= $this->createSubComponent();
-        return $component . sprintf( self::$FMTEND, $compType );
+        return Formatter::format( $this );
     }
 }
