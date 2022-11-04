@@ -10,7 +10,7 @@
     "Active and upcoming": "Aktiv und in Kürze",
     "Open calendar": "Kalender öffnen",
     "All Day": "Ganztägig",
-    "DD-MM-YYYY": "DD.MM.YYYY",
+    "DD-MM-YYYY": "DD-MM-YYYY",
     "hh:mm a": "HH:mm",
     "Add to calendar": "Zum Kalender hinzufügen",
     "Busy": "Beschäftigt",
@@ -40,7 +40,7 @@
     "Added to a calendar, but the calendar has been deleted by now.": "Zum Kalender hinzugefügt, jedoch wurde der Kalender inzwischen gelöscht.",
     "Added to calendar \":calendar\" by :person, but deleted by now.": "Zum Kalender \":calendar\" von :person hinzugefügt, jedoch wurde er inzwischen gelöscht.",
     "Added to calendar \":calendar\" by :person at :start.": "Zum Kalender \":calendar\" von :person um :start hinzugefügt.",
-    "d-m-Y H:i": "d.m.Y H:i",
+    "d-m-Y H:i": "d-m-Y H:i",
     "Source": "Quelle",
     "Created by": "Erstellt von"
 }
