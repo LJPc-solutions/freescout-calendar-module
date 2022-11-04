@@ -80,7 +80,7 @@ class LJPcCalendarModuleController extends Controller {
 				->header( 'Content-Type', 'text/plain' );
 		}
 
-		if ( ! isset( $_GET['key'] ) || $_GET['key'] !== md5($calendarObj->id .  $calendarObj->created_at ) ) {
+		if ( ! isset( $_GET['key'] ) || $_GET['key'] !== md5( $calendarObj->id . $calendarObj->created_at ) ) {
 			return response( 'Forbidden', 403 )
 				->header( 'Content-Type', 'text/plain' );
 		}
@@ -100,14 +100,8 @@ class LJPcCalendarModuleController extends Controller {
 		foreach ( $calendarItems as $calendarItem ) {
 			$vevent = $calendar->newVevent();
 
-			$vevent->setDtstart(
-				new DateTime( $calendarItem->start ),
-				new DateTimezone( $tz )
-			);
-			$vevent->setDtend(
-				new DateTime( $calendarItem->end ),
-				new DateTimezone( $tz )
-			);
+			$vevent->setDtstart( new DateTime( $calendarItem->start, new DateTimezone( $tz ) ) );
+			$vevent->setDtend( new DateTime( $calendarItem->end, new DateTimezone( $tz ) ) );
 			if ( ! empty( $calendarItem->location ) ) {
 				$vevent->setLocation( $calendarItem->location );
 			}
@@ -136,9 +130,9 @@ class LJPcCalendarModuleController extends Controller {
 			} else {
 				$this->createItem( $data['calendar'], $data['schedule'] );
 			}
-		} elseif ( $data['action'] === 'update' ) {
+		} else if ( $data['action'] === 'update' ) {
 			$this->updateItem( $data['schedule']['id'], $data['changes'] );
-		} elseif ( $data['action'] === 'delete' ) {
+		} else if ( $data['action'] === 'delete' ) {
 			$this->deleteItem( $data['schedule']['id'] );
 		}
 		event( new CalendarUpdatedEvent() );
