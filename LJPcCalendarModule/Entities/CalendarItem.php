@@ -3,10 +3,25 @@
 namespace Modules\LJPcCalendarModule\Entities;
 
 use App\User;
+use DateTime;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use JsonSerializable;
 
+/**
+ * @property int $id
+ * @property int $calendar_id
+ * @property int $author_id
+ * @property bool $is_all_day
+ * @property bool $is_private
+ * @property bool $is_read_only
+ * @property string $title
+ * @property string $body
+ * @property string $state
+ * @property string $location
+ * @property DateTime $start
+ * @property DateTime $end
+ */
 class CalendarItem extends Model implements JsonSerializable {
 		public const ACTION_TYPE_ADD_TO_CALENDAR = 186;
 
@@ -25,6 +40,11 @@ class CalendarItem extends Model implements JsonSerializable {
 				'end',
 		];
 
+		protected $casts = [
+				'start' => 'datetime',
+				'end'   => 'datetime',
+		];
+
 		public function calendar(): BelongsTo {
 				return $this->belongsTo( Calendar::class );
 		}
@@ -36,8 +56,8 @@ class CalendarItem extends Model implements JsonSerializable {
 						'location'   => $this->location,
 						'body'       => $this->body,
 						'state'      => $this->state,
-						'start'      => $this->start,
-						'end'        => $this->end,
+						'start'      => $this->start->setTimezone( config( 'app.timezone' ) )->format( 'Y-m-d H:i:s' ),
+						'end'        => $this->end->setTimezone( config( 'app.timezone' ) )->format( 'Y-m-d H:i:s' ),
 						'isAllDay'   => (int) $this->is_all_day,
 						'category'   => $this->is_all_day ? 'allday' : 'time',
 						'isPrivate'  => (int) $this->is_private,
