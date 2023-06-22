@@ -7,6 +7,7 @@ use App\Thread;
 use DateTime;
 use DateTimeImmutable;
 use DateTimeZone;
+use Carbon\Carbon;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Foundation\Application;
 use Illuminate\Routing\Controller;
@@ -151,8 +152,8 @@ class LJPcCalendarModuleController extends Controller {
 				$calendarItem->title    = $schedule['title'];
 				$calendarItem->state    = $schedule['state'];
 				$calendarItem->location = $schedule['location'];
-				$calendarItem->start    = date( DATE_ATOM, $schedule['start'] );
-				$calendarItem->end      = date( DATE_ATOM, $schedule['end'] );
+				$calendarItem->start    = Carbon::createFromTimeStamp( $schedule['start'] );
+				$calendarItem->end      = Carbon::createFromTimeStamp( $schedule['end'] );
 
 				$calendarItem->body =
 						__( 'empty' ) . '<br />' . __( 'Created by' ) . ': <img class="avatar" src="' . Auth::user()->getPhotoUrl() . '" alt="' . Auth::user()
@@ -201,8 +202,8 @@ class LJPcCalendarModuleController extends Controller {
 				$calendarItem->title    = $changes['title'] ?? $calendarItem->title;
 				$calendarItem->state    = $changes['state'] ?? $calendarItem->state;
 				$calendarItem->location = $changes['location'] ?? $calendarItem->location;
-				$calendarItem->start    = isset( $changes['start'] ) ? date( DATE_ATOM, $changes['start'] ) : $calendarItem->start;
-				$calendarItem->end      = isset( $changes['end'] ) ? date( DATE_ATOM, $changes['end'] ) : $calendarItem->end;
+				$calendarItem->start    = isset( $changes['start'] ) ? Carbon::createFromTimeStamp( $changes['start'] ) : $calendarItem->start;
+				$calendarItem->end      = isset( $changes['end'] ) ? Carbon::createFromTimeStamp( $changes['end'] ) : $calendarItem->end;
 
 				$calendarItem->save();
 		}
