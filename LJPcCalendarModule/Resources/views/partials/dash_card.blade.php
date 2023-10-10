@@ -20,7 +20,7 @@
     </div>
 </div>
 
-<script>
+<script {!! \Helper::cspNonceAttr() !!}>
     const translations = {
         allDay: '{{__('All Day')}}',
         dateFormat: '{{__('DD-MM-YYYY')}}',
@@ -30,7 +30,7 @@
 
     const calendars = {!! $calendars !!};
 </script>
-<script src="{{Module::getPublicPath( LJPC_CALENDARS_MODULE ) . '/js/jquery-3.6.0.min.js'}}"></script>
-<script src="{{Module::getPublicPath( LJPC_CALENDARS_MODULE ) . '/js/moment-with-locales.min.js'}}"></script>
-<script>moment.locale('{{Helper::getRealAppLocale()}}');</script>
-<script src="{{Module::getPublicPath( LJPC_CALENDARS_MODULE ) . '/js/calendar-dashboard.js'}}"></script>
+<script {!! \Helper::cspNonceAttr() !!} src="{{Module::getPublicPath( LJPC_CALENDARS_MODULE ) . '/js/jquery-3.6.0.min.js'}}"></script>
+<script {!! \Helper::cspNonceAttr() !!} src="{{Module::getPublicPath( LJPC_CALENDARS_MODULE ) . '/js/moment-with-locales.min.js'}}"></script>
+<script {!! \Helper::cspNonceAttr() !!}>moment.locale('{{Helper::getRealAppLocale()}}');</script>
+<script {!! \Helper::cspNonceAttr() !!} src="{{Module::getPublicPath( LJPC_CALENDARS_MODULE ) . '/js/calendar-dashboard.js'}}"></script>

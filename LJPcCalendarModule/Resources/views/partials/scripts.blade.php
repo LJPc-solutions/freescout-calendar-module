@@ -1,11 +1,11 @@
-<script src="{{ Module::getPublicPath(LJPC_CALENDARS_MODULE).'/js/jquery-3.6.0.min.js' }}"></script>
-<script src="{{ Module::getPublicPath(LJPC_CALENDARS_MODULE).'/js/moment-with-locales.min.js' }}"></script>
-<script src="{{ Module::getPublicPath(LJPC_CALENDARS_MODULE).'/js/tui-code-snippet.min.js' }}"></script>
-<script src="{{ Module::getPublicPath(LJPC_CALENDARS_MODULE).'/js/tui-time-picker.min.js' }}"></script>
-<script src="{{ Module::getPublicPath(LJPC_CALENDARS_MODULE).'/js/tui-date-picker.min.js' }}"></script>
-<script src="{{ Module::getPublicPath(LJPC_CALENDARS_MODULE).'/js/tui-calendar.min.js' }}"></script>
-<script src="{{ Module::getPublicPath(LJPC_CALENDARS_MODULE).'/js/calendar-app.js' }}"></script>
-<script>
+<script {!! \Helper::cspNonceAttr() !!} src="{{ Module::getPublicPath(LJPC_CALENDARS_MODULE).'/js/jquery-3.6.0.min.js' }}"></script>
+<script {!! \Helper::cspNonceAttr() !!} src="{{ Module::getPublicPath(LJPC_CALENDARS_MODULE).'/js/moment-with-locales.min.js' }}"></script>
+<script {!! \Helper::cspNonceAttr() !!} src="{{ Module::getPublicPath(LJPC_CALENDARS_MODULE).'/js/tui-code-snippet.min.js' }}"></script>
+<script {!! \Helper::cspNonceAttr() !!} src="{{ Module::getPublicPath(LJPC_CALENDARS_MODULE).'/js/tui-time-picker.min.js' }}"></script>
+<script {!! \Helper::cspNonceAttr() !!} src="{{ Module::getPublicPath(LJPC_CALENDARS_MODULE).'/js/tui-date-picker.min.js' }}"></script>
+<script {!! \Helper::cspNonceAttr() !!} src="{{ Module::getPublicPath(LJPC_CALENDARS_MODULE).'/js/tui-calendar.min.js' }}"></script>
+<script {!! \Helper::cspNonceAttr() !!} src="{{ Module::getPublicPath(LJPC_CALENDARS_MODULE).'/js/calendar-app.js' }}"></script>
+<script {!! \Helper::cspNonceAttr() !!}>
     moment.locale('{{Helper::getRealAppLocale()}}');
 
     const dayTranslations = ['{{__('Sun')}}', '{{__('Mon')}}', '{{__('Tue')}}', '{{__('Wed')}}', '{{__('Thu')}}', '{{__('Fri')}}', '{{__('Sat')}}'];
