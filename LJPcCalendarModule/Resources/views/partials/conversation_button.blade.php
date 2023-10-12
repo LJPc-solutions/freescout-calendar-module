@@ -1,7 +1,7 @@
 <span class="conv-add-to-calendar conv-action glyphicon glyphicon-calendar" data-toggle="tooltip"
       data-placement="bottom" title="{{ __("Add to calendar") }}" aria-label="{{ __("Add to calendar") }}"
       role="button"></span>
-<script>
+<script {!! \Helper::cspNonceAttr() !!}>
     const addToCalendar = {
         'route': '{{route('ljpccalendarmodule.ajax')}}',
         'translationBusy': '{{__('Busy')}}',
