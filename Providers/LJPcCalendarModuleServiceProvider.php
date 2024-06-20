@@ -178,7 +178,7 @@ class LJPcCalendarModuleServiceProvider extends ServiceProvider {
 								}
 
 								$permissions = $calendar->permissionsForCurrentUser();
-								if ( $permissions['createItems'] ) {
+								if ( $permissions !== null && $permissions['createItems'] ) {
 										$allCalendars[] = $calendar;
 								}
 						}
