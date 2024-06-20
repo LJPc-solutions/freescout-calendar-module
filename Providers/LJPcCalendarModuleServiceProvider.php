@@ -119,7 +119,8 @@ class LJPcCalendarModuleServiceProvider extends ServiceProvider {
 								if ( ! $calendar->enabled ) {
 										continue;
 								}
-								if ( ! $calendar->permissionsForCurrentUser()['showInDashboard'] ?? false ) {
+								$permissions = $calendar->permissionsForCurrentUser();
+								if ( $permissions === null || ! ( $permissions['showInDashboard'] ?? false ) ) {
 										continue;
 								}
 								$calendarEvents = $calendar->events( new DateTimeImmutable(), new DateTimeImmutable( '+1 week' ) );
