@@ -9,7 +9,6 @@ use App\User;
 use DateTimeImmutable;
 use DateTimeZone;
 use Exception;
-use Helper;
 use ICal\Event;
 use ICal\ICal;
 use Illuminate\Http\JsonResponse;
@@ -20,7 +19,6 @@ use Modules\LJPcCalendarModule\Entities\CalendarItem;
 use Modules\LJPcCalendarModule\Http\Helpers\CalDAV;
 use Modules\LJPcCalendarModule\Jobs\UpdateExternalCalendarJob;
 use Modules\Teams\Providers\TeamsServiceProvider as Teams;
-use Response;
 
 class LJPcCalendarModuleAPIController extends Controller {
 		/**
@@ -62,7 +60,7 @@ class LJPcCalendarModuleAPIController extends Controller {
 						];
 				}
 
-				return Response::json( $response );
+				return response()->json( $response );
 		}
 
 		/**
@@ -73,7 +71,7 @@ class LJPcCalendarModuleAPIController extends Controller {
 		public function getCalendars(): JsonResponse {
 				$calendars = Calendar::all();
 
-				return Response::json( $calendars );
+				return response()->json( $calendars );
 		}
 
 		/**
@@ -256,7 +254,7 @@ class LJPcCalendarModuleAPIController extends Controller {
 				}
 				unset( $event );
 
-				return Response::json( $events );
+				return response()->json( $events );
 		}
 
 		/**
