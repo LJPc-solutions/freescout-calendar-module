@@ -449,6 +449,13 @@ class LJPcCalendarModuleAPIController extends Controller {
 						return response()->json( [ 'error' => 'Calendar not found' ], 404 );
 				}
 
+				//add conversation url to body
+				$conversation    = Conversation::find( $conversation );
+				if ( $conversation !== null ) {
+						$conversationUrl       = route( 'conversation.view', [ 'id' => $conversation ] );
+						$validatedData['body'] = $validatedData['body'] . PHP_EOL . PHP_EOL . 'Source: ' . $conversationUrl;
+				}
+
 				$uid = null;
 				if ( $calendar->type === 'normal' ) {
 						$calendarItem              = new CalendarItem();
@@ -540,6 +547,13 @@ class LJPcCalendarModuleAPIController extends Controller {
 
 				$refetchCalendarIds = [];
 
+				//add conversation url to body
+				$conversation    = Conversation::find( $conversation );
+				$conversationUrl = null;
+				if ( $conversation !== null ) {
+						$conversationUrl       = route( 'conversation.view', [ 'id' => $conversation ] );
+				}
+
 				foreach ( $events as $event ) {
 						$start = DateTimeImmutable::createFromMutable( $ical->iCalDateToDateTime( $event->dtstart_array[3] )->setTimezone( new DateTimeZone( 'UTC' ) ) );
 						if ( ! empty( $event->dtend ) ) {
@@ -559,7 +573,11 @@ class LJPcCalendarModuleAPIController extends Controller {
 								$calendarItem->start       = $start;
 								$calendarItem->end         = $end;
 								$calendarItem->location    = $event->location ?? '';
-								$calendarItem->body        = $event->description ?? '';
+								if($conversationUrl !== null) {
+										$calendarItem->body = $event->description . PHP_EOL . PHP_EOL . 'Source: ' . $conversationUrl;
+								} else {
+										$calendarItem->body = $event->description ?? '';
+								}
 								$calendarItem->save();
 
 								$uid = $calendarItem->id;
@@ -571,9 +589,13 @@ class LJPcCalendarModuleAPIController extends Controller {
 
 								$uid = $event->uid ?? $this->GUID();
 
+								$description = $event->description;
+								if($conversationUrl !== null) {
+										$description .= PHP_EOL . PHP_EOL . 'Source: ' . $conversationUrl;
+								}
 								$response = $caldavClient->createEvent( $remainingUrl, $uid, $event->summary, $event->description, $start, $end, $event->location );
 								if ( $response['statusCode'] < 200 || $response['statusCode'] > 300 ) {
-										return response()->json( [ 'error' => 'Error creating event', $response['body'], 'data' => [ $uid, $event->summary, $event->description, $start, $end, $event->location ] ], 500 );
+										return response()->json( [ 'error' => 'Error creating event', $response['body'], 'data' => [ $uid, $event->summary, $description, $start, $end, $event->location ] ], 500 );
 								}
 								$refetchCalendarIds[] = $calendar->id;
 						}
