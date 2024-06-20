@@ -1,0 +1,44 @@
+{
+  "name": "@toast-ui/date",
+  "version": "0.0.3",
+  "description": "TOAST UI Components: A Date interface  which is extensible. It provides UTCDate, LocalDate, MomentDate.",
+  "main": "dist/toastui-date.js",
+  "module": "src/",
+  "types": "index.d.ts",
+  "files": [
+    "dist/",
+    "src/",
+    "index.d.ts"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nhn/toast-ui.date.git"
+  },
+  "scripts": {
+    "lint": "eslint ./src ./test",
+    "build": "webpack --mode=production && webpack --mode=production --env minify && node tsBannerGenerator.js",
+    "doc": "tuidoc",
+    "analyze": "NODE_ENV=production webpack --mode=production --minify --profile --json > stats.json && webpack-bundle-analyzer stats.json ./dist",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "nhn",
+    "nhnent",
+    "toastui",
+    "toast-ui",
+    "tui",
+    "component",
+    "date",
+    "timezone",
+    "moment"
+  ],
+  "author": "NHN FE Development Lab <dl_javascript@nhn.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "tui-jsdoc-template": "^1.2.2"
+  },
+  "dependencies": {
+    "moment": "^2.29.4",
+    "moment-timezone": "^0.5.35"
+  }
+}

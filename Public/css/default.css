@@ -1,0 +1,125 @@
+.ljpc_calendar_module {
+    width: 100%;
+    height: 100%;
+
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.col-md-10, .col-md-2 {
+    height: 100%;
+}
+
+.calendar-wrapper {
+    padding-right: 0;
+    padding-left: 0;
+
+    border-left: 1px solid rgb(229, 229, 229);
+
+}
+
+.calendar-wrapper .navbar {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.btn-round {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    line-height: 1;
+}
+
+.rounded-pill {
+    border-radius: 20px; /* You can adjust the value to increase or decrease the roundness */
+    height: 40px;
+    padding: 0 20px;
+    line-height: 1;
+}
+
+#current-date {
+    margin-left: 10px;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.calendar-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.calendar-button {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    background-color: transparent; /* Make the button transparent */
+}
+
+.calendar-button:hover {
+    background-color: rgba(0, 0, 0, 0.1); /* Add a light background color on hover */
+}
+
+.calendar-button-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+    background-color: currentColor; /* Use the button's text color for the dot */
+}
+
+.calendar-button-dot.transparent {
+    background-color: transparent !important; /* Make the dot transparent */
+    border: 2px solid currentColor; /* Add a border with the button's text color */
+}
+
+.event-modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.event-modal-content {
+    background-color: #fefefe;
+    margin: 55px auto;
+    padding: 20px;
+    border: 1px solid #888;
+    position: relative;
+    max-width: 600px;
+    width: 95%;
+}
+
+.event-modal-close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.event-modal-close:hover,
+.event-modal-close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.event-modal textarea {
+    resize: vertical;
+}
+
+#calendar {
+    border-bottom: 1px solid rgb(229, 229, 229);
+}

@@ -1,0 +1,54 @@
+{
+  "header": {
+    "logo": {
+      "src": "https://uicdn.toast.com/toastui/img/tui-calendar-bi-white.png"
+    },
+    "title": {
+      "text": "repo",
+      "linkUrl": "https://github.com/nhn/tui.calendar"
+    }
+  },
+  "footer": [
+    {
+      "title": "NHN Cloud",
+      "linkUrl": "https://github.com/nhn"
+    },
+    {
+      "title": "FE Development Lab",
+      "linkUrl": "https://ui.toast.com/"
+    }
+  ],
+  "main": {
+    "filePath": "README.md"
+  },
+  "api": {
+    "filePath": [
+      "tmpdoc/src/factory/calendarCore.js",
+      "tmpdoc/src/factory/calendar.js",
+      "tmpdoc/src/time/date.js"
+    ],
+    "permalink": false
+  },
+  "examples": {
+    "filePath": "examples",
+    "titles": {
+      "00-calendar-app": "Calendar App",
+      "01-monthly-view-basic": "Monthly View",
+      "02-monthly-view-2weeks": "Monthly View (2 weeks)",
+      "03-monthly-view-3weeks": "Monthly View (3 weeks)",
+      "04-weekly-view": "Weekly View",
+      "05-weekly-view-no-event-view": "Weekly View (No Events View)",
+      "06-daily-view": "Daily View",
+      "07-narrow-weekends": "Narrow Weekends",
+      "08-hidden-weekends": "Hidden Weekends",
+      "09-timezone": "Timezone",
+      "10-theme-common": "Theme (Common)",
+      "11-theme-monthly": "Theme (Monthly)",
+      "12-theme-weekly": "Theme (Weekly)",
+      "13-template-monthly": "Template (Monthly)",
+      "14-template-weekly": "Template (Weekly)",
+      "15-template-popup": "Template (Popup)"
+    }
+  },
+  "pathPrefix": "tui.calendar"
+}

@@ -1,0 +1,36 @@
+name: Release
+
+on:
+    push:
+        tags:
+            - '*'
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            -   uses: actions/checkout@v3
+
+            -   name: Prepare files
+                run: |
+                    mkdir LJPcCalendarModule
+                    # Move everything except .git and README.md into the WHMCS folder
+                    find . -maxdepth 1 ! -name .git ! -name .github ! -name LJPcCalendarModule ! -name . ! -name README.md -exec mv {} LJPcCalendarModule/ \;
+
+            -   name: Archive repository
+                run: |
+                    zip -r "${GITHUB_REF_NAME}.zip" LJPcCalendarModule
+                    cp "${GITHUB_REF_NAME}.zip" latest.zip
+
+            -   name: Create version.txt
+                run: echo "${GITHUB_REF_NAME}" > version.txt
+
+            -   name: Upload to FTP
+                uses: SamKirkland/FTP-Deploy-Action@4.2.0
+                with:
+                    server: ${{ secrets.FTP_SERVER }}
+                    username: ${{ secrets.FTP_USERNAME }}
+                    password: ${{ secrets.FTP_PASSWORD }}
+                    local-dir: ./
+                    server-dir: './'
