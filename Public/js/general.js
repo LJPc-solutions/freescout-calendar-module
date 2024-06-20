@@ -1,4 +1,8 @@
 $(document).ready(function () {
+    $('.dash-card.ljpc_move_dash_card').each(function (i, el) {
+        $('.dash-cards').prepend(el);
+    });
+
     // Check if there is an element with the class "add-attachment-to-calendar"
     if ($('.add-attachment-to-calendar').length) {
         // Get the data-attachment-id value from the element with the class "add-attachment-to-calendar"
