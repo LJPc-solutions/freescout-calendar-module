@@ -4,6 +4,7 @@ namespace Modules\LJPcCalendarModule\Http\Controllers;
 
 use App\Attachment;
 use App\Conversation;
+use App\Misc\Helper;
 use App\Thread;
 use App\User;
 use DateTimeImmutable;
