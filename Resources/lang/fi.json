@@ -99,5 +99,6 @@
   "Welcome to the calendar settings page. Please select a calendar from the menu on the left.": "Tervetuloa kalenterin asetussivulle. Valitse kalenteri vasemmalla olevasta valikosta.",
   "Export": "Vie",
   "ICS with all details": "ICS kaikilla tiedoilla",
-  "ICS with only free/busy information": "ICS vain vapaana/varattuna tiedoilla"
+  "ICS with only free/busy information": "ICS vain vapaana/varattuna tiedoilla",
+  "Source:": "Lähde:"
 }

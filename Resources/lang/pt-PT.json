@@ -99,5 +99,6 @@
   "Welcome to the calendar settings page. Please select a calendar from the menu on the left.": "Bem-vindo à página de definições do calendário. Selecione um calendário no menu à esquerda.",
   "Export": "Exportar",
   "ICS with all details": "ICS com todos os detalhes",
-  "ICS with only free/busy information": "ICS apenas com informações de livre/ocupado"
+  "ICS with only free/busy information": "ICS apenas com informações de livre/ocupado",
+  "Source:": "Fonte:"
 }

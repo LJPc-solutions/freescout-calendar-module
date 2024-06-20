@@ -99,5 +99,6 @@
   "Welcome to the calendar settings page. Please select a calendar from the menu on the left.": "به صفحه تنظیمات تقویم خوش آمدید. لطفاً یک تقویم از منوی سمت چپ انتخاب کنید.",
   "Export": "صادر کردن",
   "ICS with all details": "ICS با تمام جزئیات",
-  "ICS with only free/busy information": "ICS فقط با اطلاعات آزاد/مشغول"
+  "ICS with only free/busy information": "ICS فقط با اطلاعات آزاد/مشغول",
+  "Source:": "منبع:"
 }

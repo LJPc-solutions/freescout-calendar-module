@@ -99,5 +99,6 @@
   "Welcome to the calendar settings page. Please select a calendar from the menu on the left.": "Välkommen till kalenderns inställningssida. Välj en kalender från menyn till vänster.",
   "Export": "Exportera",
   "ICS with all details": "ICS med alla detaljer",
-  "ICS with only free/busy information": "ICS med endast ledig/upptagen information"
+  "ICS with only free/busy information": "ICS med endast ledig/upptagen information",
+  "Source:": "Källa:"
 }

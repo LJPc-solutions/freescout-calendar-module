@@ -99,5 +99,6 @@
   "Welcome to the calendar settings page. Please select a calendar from the menu on the left.": "Vitajte na stránke nastavení kalendára. Vyberte kalendár z menu na ľavej strane.",
   "Export": "Exportovať",
   "ICS with all details": "ICS so všetkými podrobnosťami",
-  "ICS with only free/busy information": "ICS iba s informáciami o voľnom/obsadenom čase"
+  "ICS with only free/busy information": "ICS iba s informáciami o voľnom/obsadenom čase",
+  "Source:": "Zdroj:"
 }

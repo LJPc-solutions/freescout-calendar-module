@@ -99,5 +99,6 @@
   "Welcome to the calendar settings page. Please select a calendar from the menu on the left.": "Welkom op de agenda instellingenpagina. Selecteer een agenda uit het menu aan de linkerkant.",
   "Export": "Exporteren",
   "ICS with all details": "ICS met alle details",
-  "ICS with only free/busy information": "ICS met alleen beschikbaar/bezet informatie"
+  "ICS with only free/busy information": "ICS met alleen beschikbaar/bezet informatie",
+  "Source:": "Bron:"
 }

@@ -99,5 +99,6 @@
   "Welcome to the calendar settings page. Please select a calendar from the menu on the left.": "Dobrodošli na stranicu postavki kalendara. Odaberite kalendar iz izbornika s lijeve strane.",
   "Export": "Izvoz",
   "ICS with all details": "ICS sa svim detaljima",
-  "ICS with only free/busy information": "ICS samo s informacijama o slobodno/zauzeto"
+  "ICS with only free/busy information": "ICS samo s informacijama o slobodno/zauzeto",
+  "Source:": "Izvor:"
 }

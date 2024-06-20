@@ -99,5 +99,6 @@
   "Welcome to the calendar settings page. Please select a calendar from the menu on the left.": "Takvim ayarları sayfasına hoş geldiniz. Lütfen sol menüden bir takvim seçin.",
   "Export": "Dışa Aktar",
   "ICS with all details": "Tüm ayrıntıları içeren ICS",
-  "ICS with only free/busy information": "Yalnızca müsait/meşgul bilgilerini içeren ICS"
+  "ICS with only free/busy information": "Yalnızca müsait/meşgul bilgilerini içeren ICS",
+  "Source:": "Kaynak:"
 }

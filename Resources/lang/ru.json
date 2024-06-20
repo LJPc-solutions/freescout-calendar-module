@@ -99,5 +99,6 @@
   "Welcome to the calendar settings page. Please select a calendar from the menu on the left.": "Добро пожаловать на страницу настроек календаря. Выберите календарь в меню слева.",
   "Export": "Экспорт",
   "ICS with all details": "ICS со всеми деталями",
-  "ICS with only free/busy information": "ICS только с информацией о свободном/занятом времени"
+  "ICS with only free/busy information": "ICS только с информацией о свободном/занятом времени",
+  "Source:": "Источник:"
 }

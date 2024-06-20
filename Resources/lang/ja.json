@@ -99,5 +99,6 @@
   "Welcome to the calendar settings page. Please select a calendar from the menu on the left.": "カレンダー設定ページへようこそ。左のメニューからカレンダーを選択してください。",
   "Export": "エクスポート",
   "ICS with all details": "すべての詳細を含むICS",
-  "ICS with only free/busy information": "空き時間/予定ありの情報のみを含むICS"
+  "ICS with only free/busy information": "空き時間/予定ありの情報のみを含むICS",
+  "Source:": "ソース:"
 }

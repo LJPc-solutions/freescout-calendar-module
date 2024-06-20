@@ -99,5 +99,6 @@
   "Welcome to the calendar settings page. Please select a calendar from the menu on the left.": "欢迎来到日历设置页面。请从左侧菜单中选择一个日历。",
   "Export": "导出",
   "ICS with all details": "包含所有详情的 ICS",
-  "ICS with only free/busy information": "仅包含空闲/忙碌信息的 ICS"
+  "ICS with only free/busy information": "仅包含空闲/忙碌信息的 ICS",
+  "Source:": "来源:"
 }

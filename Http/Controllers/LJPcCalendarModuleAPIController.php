@@ -449,10 +449,10 @@ class LJPcCalendarModuleAPIController extends Controller {
 				}
 
 				//add conversation url to body
-				$conversation    = Conversation::find( $conversation );
-				if ( $conversation !== null ) {
-						$conversationUrl       = route( 'conversation.view', [ 'id' => $conversation ] );
-						$validatedData['body'] = $validatedData['body'] . PHP_EOL . PHP_EOL . 'Source: ' . $conversationUrl;
+				if ( Conversation::find( $conversation ) !== null ) {
+						$conversationUrl       = route( 'conversations.view', [ 'id' => $conversation ] );
+						$validatedData['body'] = $validatedData['body'] . PHP_EOL . PHP_EOL . __( 'Source:' ) . ' ' . $conversationUrl;
+						$validatedData['body'] = trim( $validatedData['body'] );
 				}
 
 				$uid = null;
@@ -547,11 +547,7 @@ class LJPcCalendarModuleAPIController extends Controller {
 				$refetchCalendarIds = [];
 
 				//add conversation url to body
-				$conversation    = Conversation::find( $conversation );
-				$conversationUrl = null;
-				if ( $conversation !== null ) {
-						$conversationUrl       = route( 'conversation.view', [ 'id' => $conversation ] );
-				}
+				$conversationUrl = route( 'conversations.view', [ 'id' => $conversation->id ] );
 
 				foreach ( $events as $event ) {
 						$start = DateTimeImmutable::createFromMutable( $ical->iCalDateToDateTime( $event->dtstart_array[3] )->setTimezone( new DateTimeZone( 'UTC' ) ) );
@@ -572,8 +568,8 @@ class LJPcCalendarModuleAPIController extends Controller {
 								$calendarItem->start       = $start;
 								$calendarItem->end         = $end;
 								$calendarItem->location    = $event->location ?? '';
-								if($conversationUrl !== null) {
-										$calendarItem->body = $event->description . PHP_EOL . PHP_EOL . 'Source: ' . $conversationUrl;
+								if ( $conversationUrl !== null ) {
+										$calendarItem->body = trim( ( $event->description ?? '' ) . PHP_EOL . PHP_EOL . 'Source: ' . $conversationUrl );
 								} else {
 										$calendarItem->body = $event->description ?? '';
 								}
@@ -589,8 +585,8 @@ class LJPcCalendarModuleAPIController extends Controller {
 								$uid = $event->uid ?? $this->GUID();
 
 								$description = $event->description;
-								if($conversationUrl !== null) {
-										$description .= PHP_EOL . PHP_EOL . 'Source: ' . $conversationUrl;
+								if ( $conversationUrl !== null ) {
+										$description .= PHP_EOL . PHP_EOL . __( 'Source:' ) . ' ' . $conversationUrl;
 								}
 								$response = $caldavClient->createEvent( $remainingUrl, $uid, $event->summary, $event->description, $start, $end, $event->location );
 								if ( $response['statusCode'] < 200 || $response['statusCode'] > 300 ) {
