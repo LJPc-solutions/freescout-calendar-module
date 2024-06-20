@@ -57,6 +57,9 @@ class Calendar extends Model implements JsonSerializable {
 		}
 
 		public function permissionsForCurrentUser(): ?array {
+				if ( $this->permissions === null ) {
+						return null;
+				}
 				$permissions = $this->permissions;
 				$user        = auth()->user();
 
