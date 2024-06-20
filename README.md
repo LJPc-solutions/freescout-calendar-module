@@ -39,6 +39,8 @@ This module supports automatic updates. You can update the module via the Module
 > [!NOTE]  
 > This works since version 2.0.0. If you are using an older version, you need to update manually.
 
+If you are upgrading from version 1.x, please check the [releasenotes](https://github.com/LJPc-solutions/freescout-calendar-module/releases/tag/2.0.0).
+
 ## Translations
 
 Here is the complete list of translations for the WHMCS Module for FreeScout:
