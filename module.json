@@ -2,7 +2,7 @@
   "name": "LJPc calendar module",
   "alias": "ljpccalendarmodule",
   "description": "This module adds a calendar to Freescout with support for external ICS and CalDAV calendars!",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "detailsUrl": "",
   "author": "LJPc solutions",
   "authorUrl": "https://ljpc.solutions",
