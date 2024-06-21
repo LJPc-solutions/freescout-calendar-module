@@ -3,6 +3,7 @@
 namespace Modules\LJPcCalendarModule\Http\Controllers;
 
 use DateTimeImmutable;
+use DateTimeZone;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\LJPcCalendarModule\Entities\Calendar;
@@ -62,19 +63,21 @@ class LJPcCalendarModuleCalendarController extends Controller {
 
 				if ( $calendar->type === 'normal' ) {
 						$events = json_decode( CalendarItem::where( 'calendar_id', $calendar->id )->get()->toJson(), true );
-						$ics    = \Spatie\IcalendarGenerator\Components\Calendar::create( $calendar->name );
+						$ics    = \Spatie\IcalendarGenerator\Components\Calendar::create( $calendar->name )->timezone( 'UTC' );
 
 						foreach ( $events as $event ) {
 								$start    = new DateTimeImmutable( $event['start'] );
 								$end      = new DateTimeImmutable( $event['end'] );
 								$isAllDay = DateTimeRange::isAllDay( $start, $end );
+
 								if ( $isObfuscated ) {
 										$newEvent = Event::create()
 										                 ->name( 'Unavailable' )
 										                 ->description( '' )
-										                 ->startsAt( $start )
-										                 ->endsAt( $end )
-										                 ->address( '' );
+										                 ->startsAt( $start->setTimezone( new DateTimeZone( 'UTC' ) ) )
+										                 ->endsAt( $end->setTimezone( new DateTimeZone( 'UTC' ) ) )
+										                 ->address( '' )
+										                 ->withoutTimezone();
 										if ( $isAllDay ) {
 												$newEvent->fullDay();
 										}
@@ -82,9 +85,10 @@ class LJPcCalendarModuleCalendarController extends Controller {
 										$newEvent = Event::create()
 										                 ->name( $event['title'] ?? '' )
 										                 ->description( $event['body'] ?? '' )
-										                 ->startsAt( $start )
-										                 ->endsAt( $end )
-										                 ->address( $event['location'] ?? '' );
+										                 ->startsAt( $start->setTimezone( new DateTimeZone( 'UTC' ) ) )
+										                 ->endsAt( $end->setTimezone( new DateTimeZone( 'UTC' ) ) )
+										                 ->address( $event['location'] ?? '' )
+										                 ->withoutTimezone();
 										if ( $isAllDay ) {
 												$newEvent->fullDay();
 										}
