@@ -12,6 +12,7 @@ use ICal\ICal;
 use Illuminate\Database\Eloquent\Model;
 use JsonSerializable;
 use Modules\LJPcCalendarModule\Http\Helpers\CalDAV;
+use Modules\LJPcCalendarModule\Http\Helpers\DateTimeRange;
 
 /**
  * Class Calendar
@@ -176,7 +177,7 @@ class Calendar extends Model implements JsonSerializable {
 						}
 
 						$modifiedEnd = $end;
-						if ( $this->isAllDay( $start, $end ) ) {
+						if ( DateTimeRange::isAllDay( $start, $end ) ) {
 								$modifiedEnd = $end->modify( '-1 second' );
 						}
 
@@ -189,7 +190,7 @@ class Calendar extends Model implements JsonSerializable {
 						$newCalendarItem->state        = $event->status;
 						$newCalendarItem->start        = $start;
 						$newCalendarItem->end          = $modifiedEnd;
-						$newCalendarItem->is_all_day   = $this->isAllDay( $start, $end );
+						$newCalendarItem->is_all_day   = DateTimeRange::isAllDay( $start, $end );
 						$newCalendarItem->is_private   = false;
 						$newCalendarItem->is_read_only = $readOnly;
 
@@ -197,15 +198,6 @@ class Calendar extends Model implements JsonSerializable {
 				}
 
 				return $retArr;
-		}
-
-		private function isAllDay( DateTimeImmutable $start, DateTimeImmutable $end ): bool {
-				//check if exactly 24 hours
-				$diff = $end->getTimestamp() - $start->getTimestamp();
-
-				return $diff === 86400;
-
-
 		}
 
 

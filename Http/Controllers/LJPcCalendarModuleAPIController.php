@@ -7,6 +7,7 @@ use App\Conversation;
 use App\Misc\Helper;
 use App\Thread;
 use App\User;
+use DateInterval;
 use DateTimeImmutable;
 use DateTimeZone;
 use Exception;
@@ -18,6 +19,7 @@ use Illuminate\Routing\Controller;
 use Modules\LJPcCalendarModule\Entities\Calendar;
 use Modules\LJPcCalendarModule\Entities\CalendarItem;
 use Modules\LJPcCalendarModule\Http\Helpers\CalDAV;
+use Modules\LJPcCalendarModule\Http\Helpers\DateTimeRange;
 use Modules\LJPcCalendarModule\Jobs\UpdateExternalCalendarJob;
 use Modules\Teams\Providers\TeamsServiceProvider as Teams;
 
@@ -376,7 +378,7 @@ class LJPcCalendarModuleAPIController extends Controller {
 						$validatedData = $request->validate( [
 								'title'      => 'required',
 								'start'      => 'required|date',
-								'end'        => 'required|date|after:start',
+								'end'        => 'required|date',
 								'location'   => 'nullable',
 								'body'       => 'nullable',
 								'calendarId' => 'required',
@@ -390,12 +392,21 @@ class LJPcCalendarModuleAPIController extends Controller {
 						return response()->json( [ 'error' => 'Calendar not found' ], 404 );
 				}
 
+				$start = ( new DateTimeImmutable( $validatedData['start'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
+				$end   = ( new DateTimeImmutable( $validatedData['end'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
+				if ( $start->getTimestamp() === $end->getTimestamp() ) {
+						$end = $start->add( new DateInterval( 'P1D' ) )->sub( new DateInterval( 'PT1S' ) );
+				}
+
+				$isAllDay = DateTimeRange::isAllDay( $start, $end );
+
 				if ( $calendar->type === 'normal' ) {
 						$calendarItem              = new CalendarItem();
 						$calendarItem->calendar_id = $validatedData['calendarId'];
 						$calendarItem->title       = $validatedData['title'];
-						$calendarItem->start       = ( new DateTimeImmutable( $validatedData['start'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
-						$calendarItem->end         = ( new DateTimeImmutable( $validatedData['end'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
+						$calendarItem->start       = $start;
+						$calendarItem->end         = $end;
+						$calendarItem->is_all_day  = $isAllDay;
 						$calendarItem->location    = $validatedData['location'] ?? '';
 						$calendarItem->body        = $validatedData['body'] ?? '';
 						$calendarItem->save();
@@ -407,10 +418,7 @@ class LJPcCalendarModuleAPIController extends Controller {
 
 						$uid = $this->GUID();
 
-						$start = ( new DateTimeImmutable( $validatedData['start'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
-						$end   = ( new DateTimeImmutable( $validatedData['end'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
-
-						$response = $caldavClient->createEvent( $remainingUrl, $uid, $validatedData['title'], $validatedData['body'], $start, $end, $validatedData['location'] );
+						$response = $caldavClient->createEvent( $remainingUrl, $uid, $validatedData['title'], $validatedData['body'], $start, $end, $isAllDay, $validatedData['location'] );
 						if ( $response['statusCode'] < 200 || $response['statusCode'] > 300 ) {
 								return response()->json( [ 'error' => 'Error creating event' ], 500 );
 						}
@@ -455,13 +463,21 @@ class LJPcCalendarModuleAPIController extends Controller {
 						$validatedData['body'] = trim( $validatedData['body'] );
 				}
 
+				$start = ( new DateTimeImmutable( $validatedData['start'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
+				$end   = ( new DateTimeImmutable( $validatedData['end'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
+				if ( $start->getTimestamp() === $end->getTimestamp() ) {
+						$end = $start->add( new DateInterval( 'P1D' ) )->sub( new DateInterval( 'PT1S' ) );
+				}
+				$isAllDay = DateTimeRange::isAllDay( $start, $end );
+
 				$uid = null;
 				if ( $calendar->type === 'normal' ) {
 						$calendarItem              = new CalendarItem();
 						$calendarItem->calendar_id = $validatedData['calendarId'];
 						$calendarItem->title       = $validatedData['title'];
-						$calendarItem->start       = ( new DateTimeImmutable( $validatedData['start'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
-						$calendarItem->end         = ( new DateTimeImmutable( $validatedData['end'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
+						$calendarItem->start       = $start;
+						$calendarItem->end         = $end;
+						$calendarItem->is_all_day  = $isAllDay;
 						$calendarItem->location    = $validatedData['location'] ?? '';
 						$calendarItem->body        = $validatedData['body'] ?? '';
 						$calendarItem->save();
@@ -475,10 +491,7 @@ class LJPcCalendarModuleAPIController extends Controller {
 
 						$uid = $this->GUID();
 
-						$start = ( new DateTimeImmutable( $validatedData['start'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
-						$end   = ( new DateTimeImmutable( $validatedData['end'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
-
-						$response = $caldavClient->createEvent( $remainingUrl, $uid, $validatedData['title'], $validatedData['body'], $start, $end, $validatedData['location'] );
+						$caldavClient->createEvent( $remainingUrl, $uid, $validatedData['title'], $validatedData['body'], $start, $end, $isAllDay, $validatedData['location'] );
 						$calendar->getExternalContent( true );
 				}
 
@@ -555,11 +568,15 @@ class LJPcCalendarModuleAPIController extends Controller {
 								$end = DateTimeImmutable::createFromMutable( $ical->iCalDateToDateTime( $event->dtend_array[3] )->setTimezone( new DateTimeZone( 'UTC' ) ) );
 						} else {
 								if ( ! empty( $event->duration ) ) {
-										$end = $start->add( new \DateInterval( $event->duration ) );
+										$end = $start->add( new DateInterval( $event->duration ) );
 								} else {
-										$end = $start->add( new \DateInterval( 'PT1H' ) );
+										$end = $start->add( new DateInterval( 'PT1H' ) );
 								}
 						}
+						if ( $start->getTimestamp() === $end->getTimestamp() ) {
+								$end = $start->add( new DateInterval( 'P1D' ) )->sub( new DateInterval( 'PT1S' ) );
+						}
+						$isAllDay = DateTimeRange::isAllDay( $start, $end );
 
 						if ( $calendar->type === 'normal' ) {
 								$calendarItem              = new CalendarItem();
@@ -567,6 +584,7 @@ class LJPcCalendarModuleAPIController extends Controller {
 								$calendarItem->title       = $event->summary;
 								$calendarItem->start       = $start;
 								$calendarItem->end         = $end;
+								$calendarItem->is_all_day  = $isAllDay;
 								$calendarItem->location    = $event->location ?? '';
 								if ( $conversationUrl !== null ) {
 										$calendarItem->body = trim( ( $event->description ?? '' ) . PHP_EOL . PHP_EOL . 'Source: ' . $conversationUrl );
@@ -588,7 +606,7 @@ class LJPcCalendarModuleAPIController extends Controller {
 								if ( $conversationUrl !== null ) {
 										$description .= PHP_EOL . PHP_EOL . __( 'Source:' ) . ' ' . $conversationUrl;
 								}
-								$response = $caldavClient->createEvent( $remainingUrl, $uid, $event->summary, $event->description, $start, $end, $event->location );
+								$response = $caldavClient->createEvent( $remainingUrl, $uid, $event->summary, $event->description, $start, $end, $isAllDay, $event->location );
 								if ( $response['statusCode'] < 200 || $response['statusCode'] > 300 ) {
 										return response()->json( [ 'error' => 'Error creating event', $response['body'], 'data' => [ $uid, $event->summary, $description, $start, $end, $event->location ] ], 500 );
 								}

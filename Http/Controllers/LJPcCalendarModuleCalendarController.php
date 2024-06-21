@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\LJPcCalendarModule\Entities\Calendar;
 use Modules\LJPcCalendarModule\Entities\CalendarItem;
+use Modules\LJPcCalendarModule\Http\Helpers\DateTimeRange;
 use Spatie\IcalendarGenerator\Components\Event;
 
 class LJPcCalendarModuleCalendarController extends Controller {
@@ -64,21 +65,31 @@ class LJPcCalendarModuleCalendarController extends Controller {
 						$ics    = \Spatie\IcalendarGenerator\Components\Calendar::create( $calendar->name );
 
 						foreach ( $events as $event ) {
+								$start    = new DateTimeImmutable( $event['start'] );
+								$end      = new DateTimeImmutable( $event['end'] );
+								$isAllDay = DateTimeRange::isAllDay( $start, $end );
 								if ( $isObfuscated ) {
-										$ics->event( Event::create()
-										                  ->name( 'Unavailable' )
-										                  ->description( '' )
-										                  ->startsAt( new DateTimeImmutable( $event['start'] ) )
-										                  ->endsAt( new DateTimeImmutable( $event['end'] ) )
-										                  ->address( '' ) );
+										$newEvent = Event::create()
+										                 ->name( 'Unavailable' )
+										                 ->description( '' )
+										                 ->startsAt( $start )
+										                 ->endsAt( $end )
+										                 ->address( '' );
+										if ( $isAllDay ) {
+												$newEvent->fullDay();
+										}
 								} else {
-										$ics->event( Event::create()
-										                  ->name( $event['title'] ?? '' )
-										                  ->description( $event['body'] ?? '' )
-										                  ->startsAt( new DateTimeImmutable( $event['start'] ) )
-										                  ->endsAt( new DateTimeImmutable( $event['end'] ) )
-										                  ->address( $event['location'] ?? '' ) );
+										$newEvent = Event::create()
+										                 ->name( $event['title'] ?? '' )
+										                 ->description( $event['body'] ?? '' )
+										                 ->startsAt( $start )
+										                 ->endsAt( $end )
+										                 ->address( $event['location'] ?? '' );
+										if ( $isAllDay ) {
+												$newEvent->fullDay();
+										}
 								}
+								$ics->event( $newEvent );
 						}
 
 						$data = $ics->get();
