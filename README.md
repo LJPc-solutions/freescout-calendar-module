@@ -24,7 +24,7 @@ This module adds a calendar module to FreeScout.
 
 ## Installation
 
-1. Download the latest module zip file [here](https://resources.ljpc.network/freescout-modules/ljpc-calendar/latest.zip). **Do not use the master branch!** The master branch is not stable and should only be used for development
+1. Download the latest module zip file [here](https://resources.ljpc.network/freescout-modules/calendar/latest.zip). **Do not use the master branch!** The master branch is not stable and should only be used for development
    purposes.
 2. Transfer the zip file to the server in the Modules folder of FreeScout.
 3. Unpack the zip file.
