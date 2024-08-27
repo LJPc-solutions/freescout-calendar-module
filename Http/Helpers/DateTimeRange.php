@@ -12,7 +12,7 @@ class DateTimeRange {
 
 				$diff = $end->getTimestamp() - $start->getTimestamp();
 
-				return $diff === 86400 || $diff === 86399;
+				return $diff > 86280;
 
 
 		}

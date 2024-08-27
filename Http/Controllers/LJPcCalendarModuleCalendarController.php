@@ -51,6 +51,8 @@ class LJPcCalendarModuleCalendarController extends Controller {
 
 				$isObfuscated = $requiredTokenObfuscated === $request->get( 'token' );
 
+				$defaultTimezone = config( 'app.timezone' );
+
 				/** @var Calendar|null $calendar */
 				$calendar = Calendar::find( $id );
 				if ( $calendar === null ) {
@@ -79,7 +81,10 @@ class LJPcCalendarModuleCalendarController extends Controller {
 										                 ->address( '' )
 										                 ->withoutTimezone();
 										if ( $isAllDay ) {
-												$newEvent->fullDay();
+												$newEvent
+														->fullDay()
+														->startsAt( $start->setTimezone( new DateTimeZone( $defaultTimezone ) ) )
+														->endsAt( $end->setTimezone( new DateTimeZone( $defaultTimezone ) ) );
 										}
 								} else {
 										$newEvent = Event::create()
@@ -90,7 +95,9 @@ class LJPcCalendarModuleCalendarController extends Controller {
 										                 ->address( $event['location'] ?? '' )
 										                 ->withoutTimezone();
 										if ( $isAllDay ) {
-												$newEvent->fullDay();
+												$newEvent->fullDay()
+												         ->startsAt( $start->setTimezone( new DateTimeZone( $defaultTimezone ) ) )
+												         ->endsAt( $end->setTimezone( new DateTimeZone( $defaultTimezone ) ) );
 										}
 								}
 								$ics->event( $newEvent );
