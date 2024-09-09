@@ -1,5 +1,6 @@
 <script setup>
 import {onMounted, ref} from "vue";
+import draggable from 'vuedraggable';
 
 const permissions = ref({});
 const emit = defineEmits(['save'])
@@ -18,6 +19,22 @@ const ljpccalendarmoduletranslations = window.ljpccalendarmoduletranslations
 
 const loadingIndicator = ref(false);
 
+const customFields = ref([]);
+
+const addCustomField = () => {
+  customFields.value.push({
+    id: Date.now(),
+    name: '',
+    type: 'text',
+    required: false,
+    options: ''
+  });
+};
+
+const removeField = (index) => {
+  customFields.value.splice(index, 1);
+};
+
 const handleSubmit = async (event) => {
   event.preventDefault();
 
@@ -31,7 +48,9 @@ const handleSubmit = async (event) => {
     name: name.value,
     color: color.value,
     type: calendarType.value,
-    custom_fields: {},
+    custom_fields: {
+      fields: customFields.value
+    },
     permissions: permissions.value,
   }
 
@@ -198,6 +217,41 @@ onMounted(() => {
         </div>
       </template>
 
+      <template v-if="calendarType !== 'ics'">
+        <hr>
+        <div class="form-group">
+          <label><strong>{{ ljpccalendarmoduletranslations.customFields }}:</strong></label>
+          <draggable v-model="customFields" group="customFields" item-key="id" handle=".drag-handle">
+            <template #item="{ element, index }">
+              <div class="custom-field">
+                <div class="field-header">
+                  <span class="drag-handle">&#9776;</span>
+                  <input v-model="element.name" placeholder="Field Name" class="form-control">
+                  <select v-model="element.type" class="form-control">
+                    <option value="text">{{ ljpccalendarmoduletranslations.text }}</option>
+                    <option value="number">{{ ljpccalendarmoduletranslations.number }}</option>
+                    <option value="dropdown">{{ ljpccalendarmoduletranslations.dropdown }}</option>
+                    <option value="boolean">{{ ljpccalendarmoduletranslations.boolean }}</option>
+                    <option value="multiselect">{{ ljpccalendarmoduletranslations.multiselect }}</option>
+                    <option value="date">{{ ljpccalendarmoduletranslations.date }}</option>
+                    <option value="email">{{ ljpccalendarmoduletranslations.email }}</option>
+                    <option value="source">{{ ljpccalendarmoduletranslations.source }}</option>
+                  </select>
+                  <input type="checkbox" v-model="element.required" :id="'required-' + element.id">
+                  <label :for="'required-' + element.id">{{ ljpccalendarmoduletranslations.required }}</label>
+                  <button @click="removeField(index)" class="btn btn-danger btn-sm">{{ ljpccalendarmoduletranslations.remove }}</button>
+                </div>
+                <div v-if="element.type === 'dropdown' || element.type === 'multiselect'" class="field-options">
+                  <input v-model="element.options" placeholder="Option1,Option2,Option3" class="form-control">
+                </div>
+              </div>
+            </template>
+          </draggable>
+          <button type="button" @click="addCustomField" class="btn btn-primary mt-2">{{ ljpccalendarmoduletranslations.addCustomField }}</button>
+        </div>
+      </template>
+
+
       <hr>
       <div class="form-group">
         <label><strong>{{ ljpccalendarmoduletranslations.permissions }}:</strong></label>
@@ -223,8 +277,39 @@ onMounted(() => {
         </table>
       </div>
 
+
       <button type="submit" v-if="!loadingIndicator" class="btn btn-primary">{{ ljpccalendarmoduletranslations.createCalendar }}</button>
       <span v-else>{{ ljpccalendarmoduletranslations.creating }}</span>
     </form>
   </div>
 </template>
+<style scoped>
+.custom-field {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #f9f9f9;
+}
+
+.field-header {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.field-options {
+  margin-top: 10px;
+}
+
+.drag-handle {
+  cursor: move;
+  padding: 5px;
+  font-size: 20px;
+  color: #888;
+}
+
+.drag-handle:hover {
+  color: #333;
+}
+</style>

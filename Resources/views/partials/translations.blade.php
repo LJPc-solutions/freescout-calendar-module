@@ -22,6 +22,18 @@
         export: '{{__('Export')}}',
         allDetails: '{{__('ICS with all details')}}',
         onlyFreeBusy: '{{__('ICS with only free/busy information')}}',
+        customFields: '{{__('Custom Fields')}}',
+        text: '{{__('Text')}}',
+        number: '{{__('Number')}}',
+        dropdown: '{{__('Dropdown')}}',
+        boolean: '{{__('Boolean')}}',
+        multiselect: '{{__('Multiselect')}}',
+        date: '{{__('Date')}}',
+        email: '{{__('Email')}}',
+        required: '{{__('Required')}}',
+        remove: '{{__('Remove')}}',
+        addCustomField: '{{__('Add custom field')}}',
+        source: '{{__('Source')}}',
 
         // ICS settings
         icsUrl: '{{__('ICS URL')}}',

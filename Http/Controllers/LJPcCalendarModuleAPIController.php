@@ -95,6 +95,9 @@ class LJPcCalendarModuleAPIController extends Controller {
 				$calendar->name  = $request->input( 'name' );
 				$calendar->color = $request->input( 'color' );
 
+				$customFields            = $request->input( 'custom_fields', [] );
+				$calendar->custom_fields = $this->validateCustomFields( $customFields );
+
 				if ( $calendar->type === 'ics' ) {
 						$calendar->custom_fields = array_merge( $calendar->custom_fields, [
 								'url'     => $request->input( 'url' ),
@@ -126,6 +129,38 @@ class LJPcCalendarModuleAPIController extends Controller {
 		}
 
 		/**
+		 * Validate and sanitize custom fields
+		 *
+		 * @param array $customFields The custom fields to validate
+		 *
+		 * @return array The validated and sanitized custom fields
+		 */
+		private function validateCustomFields( array $customFields ): array {
+				$validatedFields = [];
+
+				foreach ( $customFields['fields'] as $field ) {
+						$validatedField = [
+								'id'       => $field['id'],
+								'name'     => strip_tags( $field['name'] ),
+								'type'     => in_array( $field['type'], [ 'text', 'number', 'dropdown', 'boolean', 'multiselect', 'date', 'email', 'source' ] ) ? $field['type'] : 'text',
+								'required' => (bool) $field['required'],
+						];
+
+						if ( in_array( $field['type'], [ 'dropdown', 'multiselect' ] ) ) {
+								if ( is_array( $field['options'] ) ) {
+										$validatedField['options'] = array_map( 'trim', array_map( 'strip_tags', $field['options'] ) );
+								} else {
+										$validatedField['options'] = array_map( 'trim', array_map( 'strip_tags', explode( ',', $field['options'] ) ) );
+								}
+						}
+
+						$validatedFields[] = $validatedField;
+				}
+
+				return [ 'fields' => $validatedFields ];
+		}
+
+		/**
 		 * Create a new calendar
 		 *
 		 * @param Request $request The request object
@@ -138,6 +173,9 @@ class LJPcCalendarModuleAPIController extends Controller {
 				$calendar->name  = $request->input( 'name' );
 				$calendar->color = $request->input( 'color' );
 				$calendar->type  = $request->input( 'type' );
+
+				$customFields            = $request->input( 'custom_fields', [] );
+				$calendar->custom_fields = $this->validateCustomFields( $customFields );
 
 				if ( $calendar->type === 'ics' ) {
 						$calendar->custom_fields = [
@@ -456,13 +494,6 @@ class LJPcCalendarModuleAPIController extends Controller {
 						return response()->json( [ 'error' => 'Calendar not found' ], 404 );
 				}
 
-				//add conversation url to body
-				if ( Conversation::find( $conversation ) !== null ) {
-						$conversationUrl       = route( 'conversations.view', [ 'id' => $conversation ] );
-						$validatedData['body'] = $validatedData['body'] . PHP_EOL . PHP_EOL . __( 'Source:' ) . ' ' . $conversationUrl;
-						$validatedData['body'] = trim( $validatedData['body'] );
-				}
-
 				$start = ( new DateTimeImmutable( $validatedData['start'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
 				$end   = ( new DateTimeImmutable( $validatedData['end'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
 				if ( $start->getTimestamp() === $end->getTimestamp() ) {
@@ -480,6 +511,13 @@ class LJPcCalendarModuleAPIController extends Controller {
 						$calendarItem->is_all_day  = $isAllDay;
 						$calendarItem->location    = $validatedData['location'] ?? '';
 						$calendarItem->body        = $validatedData['body'] ?? '';
+						$customFields              = $calendarItem->custom_fields;
+						if ( ! is_array( $customFields ) ) {
+								$customFields = [];
+						}
+						$customFields['conversation_id'] = $conversation;
+						$customFields['author_id']       = auth()->user()->id;
+						$calendarItem->custom_fields     = $customFields;
 						$calendarItem->save();
 
 						$uid = $calendarItem->id;
@@ -490,6 +528,14 @@ class LJPcCalendarModuleAPIController extends Controller {
 						$caldavClient = new CalDAV( $baseUrl, $calendar->custom_fields['username'], $calendar->custom_fields['password'] );
 
 						$uid = $this->GUID();
+
+						if ( ! is_array( $validatedData['body'] ) ) {
+								$validatedData['body'] = [ 'body' => $validatedData['body'] ];
+						}
+						$validatedData['body']['custom_fields'] = [
+								'conversation_id' => $conversation,
+								'author_id'       => auth()->user()->id,
+						];
 
 						$caldavClient->createEvent( $remainingUrl, $uid, $validatedData['title'], $validatedData['body'], $start, $end, $isAllDay, $validatedData['location'] );
 						$calendar->getExternalContent( true );
