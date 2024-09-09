@@ -6,6 +6,11 @@
         moment.locale('{{Helper::getRealAppLocale()}}');
 
         // Constants
+        const MOBILE_BREAKPOINT = 768;
+        const VIEW_DAY = 'day';
+        const VIEW_WEEK = 'week';
+        const VIEW_MONTH = 'month';
+
         const calendars = {!! json_encode($calendars) !!};
         const csrfToken = '{{ csrf_token() }}';
         const calendarOptions = {
@@ -17,6 +22,10 @@
                 startDayOfWeek: 1,
                 taskView: false,
                 eventView: ['allday', 'time'],
+                dayNames: window.ljpccalendarmoduledaytranslations,
+            },
+            month: {
+                startDayOfWeek: 1,
                 dayNames: window.ljpccalendarmoduledaytranslations,
             },
             calendars: calendars,
@@ -61,6 +70,11 @@
                 hiddenUid: document.getElementById('hidden-event-details-uid'),
                 updateButton: document.getElementById('update-button'),
                 deleteButton: document.getElementById('delete-button'),
+            },
+            viewSelector: {
+                dayButton: document.getElementById('day-view-button'),
+                weekButton: document.getElementById('week-view-button'),
+                monthButton: document.getElementById('month-view-button'),
             }
         };
 
@@ -118,6 +132,31 @@
 
         dom.calendarPicker.container.appendChild(calendarButtons);
 
+        const isMobileView = () => window.innerWidth < MOBILE_BREAKPOINT;
+
+        const setCalendarView = (view) => {
+            calendar.changeView(view);
+            updateViewButtons(view);
+            updateTime();
+        };
+
+        const updateViewButtons = (currentView) => {
+            dom.viewSelector.dayButton.classList.toggle('active', currentView === VIEW_DAY);
+            dom.viewSelector.weekButton.classList.toggle('active', currentView === VIEW_WEEK);
+            dom.viewSelector.monthButton.classList.toggle('active', currentView === VIEW_MONTH);
+
+            // Hide week and month buttons on mobile
+            const isMobile = isMobileView();
+            dom.viewSelector.weekButton.style.display = isMobile ? 'none' : 'inline-block';
+            dom.viewSelector.monthButton.style.display = isMobile ? 'none' : 'inline-block';
+        };
+
+        // Event listeners for view buttons
+        dom.viewSelector.dayButton.addEventListener('click', () => setCalendarView(VIEW_DAY));
+        dom.viewSelector.weekButton.addEventListener('click', () => setCalendarView(VIEW_WEEK));
+        dom.viewSelector.monthButton.addEventListener('click', () => setCalendarView(VIEW_MONTH));
+
+
         // Rerender functions
         const rerender = () => {
             const navbarHeight = outerHeight(document.querySelector('.navbar'));
@@ -130,38 +169,42 @@
             dom.general.calendar.style.minHeight = `${maxHeight - calendarNavbarHeight}px`;
             dom.general.calendar.style.height = `${maxHeight - calendarNavbarHeight}px`;
 
-            const isMobile = window.innerWidth < 768;
-            const wantedView = isMobile ? 'day' : 'week';
+            const isMobile = isMobileView();
+            const currentView = calendar.getViewName();
+            const wantedView = isMobile ? VIEW_DAY : (currentView === VIEW_DAY ? VIEW_DAY : VIEW_WEEK);
 
-            if (calendar.getViewName() !== wantedView) {
-                calendar.changeView(wantedView);
+            if (currentView !== wantedView) {
+                setCalendarView(wantedView);
 
-                //set all calendars visible
+                // Set all calendars visible
                 for (const calendarInstance of calendarInstances) {
                     calendarInstance.isVisible = true;
                     calendarInstance.render();
                 }
             }
 
+            updateViewButtons(wantedView);
             calendar.render();
-
-            updateTime()
+            updateTime();
         }
 
         const updateTime = () => {
             const start = calendar.getDateRangeStart().toDate();
-            1
             const end = calendar.getDateRangeEnd().toDate();
+            const currentView = calendar.getViewName();
 
-            const isMobile = window.innerWidth < 768;
-
-            if (isMobile) {
-                dom.topBar.currentDate.innerHTML = moment(start).format(window.ljpccalendarmoduletranslations.dateFormat)
+            let dateFormat;
+            if (currentView === VIEW_DAY) {
+                dateFormat = moment(start).format(window.ljpccalendarmoduletranslations.dateFormat);
+            } else if (currentView === VIEW_WEEK) {
+                dateFormat = `${moment(start).format(window.ljpccalendarmoduletranslations.dateFormat)} - ${moment(end).format(window.ljpccalendarmoduletranslations.dateFormat)}`;
             } else {
-                dom.topBar.currentDate.innerHTML = `${moment(start).format(window.ljpccalendarmoduletranslations.dateFormat)} - ${moment(end).format(window.ljpccalendarmoduletranslations.dateFormat)}`;
+                dateFormat = moment(start).format('MMMM YYYY');
             }
 
-            getEvents()
+            dom.topBar.currentDate.innerHTML = dateFormat;
+
+            getEvents();
         }
 
         const api = {

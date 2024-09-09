@@ -22,6 +22,13 @@
                     <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
                 </button>
 
+                <!-- Add view selector buttons -->
+                <div class="btn-group view-selector" role="group" aria-label="Calendar View" style="margin-left: 10px;">
+                    <button type="button" class="btn btn-default" id="day-view-button" style="z-index:1 !important;">{{__('Day')}}</button>
+                    <button type="button" class="btn btn-default" id="week-view-button" style="z-index:1 !important;">{{__('Week')}}</button>
+                    <button type="button" class="btn btn-default" id="month-view-button" style="z-index:1 !important;">{{__('Month')}}</button>
+                </div>
+
                 <div id="current-date"></div>
             </nav>
             <main id="calendar"></main>
