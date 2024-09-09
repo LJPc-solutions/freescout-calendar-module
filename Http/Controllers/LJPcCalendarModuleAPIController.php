@@ -309,13 +309,14 @@ class LJPcCalendarModuleAPIController extends Controller {
 		public function updateEvent( Request $request ) {
 				try {
 						$validatedData = $request->validate( [
-								'uid'        => 'required',
-								'title'      => 'required',
-								'start'      => 'required|date',
-								'end'        => 'required|date|after:start',
-								'location'   => 'nullable',
-								'body'       => 'nullable',
-								'calendarId' => 'required',
+								'uid'          => 'required',
+								'title'        => 'required',
+								'start'        => 'required|date',
+								'end'          => 'required|date|after:start',
+								'location'     => 'nullable',
+								'body'         => 'nullable',
+								'calendarId'   => 'required',
+								'customFields' => 'nullable',
 						] );
 				} catch ( Exception $e ) {
 						return response()->json( [ 'error' => $e->getMessage() ], 400 );
@@ -324,6 +325,19 @@ class LJPcCalendarModuleAPIController extends Controller {
 				$calendar = Calendar::find( $validatedData['calendarId'] );
 				if ( ! $calendar ) {
 						return response()->json( [ 'error' => 'Calendar not found' ], 404 );
+				}
+
+				$customFieldsData      = $validatedData['customFields'] ?? [];
+				$customFields          = $calendar->custom_fields['fields'] ?? [];
+				$processedCustomFields = [];
+
+				foreach ( $customFields as $field ) {
+						$fieldId = 'custom_field_' . $field['id'];
+						if ( isset( $customFieldsData[ $fieldId ] ) ) {
+								$processedCustomFields[ $fieldId ] = $customFieldsData[ $fieldId ];
+						} else if ( $field['required'] ) {
+								return response()->json( [ 'error' => 'Required custom field missing: ' . $field['name'] ], 400 );
+						}
 				}
 
 				if ( $calendar->type === 'normal' ) {
@@ -337,6 +351,10 @@ class LJPcCalendarModuleAPIController extends Controller {
 						$calendarItem->end      = ( new DateTimeImmutable( $validatedData['end'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
 						$calendarItem->location = $validatedData['location'];
 						$calendarItem->body     = $validatedData['body'];
+						if ( ! is_array( $calendarItem->custom_fields ) ) {
+								$calendarItem->custom_fields = [];
+						}
+						$calendarItem->custom_fields = array_merge( $calendarItem->custom_fields, $processedCustomFields );
 
 						$calendarItem->save();
 				} else if ( $calendar->type === 'caldav' ) {
@@ -347,6 +365,16 @@ class LJPcCalendarModuleAPIController extends Controller {
 
 						$start = ( new DateTimeImmutable( $validatedData['start'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
 						$end   = ( new DateTimeImmutable( $validatedData['end'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
+
+						if ( count( $processedCustomFields ) > 0 ) {
+								if ( ! is_array( $validatedData['body'] ) ) {
+										$validatedData['body'] = [ 'body' => $validatedData['body'] ];
+								}
+								if ( ! is_array( $validatedData['body']['custom_fields'] ) ) {
+										$validatedData['body']['custom_fields'] = [];
+								}
+								$validatedData['body']['custom_fields'] = array_merge( $validatedData['body']['custom_fields'], $processedCustomFields );
+						}
 
 						$response = $caldavClient->updateEvent( $remainingUrl, $validatedData['uid'], $validatedData['title'], $validatedData['body'], $start, $end, $validatedData['location'] );
 						$calendar->getExternalContent( true );
@@ -414,12 +442,13 @@ class LJPcCalendarModuleAPIController extends Controller {
 		public function createEvent( Request $request ) {
 				try {
 						$validatedData = $request->validate( [
-								'title'      => 'required',
-								'start'      => 'required|date',
-								'end'        => 'required|date',
-								'location'   => 'nullable',
-								'body'       => 'nullable',
-								'calendarId' => 'required',
+								'title'        => 'required',
+								'start'        => 'required|date',
+								'end'          => 'required|date',
+								'location'     => 'nullable',
+								'body'         => 'nullable',
+								'calendarId'   => 'required',
+								'customFields' => 'nullable',
 						] );
 				} catch ( Exception $e ) {
 						return response()->json( [ 'error' => $e->getMessage() ], 400 );
@@ -428,6 +457,21 @@ class LJPcCalendarModuleAPIController extends Controller {
 				$calendar = Calendar::find( $validatedData['calendarId'] );
 				if ( ! $calendar ) {
 						return response()->json( [ 'error' => 'Calendar not found' ], 404 );
+				}
+
+				$customFieldsData      = $validatedData['customFields'] ?? [];
+				$customFields          = $calendar->custom_fields['fields'] ?? [];
+				$processedCustomFields = [
+						'author_id' => auth()->id(),
+				];
+
+				foreach ( $customFields as $field ) {
+						$fieldId = 'custom_field_' . $field['id'];
+						if ( isset( $customFieldsData[ $fieldId ] ) ) {
+								$processedCustomFields[ $fieldId ] = $customFieldsData[ $fieldId ];
+						} else if ( $field['required'] ) {
+								return response()->json( [ 'error' => 'Required custom field missing: ' . $field['name'] ], 400 );
+						}
 				}
 
 				$start = ( new DateTimeImmutable( $validatedData['start'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
@@ -439,14 +483,15 @@ class LJPcCalendarModuleAPIController extends Controller {
 				$isAllDay = DateTimeRange::isAllDay( $start, $end );
 
 				if ( $calendar->type === 'normal' ) {
-						$calendarItem              = new CalendarItem();
-						$calendarItem->calendar_id = $validatedData['calendarId'];
-						$calendarItem->title       = $validatedData['title'];
-						$calendarItem->start       = $start;
-						$calendarItem->end         = $end;
-						$calendarItem->is_all_day  = $isAllDay;
-						$calendarItem->location    = $validatedData['location'] ?? '';
-						$calendarItem->body        = $validatedData['body'] ?? '';
+						$calendarItem                = new CalendarItem();
+						$calendarItem->calendar_id   = $validatedData['calendarId'];
+						$calendarItem->title         = $validatedData['title'];
+						$calendarItem->start         = $start;
+						$calendarItem->end           = $end;
+						$calendarItem->is_all_day    = $isAllDay;
+						$calendarItem->location      = $validatedData['location'] ?? '';
+						$calendarItem->body          = $validatedData['body'] ?? '';
+						$calendarItem->custom_fields = $processedCustomFields;
 						$calendarItem->save();
 				} else if ( $calendar->type === 'caldav' ) {
 						$fullUrl      = $calendar->custom_fields['url'];
@@ -455,6 +500,11 @@ class LJPcCalendarModuleAPIController extends Controller {
 						$caldavClient = new CalDAV( $baseUrl, $calendar->custom_fields['username'], $calendar->custom_fields['password'] );
 
 						$uid = $this->GUID();
+
+						if ( ! is_array( $validatedData['body'] ) ) {
+								$validatedData['body'] = [ 'body' => $validatedData['body'] ];
+						}
+						$validatedData['body']['custom_fields'] = $processedCustomFields;
 
 						$response = $caldavClient->createEvent( $remainingUrl, $uid, $validatedData['title'], $validatedData['body'], $start, $end, $isAllDay, $validatedData['location'] );
 						if ( $response['statusCode'] < 200 || $response['statusCode'] > 300 ) {
@@ -478,12 +528,13 @@ class LJPcCalendarModuleAPIController extends Controller {
 		public function createEventFromConversation( int $conversation, Request $request ) {
 				try {
 						$validatedData = $request->validate( [
-								'title'      => 'required',
-								'start'      => 'required|date',
-								'end'        => 'required|date|after:start',
-								'location'   => 'nullable',
-								'body'       => 'nullable',
-								'calendarId' => 'required',
+								'title'        => 'required',
+								'start'        => 'required|date',
+								'end'          => 'required|date|after:start',
+								'location'     => 'nullable',
+								'body'         => 'nullable',
+								'calendarId'   => 'required',
+								'customFields' => 'nullable',
 						] );
 				} catch ( Exception $e ) {
 						return response()->json( [ 'error' => $e->getMessage() ], 400 );
@@ -501,6 +552,19 @@ class LJPcCalendarModuleAPIController extends Controller {
 				}
 				$isAllDay = DateTimeRange::isAllDay( $start, $end );
 
+				$customFieldsData      = $validatedData['customFields'] ?? [];
+				$customFields          = $calendar->custom_fields['fields'] ?? [];
+				$processedCustomFields = [];
+
+				foreach ( $customFields as $field ) {
+						$fieldId = 'custom_field_' . $field['id'];
+						if ( isset( $customFieldsData[ $fieldId ] ) ) {
+								$processedCustomFields[ $fieldId ] = $customFieldsData[ $fieldId ];
+						} else if ( $field['required'] ) {
+								return response()->json( [ 'error' => 'Required custom field missing: ' . $field['name'] ], 400 );
+						}
+				}
+
 				$uid = null;
 				if ( $calendar->type === 'normal' ) {
 						$calendarItem              = new CalendarItem();
@@ -517,7 +581,8 @@ class LJPcCalendarModuleAPIController extends Controller {
 						}
 						$customFields['conversation_id'] = $conversation;
 						$customFields['author_id']       = auth()->user()->id;
-						$calendarItem->custom_fields     = $customFields;
+						$calendarItem->custom_fields     = array_merge( $customFields, $processedCustomFields );
+
 						$calendarItem->save();
 
 						$uid = $calendarItem->id;
@@ -532,10 +597,10 @@ class LJPcCalendarModuleAPIController extends Controller {
 						if ( ! is_array( $validatedData['body'] ) ) {
 								$validatedData['body'] = [ 'body' => $validatedData['body'] ];
 						}
-						$validatedData['body']['custom_fields'] = [
+						$validatedData['body']['custom_fields'] = array_merge( [
 								'conversation_id' => $conversation,
 								'author_id'       => auth()->user()->id,
-						];
+						], $processedCustomFields );
 
 						$caldavClient->createEvent( $remainingUrl, $uid, $validatedData['title'], $validatedData['body'], $start, $end, $isAllDay, $validatedData['location'] );
 						$calendar->getExternalContent( true );
@@ -562,6 +627,22 @@ class LJPcCalendarModuleAPIController extends Controller {
 				}
 
 				return response()->json( [ 'status' => 'success', 'ok' => true, 'message' => 'Event created successfully' ] );
+		}
+
+		/**
+		 * Get a calendar
+		 *
+		 * @param int $id
+		 *
+		 * @return JsonResponse
+		 */
+		public function getCalendar( $id ) {
+				$calendar = Calendar::find( $id );
+				if ( ! $calendar ) {
+						return response()->json( [ 'error' => 'Calendar not found' ], 404 );
+				}
+
+				return response()->json( $calendar );
 		}
 
 		/**

@@ -56,6 +56,7 @@
                 location: document.getElementById('event-details-location'),
                 body: document.getElementById('event-details-body'),
                 calendar: document.getElementById('event-details-calendar'),
+                createdBy: document.getElementById('event-details-created-by'),
                 hiddenCalendar: document.getElementById('hidden-event-details-calendar'),
                 hiddenUid: document.getElementById('hidden-event-details-uid'),
                 updateButton: document.getElementById('update-button'),
@@ -65,6 +66,7 @@
 
         // Helper functions
         const hasPermissions = (calendarId, permission) => {
+            calendarId = parseInt(calendarId, 10);
             const calendar = calendars.find(calendar => calendar.id === calendarId);
             if (typeof calendar === 'undefined')
                 return false;
@@ -147,7 +149,8 @@
         }
 
         const updateTime = () => {
-            const start = calendar.getDateRangeStart().toDate();1
+            const start = calendar.getDateRangeStart().toDate();
+            1
             const end = calendar.getDateRangeEnd().toDate();
 
             const isMobile = window.innerWidth < 768;
@@ -222,6 +225,94 @@
             updateTime()
         });
 
+        const fetchCustomFields = async (calendarId) => {
+            try {
+                const response = await fetch(laroute.route('ljpccalendarmodule.api.calendar.get', {id: calendarId}));
+                const calendar = await response.json();
+                if (calendar.custom_fields === null) {
+                    return [];
+                }
+                return calendar.custom_fields.fields || [];
+            } catch (error) {
+                console.error('Error fetching custom fields:', error);
+                return [];
+            }
+        };
+
+        const renderCustomFields = (fields, container, canEdit, values = {}) => {
+            container.innerHTML = '';
+            fields.forEach(field => {
+                const fieldElement = document.createElement('div');
+                fieldElement.className = 'form-group';
+
+                const label = document.createElement('label');
+                label.textContent = field.name + (field.required ? ' *' : '');
+                label.htmlFor = `custom_field_${field.id}`;
+                fieldElement.appendChild(label);
+
+                let input;
+                switch (field.type) {
+                    case 'text':
+                    case 'number':
+                    case 'email':
+                    case 'date':
+                        input = document.createElement('input');
+                        input.type = field.type;
+                        input.className = 'form-control';
+                        input.name = `custom_field_${field.id}`;
+                        input.required = field.required;
+                        input.value = values[`custom_field_${field.id}`] || '';
+                        break;
+                    case 'dropdown':
+                    case 'multiselect':
+                        input = document.createElement('select');
+                        input.className = 'form-control';
+                        input.style = 'height: auto;';
+                        input.name = `custom_field_${field.id}`;
+                        input.required = field.required;
+                        if (field.type === 'multiselect') {
+                            input.multiple = true;
+                        }
+                        field.options.forEach(option => {
+                            const optionElement = document.createElement('option');
+                            optionElement.value = option;
+                            optionElement.textContent = option;
+                            if (values[`custom_field_${field.id}`] === option || (Array.isArray(values[`custom_field_${field.id}`]) && values[`custom_field_${field.id}`].includes(option))) {
+                                optionElement.selected = true;
+                            }
+                            input.appendChild(optionElement);
+                        });
+                        break;
+                    case 'boolean':
+                        input = document.createElement('input');
+                        input.type = 'checkbox';
+                        input.name = `custom_field_${field.id}`;
+                        input.checked = values[`custom_field_${field.id}`] === true;
+                        input.style = 'margin-left:5px;'
+                        break;
+                    case 'source':
+                        if (!values.hasOwnProperty('conversation_url') || !values.hasOwnProperty('conversation_id')) {
+                            return;
+                        }
+                        input = document.createElement('a');
+                        input.href = values.conversation_url;
+                        input.textContent = '#' + values.conversation_id;
+                        input.target = '_blank';
+                        input.style = "display:block;";
+                        break;
+                    default:
+                        return;
+                }
+
+                input.id = `custom_field_${field.id}`
+                input.disabled = !canEdit;
+
+                fieldElement.appendChild(input);
+                container.appendChild(fieldElement);
+            });
+        };
+
+
         /**
          * New event modal
          */
@@ -246,6 +337,14 @@
                     dom.newEventModal.calendar.add(option);
                 }
             });
+
+            // Add event listener for calendar selection
+            dom.newEventModal.calendar.addEventListener('change', async function () {
+                const selectedCalendarId = this.value;
+                const customFields = await fetchCustomFields(selectedCalendarId);
+                const canEdit = hasPermissions(selectedCalendarId, 'createItems');
+                renderCustomFields(customFields, document.getElementById('event-custom-fields'), canEdit);
+            });
         }
         const closeNewEventModal = () => {
             dom.newEventModal.modal.style.display = 'none';
@@ -255,6 +354,9 @@
             dom.newEventModal.location.value = '';
             dom.newEventModal.body.value = '';
             dom.newEventModal.calendar.value = '';
+
+            // Clear custom fields
+            document.getElementById('event-custom-fields').innerHTML = '';
         }
         dom.newEventModal.modalClose.addEventListener('click', closeNewEventModal);
         window.addEventListener('click', (event) => {
@@ -269,6 +371,13 @@
             //disable save button
             dom.newEventModal.saveButton.disabled = true;
 
+            const customFieldsData = {};
+            const fields = jQuery('#event-custom-fields input, #event-custom-fields select');
+            for (const fieldId of fields) {
+                const field = jQuery(fieldId);
+                customFieldsData[field.attr('name')] = field.attr('type') === 'checkbox' ? field.prop('checked') : field.val();
+            }
+
             try {
                 api.createEvent({
                     calendarId: dom.newEventModal.calendar.value,
@@ -277,6 +386,7 @@
                     end: moment(dom.newEventModal.end.value).toISOString(),
                     location: dom.newEventModal.location.value,
                     body: dom.newEventModal.body.value,
+                    customFields: customFieldsData
                 }).then(response => {
                     //enable save button
                     dom.newEventModal.saveButton.disabled = false;
@@ -297,7 +407,8 @@
         /**
          * Event details modal
          */
-        const openEventDetailsModal = (event) => {
+        const openEventDetailsModal = async (event) => {
+            console.log(event)
             dom.eventDetailModal.modal.style.display = 'block';
 
             dom.eventDetailModal.title.value = event.title;
@@ -311,57 +422,71 @@
             dom.eventDetailModal.calendar.innerHTML = '';
 
             // Populate calendar options
-            calendars.forEach(calendar => {
+            for (const calendar of calendars) {
                 if (calendar.id === event.calendarId) {
                     dom.eventDetailModal.calendar.innerHTML = calendar.name;
                     dom.eventDetailModal.hiddenCalendar.value = calendar.id;
-                    if (!hasPermissions(calendar.id, 'editItems') || (calendar.type !== 'normal' && calendar.type !== 'caldav')) {
-                        dom.eventDetailModal.title.readOnly = true;
-                        dom.eventDetailModal.start.readOnly = true;
-                        dom.eventDetailModal.end.readOnly = true;
-                        dom.eventDetailModal.location.readOnly = true;
-                        dom.eventDetailModal.body.readOnly = true;
-                        dom.eventDetailModal.updateButton.disabled = true;
-                        dom.eventDetailModal.deleteButton.disabled = true;
-                    } else {
-                        dom.eventDetailModal.title.readOnly = false;
-                        dom.eventDetailModal.start.readOnly = false;
-                        dom.eventDetailModal.end.readOnly = false;
-                        dom.eventDetailModal.location.readOnly = false;
-                        dom.eventDetailModal.body.readOnly = false;
-                        dom.eventDetailModal.updateButton.disabled = false;
-                        dom.eventDetailModal.deleteButton.disabled = false;
 
+                    dom.eventDetailModal.createdBy.innerHTML = event.raw.customFields.author_name;
+
+                    const canEdit = hasPermissions(calendar.id, 'editItems') && (calendar.type === 'normal' || calendar.type === 'caldav');
+
+                    dom.eventDetailModal.title.readOnly = !canEdit;
+                    dom.eventDetailModal.start.readOnly = !canEdit;
+                    dom.eventDetailModal.end.readOnly = !canEdit;
+                    dom.eventDetailModal.location.readOnly = !canEdit;
+                    dom.eventDetailModal.body.readOnly = !canEdit;
+                    dom.eventDetailModal.updateButton.disabled = !canEdit;
+                    dom.eventDetailModal.deleteButton.disabled = !canEdit;
+
+                    // Fetch and render custom fields
+                    try {
+                        const customFields = await fetchCustomFields(calendar.id);
+                        const customFieldsContainer = document.getElementById('event-details-custom-fields');
+                        renderCustomFields(customFields, customFieldsContainer, canEdit, event.raw.customFields);
+                    } catch (error) {
+                        console.error('Error fetching or rendering custom fields:', error);
+                        showFloatingAlert('error', '{{__('Failed to load custom fields')}}');
                     }
-                }
 
-            });
-        }
+                    break; // Exit the loop once we've found the matching calendar
+                }
+            }
+        };
 
         dom.eventDetailModal.deleteButton.addEventListener('click', async () => {
             const eventId = dom.eventDetailModal.hiddenUid.value;
             const calendarId = dom.eventDetailModal.hiddenCalendar.value;
 
-            //disable delete and update button
+            if (!hasPermissions(calendarId, 'editItems')) {
+                showFloatingAlert('error', '{{__('You do not have permission to delete this event')}}');
+                return;
+            }
+
+            if (!confirm('{{__('Are you sure you want to delete this event?')}}')) {
+                return;
+            }
+
+            // Disable delete and update buttons
             dom.eventDetailModal.deleteButton.disabled = true;
             dom.eventDetailModal.updateButton.disabled = true;
 
             try {
-                api.deleteEvent(eventId, calendarId).then(response => {
-                    //enable delete and update button
-                    dom.eventDetailModal.deleteButton.disabled = false;
-                    dom.eventDetailModal.updateButton.disabled = false;
-
-                    if (response.ok) {
-                        getEvents();
-                        closeEventDetailsModal();
-                        showFloatingAlert('success', '{{__('Event deleted successfully')}}');
-                    } else {
-                        showFloatingAlert('error', '{{__('Failed to delete event')}}');
-                    }
-                });
+                const response = await api.deleteEvent(eventId, calendarId);
+                if (response.ok) {
+                    getEvents();
+                    closeEventDetailsModal();
+                    showFloatingAlert('success', '{{__('Event deleted successfully')}}');
+                } else {
+                    showFloatingAlert('error', '{{__('Failed to delete event')}}');
+                }
             } catch (error) {
                 showFloatingAlert('error', '{{__('Failed to delete event')}}');
+                console.error(error);
+            } finally {
+                // Enable delete and update buttons
+                dom.eventDetailModal.deleteButton.disabled = false;
+                dom.eventDetailModal.updateButton.disabled = false;
             }
         });
 
@@ -373,6 +498,9 @@
             dom.eventDetailModal.location.value = '';
             dom.eventDetailModal.body.value = '';
             dom.eventDetailModal.calendar.innerHTML = '';
+
+            // Clear custom fields
+            document.getElementById('event-details-custom-fields').innerHTML = '';
         }
 
         dom.eventDetailModal.modalClose.addEventListener('click', closeEventDetailsModal);
@@ -391,6 +519,13 @@
             dom.eventDetailModal.updateButton.disabled = true;
             dom.eventDetailModal.deleteButton.disabled = true;
 
+            const customFieldsData = {};
+            const fields = jQuery('#event-details-custom-fields input, #event-details-custom-fields select');
+            for (const fieldId of fields) {
+                const field = jQuery(fieldId);
+                customFieldsData[field.attr('name')] = field.attr('type') === 'checkbox' ? field.prop('checked') : field.val();
+            }
+
             const updatedEvent = {
                 uid: dom.eventDetailModal.hiddenUid.value,
                 calendarId: dom.eventDetailModal.hiddenCalendar.value,
@@ -399,23 +534,26 @@
                 end: moment(dom.eventDetailModal.end.value).toISOString(),
                 location: dom.eventDetailModal.location.value,
                 body: dom.eventDetailModal.body.value,
+                customFields: customFieldsData
+
             };
 
             try {
-                api.updateEvent(updatedEvent).then(response => {
-                    //enable update and delete button
-                    dom.eventDetailModal.updateButton.disabled = false;
-                    dom.eventDetailModal.deleteButton.disabled = false;
-                    if (response.ok) {
-                        getEvents();
-                        closeEventDetailsModal();
-                        showFloatingAlert('success', '{{__('Event updated successfully')}}');
-                    } else {
-                        showFloatingAlert('error', '{{__('Failed to update event')}}');
-                    }
-                });
+                const response = await api.updateEvent(updatedEvent);
+                if (response.ok) {
+                    getEvents();
+                    closeEventDetailsModal();
+                    showFloatingAlert('success', '{{__('Event updated successfully')}}');
+                } else {
+                    showFloatingAlert('error', '{{__('Failed to update event')}}');
+                }
             } catch (error) {
                 showFloatingAlert('error', '{{__('Failed to update event')}}');
+                console.error(error);
+            } finally {
+                // Enable update and delete buttons
+                dom.eventDetailModal.updateButton.disabled = false;
+                dom.eventDetailModal.deleteButton.disabled = false;
             }
         });
 

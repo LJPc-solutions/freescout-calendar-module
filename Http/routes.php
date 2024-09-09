@@ -96,5 +96,11 @@ Route::group( [ 'middleware' => 'web', 'prefix' => Helper::getSubdirectory(), 'n
 				'roles'      => $roles,
 				'laroute'    => true,
 		] )->name( 'ljpccalendarmodule.api.event.delete' );
+		Route::get( '/calendar/api/calendars/{id}', [
+				'uses'       => 'LJPcCalendarModuleAPIController@getCalendar',
+				'middleware' => $middleWare,
+				'roles'      => $roles,
+				'laroute'    => true,
+		] )->name( 'ljpccalendarmodule.api.calendar.get' );
 
 } );

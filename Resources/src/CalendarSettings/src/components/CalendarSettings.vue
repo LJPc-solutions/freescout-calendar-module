@@ -294,7 +294,7 @@ onMounted(() => {
               </div>
             </template>
           </draggable>
-          <button @click="addCustomField" class="btn btn-primary mt-2">{{ ljpccalendarmoduletranslations.addCustomField }}</button>
+          <button @click="addCustomField" type="button" class="btn btn-primary mt-2">{{ ljpccalendarmoduletranslations.addCustomField }}</button>
         </div>
       </template>
 

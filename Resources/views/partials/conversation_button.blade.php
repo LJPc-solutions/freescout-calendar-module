@@ -23,13 +23,24 @@
                 <label for="calendar-item-datetime">{{__('Date and time')}}*:</label>
                 <input required="required" type="datetime-local" class="form-control" id="calendar-item-datetime" value={{date('Y-m-d\TH:i')}}>
             </div>
+            <div id="custom-fields-container">
+                <!-- Custom fields will be dynamically inserted here -->
+            </div>
             <div class="form-group margin-top">
                 <button class="btn btn-primary add-to-calendar-ok">{{__('Add')}}</button>
                 <button class="btn btn-link" data-dismiss="modal">{{__('Cancel')}}</button>
             </div>
 
     </div>
-    `
+    `,
+        'permissions': {
+            @foreach($calendars as $calendar)
+                    {{$calendar->id}}: {
+                editItems: {{json_encode($calendar->permissionsForCurrentUser()['editItems'] ?? false)}},
+                createItems: {{json_encode($calendar->permissionsForCurrentUser()['createItems'] ?? false)}}
+            },
+            @endforeach
+        }
     }
 </script>
 

@@ -47,6 +47,10 @@
     {
         "uri": "calendar\/api\/events",
         "name": "ljpccalendarmodule.api.event.delete"
+    },
+    {
+        "uri": "calendar\/api\/calendars\/{id}",
+        "name": "ljpccalendarmodule.api.calendar.get"
     }
 ];
 

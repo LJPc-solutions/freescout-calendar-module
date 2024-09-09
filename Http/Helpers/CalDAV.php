@@ -48,6 +48,9 @@ class CalDAV {
 		 * @return array{body: string, statusCode: int, headers: array}
 		 */
 		public function createEvent( $calendarUrl, $uid, $summary, $description, $start, $end, $allDay, $location ): array {
+				if ( ! is_string( $description ) ) {
+						$description = json_encode( $description );
+				}
 				$ics = new ICS( [
 						'uid'         => $uid,
 						'location'    => $location,
@@ -72,6 +75,9 @@ class CalDAV {
 		}
 
 		public function updateEvent( $calendarUrl, $uid, $summary, $description, $start, $end, $location ) {
+				if ( ! is_string( $description ) ) {
+						$description = json_encode( $description );
+				}
 				$ics = new ICS( [
 						'uid'         => $uid,
 						'location'    => $location,

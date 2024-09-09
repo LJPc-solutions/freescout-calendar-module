@@ -57,6 +57,9 @@
                                 <!-- Options will be dynamically populated -->
                             </select>
                         </div>
+                        <div id="event-custom-fields">
+                            <!-- Custom fields will be dynamically inserted here -->
+                        </div>
                         <button type="submit" id="save-button" class="btn btn-primary">{{__('Save')}}</button>
                     </form>
                 </div>
@@ -88,11 +91,18 @@
                             <textarea id="event-details-body" rows="5" class="form-control"></textarea>
                         </div>
                         <div class="form-group">
-                            <label for="event-details-calendar">{{__('Calendar')}}</label>
-                            <div id="event-details-calendar" >
-                            </div>
-                            <input type="hidden" id="hidden-event-details-calendar">
+                            <label for="event-details-calendar">{{__('Created by')}}</label>
+                            <div id="event-details-created-by"></div>
                         </div>
+                        <div class="form-group">
+                            <label for="event-details-calendar">{{__('Calendar')}}</label>
+                            <div id="event-details-calendar">
+                            </div>
+                        </div>
+                        <div id="event-details-custom-fields">
+                            <!-- Custom fields will be dynamically inserted here -->
+                        </div>
+                        <input type="hidden" id="hidden-event-details-calendar">
                         <input type="hidden" id="hidden-event-details-uid">
                         <button type="submit" id="update-button" class="btn btn-primary">{{__('Update')}}</button>
                         <button type="button" id="delete-button" class="btn btn-danger" disabled>{{__('Delete')}}</button>
