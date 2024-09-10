@@ -13,6 +13,17 @@
 
         const calendars = {!! json_encode($calendars) !!};
         const csrfToken = '{{ csrf_token() }}';
+        let templates = {};
+        @if ( Helper::isTimeFormat24())
+        templates = {
+            timegridDisplayPrimaryTime({time}) {
+                var hour = time.getHours();
+                var formattedHour = hour < 10 ? '0' + hour : hour;
+
+                return `${formattedHour}:00`;
+            }
+        }
+        @endif
         const calendarOptions = {
             defaultView: 'week',
             useDetailPopup: false,
@@ -29,6 +40,7 @@
                 dayNames: window.ljpccalendarmoduledaytranslations,
             },
             calendars: calendars,
+            template: templates
         };
 
         // DOM elements
