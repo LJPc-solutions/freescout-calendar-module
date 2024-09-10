@@ -13,10 +13,9 @@ use Sabre\HTTP\Request;
 
 // Find the autoloader
 $paths = [
-    __DIR__ . '/../vendor/autoload.php',
-    __DIR__ . '/../../../autoload.php',
-    __DIR__ . '/vendor/autoload.php',
-
+    __DIR__.'/../vendor/autoload.php',
+    __DIR__.'/../../../autoload.php',
+    __DIR__.'/vendor/autoload.php',
 ];
 
 foreach ($paths as $path) {
@@ -30,9 +29,9 @@ foreach ($paths as $path) {
 $request = new Request('GET', 'http://localhost/');
 
 $client = new Client();
-//$client->addCurlSetting(CURLOPT_PROXY,'localhost:8888');
+// $client->addCurlSetting(CURLOPT_PROXY,'localhost:8888');
 $response = $client->send($request);
 
 echo "Response:\n";
 
-echo (string)$response;
+echo (string) $response;

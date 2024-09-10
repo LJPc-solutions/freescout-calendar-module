@@ -13,10 +13,8 @@ return array(
     'Sabre\\Uri\\' => array($vendorDir . '/sabre/uri/lib'),
     'Sabre\\HTTP\\' => array($vendorDir . '/sabre/http/lib'),
     'Sabre\\Event\\' => array($vendorDir . '/sabre/event/lib'),
-    'Sabre\\DAV\\' => array($vendorDir . '/sabre/dav/lib/DAV'),
-    'Sabre\\DAVACL\\' => array($vendorDir . '/sabre/dav/lib/DAVACL'),
-    'Sabre\\CardDAV\\' => array($vendorDir . '/sabre/dav/lib/CardDAV'),
-    'Sabre\\CalDAV\\' => array($vendorDir . '/sabre/dav/lib/CalDAV'),
-    'Psr\\Log\\' => array($vendorDir . '/psr/log/Psr/Log'),
+    'Sabre\\' => array($vendorDir . '/sabre/dav/lib'),
+    'Psr\\Log\\' => array($vendorDir . '/psr/log/src'),
     'Modules\\LJPcCalendarModule\\' => array($baseDir . '/'),
+    'Dallgoot\\Yaml\\' => array($vendorDir . '/dallgoot/yaml/src'),
 );

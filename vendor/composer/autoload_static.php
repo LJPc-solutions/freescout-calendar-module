@@ -26,10 +26,7 @@ class ComposerStaticInitc927ae62bf16056cba11555aaf60873e
             'Sabre\\Uri\\' => 10,
             'Sabre\\HTTP\\' => 11,
             'Sabre\\Event\\' => 12,
-            'Sabre\\DAV\\' => 10,
-            'Sabre\\DAVACL\\' => 13,
-            'Sabre\\CardDAV\\' => 14,
-            'Sabre\\CalDAV\\' => 13,
+            'Sabre\\' => 6,
         ),
         'P' => 
         array (
@@ -38,6 +35,10 @@ class ComposerStaticInitc927ae62bf16056cba11555aaf60873e
         'M' => 
         array (
             'Modules\\LJPcCalendarModule\\' => 27,
+        ),
+        'D' => 
+        array (
+            'Dallgoot\\Yaml\\' => 14,
         ),
     );
 
@@ -70,29 +71,21 @@ class ComposerStaticInitc927ae62bf16056cba11555aaf60873e
         array (
             0 => __DIR__ . '/..' . '/sabre/event/lib',
         ),
-        'Sabre\\DAV\\' => 
+        'Sabre\\' => 
         array (
-            0 => __DIR__ . '/..' . '/sabre/dav/lib/DAV',
-        ),
-        'Sabre\\DAVACL\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/sabre/dav/lib/DAVACL',
-        ),
-        'Sabre\\CardDAV\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/sabre/dav/lib/CardDAV',
-        ),
-        'Sabre\\CalDAV\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/sabre/dav/lib/CalDAV',
+            0 => __DIR__ . '/..' . '/sabre/dav/lib',
         ),
         'Psr\\Log\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
+            0 => __DIR__ . '/..' . '/psr/log/src',
         ),
         'Modules\\LJPcCalendarModule\\' => 
         array (
             0 => __DIR__ . '/../..' . '/',
+        ),
+        'Dallgoot\\Yaml\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/dallgoot/yaml/src',
         ),
     );
 

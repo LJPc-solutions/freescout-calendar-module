@@ -1,0 +1,48 @@
+{
+    "name": "dallgoot/yaml",
+    "description": "Provides loader, dumper and an API for YAML content. Loader builds to equivalent data types in PHP 8.x",
+    "type": "library",
+    "keywords": [
+        "yaml",
+        "parser",
+        "reader",
+        "writer"
+    ],
+    "homepage": "https://github.com/dallgoot/yaml",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "dallgoot",
+            "email": "stephane.rebai@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Dallgoot\\Yaml\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Dallgoot\\Yaml\\Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "php": ">=8.1.14",
+        "ext-json": "*",
+        "ext-pcre": "*",
+        "ext-SPL": "*",
+        "lib-pcre": "*"
+    },
+    "require-dev": {
+        "ext-Reflection": "*",
+        "phan/phan": "*",
+        "phpmetrics/phpmetrics": "*",
+        "phpunit/phpunit": "*"
+    },
+    "scripts": {
+        "test": "phpunit -c ./configuration/phpunit.xml --no-coverage --testsuite All",
+        "coverage": "XDEBUG_MODE=coverage phpunit -c ./configuration/phpunit.xml --testsuite All",
+        "metrics": "phpmetrics --report-html=documentation/phpmetrics_report ./src",
+        "phan": "phan -k configuration/phan.php -C -j2 -3src/Tag"
+    }
+}
