@@ -470,7 +470,11 @@
                     dom.eventDetailModal.calendar.innerHTML = calendar.name;
                     dom.eventDetailModal.hiddenCalendar.value = calendar.id;
 
-                    dom.eventDetailModal.createdBy.innerHTML = event.raw.customFields.author_name;
+                    if (event.raw.customFields.hasOwnProperty('author_name')) {
+                        dom.eventDetailModal.createdBy.innerHTML = event.raw.customFields.author_name;
+                    } else {
+                        jQuery('.event-details-created-by-form-group').hide();
+                    }
 
                     const canEdit = hasPermissions(calendar.id, 'editItems') && (calendar.type === 'normal' || calendar.type === 'caldav');
 
@@ -544,6 +548,8 @@
 
             // Clear custom fields
             document.getElementById('event-details-custom-fields').innerHTML = '';
+
+            jQuery('.event-details-created-by-form-group').show();
         }
 
         dom.eventDetailModal.modalClose.addEventListener('click', closeEventDetailsModal);

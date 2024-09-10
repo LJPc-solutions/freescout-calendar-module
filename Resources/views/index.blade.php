@@ -97,7 +97,7 @@
                             <label for="event-details-body">{{__('Body')}}</label>
                             <textarea id="event-details-body" rows="5" class="form-control"></textarea>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group event-details-created-by-form-group">
                             <label for="event-details-calendar">{{__('Created by')}}</label>
                             <div id="event-details-created-by"></div>
                         </div>

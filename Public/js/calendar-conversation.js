@@ -74,6 +74,10 @@ document.addEventListener("DOMContentLoaded", function () {
                                 return;
                         }
 
+                        if (field.type === 'email' && jQuery('.contact-main').length) {
+                            input.value = jQuery('.contact-main').text();
+                        }
+
                         input.id = `custom_field_${field.id}`
                         input.disabled = !canEdit;
 
