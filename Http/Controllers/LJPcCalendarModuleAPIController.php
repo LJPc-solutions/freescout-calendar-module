@@ -16,6 +16,7 @@ use ICal\ICal;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Log;
 use Modules\LJPcCalendarModule\Entities\Calendar;
 use Modules\LJPcCalendarModule\Entities\CalendarItem;
 use Modules\LJPcCalendarModule\Http\Helpers\CalDAV;
@@ -366,17 +367,30 @@ class LJPcCalendarModuleAPIController extends Controller {
 						$start = ( new DateTimeImmutable( $validatedData['start'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
 						$end   = ( new DateTimeImmutable( $validatedData['end'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
 
+						if ( isset( $customFieldsData['author_id'] ) ) {
+								$processedCustomFields['author_id'] = $customFieldsData['author_id'];
+						}
+						if ( isset( $customFieldsData['conversation_id'] ) ) {
+								$processedCustomFields['conversation_id'] = $customFieldsData['conversation_id'];
+						}
 						if ( count( $processedCustomFields ) > 0 ) {
 								if ( ! is_array( $validatedData['body'] ) ) {
 										$validatedData['body'] = [ 'body' => $validatedData['body'] ];
 								}
-								if ( ! is_array( $validatedData['body']['custom_fields'] ) ) {
+
+								if ( ! isset( $validatedData['body']['custom_fields'] ) || ! is_array( $validatedData['body']['custom_fields'] ) ) {
 										$validatedData['body']['custom_fields'] = [];
 								}
+
 								$validatedData['body']['custom_fields'] = array_merge( $validatedData['body']['custom_fields'], $processedCustomFields );
 						}
 
 						$response = $caldavClient->updateEvent( $remainingUrl, $validatedData['uid'], $validatedData['title'], $validatedData['body'], $start, $end, $validatedData['location'] );
+						if ( $response['statusCode'] < 200 || $response['statusCode'] > 300 ) {
+								Log::error( 'Error updating event', $response );
+
+								return response()->json( [ 'error' => 'Error updating event' ], 500 );
+						}
 						$calendar->getExternalContent( true );
 				}
 
@@ -425,6 +439,11 @@ class LJPcCalendarModuleAPIController extends Controller {
 						$caldavClient = new CalDAV( $baseUrl, $calendar->custom_fields['username'], $calendar->custom_fields['password'] );
 
 						$response = $caldavClient->deleteEvent( $remainingUrl, $eventId );
+						if ( $response['statusCode'] < 200 || $response['statusCode'] > 300 ) {
+								Log::error( 'Error deleting event', $response );
+
+								return response()->json( [ 'error' => 'Error deleting event' ], 500 );
+						}
 						$calendar->getExternalContent( true );
 				}
 
@@ -502,12 +521,14 @@ class LJPcCalendarModuleAPIController extends Controller {
 						$uid = $this->GUID();
 
 						if ( ! is_array( $validatedData['body'] ) ) {
-								$validatedData['body'] = [ 'body' => $validatedData['body'] ];
+								$validatedData['body'] = [ 'body' => empty( $validatedData['body'] ) ? '-' : $validatedData['body'] ];
 						}
 						$validatedData['body']['custom_fields'] = $processedCustomFields;
 
 						$response = $caldavClient->createEvent( $remainingUrl, $uid, $validatedData['title'], $validatedData['body'], $start, $end, $isAllDay, $validatedData['location'] );
 						if ( $response['statusCode'] < 200 || $response['statusCode'] > 300 ) {
+								Log::error( 'Error creating event', $response );
+
 								return response()->json( [ 'error' => 'Error creating event' ], 500 );
 						}
 						$calendar->getExternalContent( true );
@@ -595,14 +616,19 @@ class LJPcCalendarModuleAPIController extends Controller {
 						$uid = $this->GUID();
 
 						if ( ! is_array( $validatedData['body'] ) ) {
-								$validatedData['body'] = [ 'body' => $validatedData['body'] ];
+								$validatedData['body'] = [ 'body' => empty( $validatedData['body'] ) ? '-' : $validatedData['body'] ];
 						}
 						$validatedData['body']['custom_fields'] = array_merge( [
 								'conversation_id' => $conversation,
 								'author_id'       => auth()->user()->id,
 						], $processedCustomFields );
 
-						$caldavClient->createEvent( $remainingUrl, $uid, $validatedData['title'], $validatedData['body'], $start, $end, $isAllDay, $validatedData['location'] );
+						$response = $caldavClient->createEvent( $remainingUrl, $uid, $validatedData['title'], $validatedData['body'], $start, $end, $isAllDay, $validatedData['location'] );
+						if ( $response['statusCode'] < 200 || $response['statusCode'] > 300 ) {
+								Log::error( 'Error creating event', $response );
+
+								return response()->json( [ 'error' => 'Error creating event' ], 500 );
+						}
 						$calendar->getExternalContent( true );
 				}
 
@@ -713,11 +739,14 @@ class LJPcCalendarModuleAPIController extends Controller {
 								$calendarItem->end         = $end;
 								$calendarItem->is_all_day  = $isAllDay;
 								$calendarItem->location    = $event->location ?? '';
-								if ( $conversationUrl !== null ) {
-										$calendarItem->body = trim( ( $event->description ?? '' ) . PHP_EOL . PHP_EOL . 'Source: ' . $conversationUrl );
-								} else {
-										$calendarItem->body = $event->description ?? '';
+								$calendarItem->body        = $event->description ?? '';
+								$customFields              = $calendarItem->custom_fields;
+								if ( ! is_array( $customFields ) ) {
+										$customFields = [];
 								}
+								$customFields['conversation_id'] = $conversation->id;
+								$customFields['author_id']       = auth()->user()->id;
+								$calendarItem->custom_fields     = $customFields;
 								$calendarItem->save();
 
 								$uid = $calendarItem->id;
@@ -729,12 +758,18 @@ class LJPcCalendarModuleAPIController extends Controller {
 
 								$uid = $event->uid ?? $this->GUID();
 
-								$description = $event->description;
-								if ( $conversationUrl !== null ) {
-										$description .= PHP_EOL . PHP_EOL . __( 'Source:' ) . ' ' . $conversationUrl;
-								}
-								$response = $caldavClient->createEvent( $remainingUrl, $uid, $event->summary, $event->description, $start, $end, $isAllDay, $event->location );
+								$description = [
+										'body'          => empty( $event->description ) ? '-' : $event->description,
+										'custom_fields' => [
+												'conversation_id' => $conversation->id,
+												'author_id'       => auth()->user()->id,
+										],
+								];
+
+								$response = $caldavClient->createEvent( $remainingUrl, $uid, $event->summary, $description, $start, $end, $isAllDay, $event->location );
 								if ( $response['statusCode'] < 200 || $response['statusCode'] > 300 ) {
+										Log::error( 'Error creating event', $response );
+
 										return response()->json( [ 'error' => 'Error creating event', $response['body'], 'data' => [ $uid, $event->summary, $description, $start, $end, $event->location ] ], 500 );
 								}
 								$refetchCalendarIds[] = $calendar->id;

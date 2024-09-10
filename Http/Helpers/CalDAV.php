@@ -2,6 +2,7 @@
 
 namespace Modules\LJPcCalendarModule\Http\Helpers;
 
+use Dallgoot\Yaml\Yaml;
 use Sabre\DAV\Client;
 
 class CalDAV {
@@ -24,7 +25,6 @@ class CalDAV {
 						'{urn:ietf:params:xml:ns:caldav}calendar-data',
 				], 2 );
 
-
 				$events = [];
 				foreach ( $response as $eventData ) {
 						if ( isset( $eventData['{urn:ietf:params:xml:ns:caldav}calendar-data'] ) ) {
@@ -46,19 +46,20 @@ class CalDAV {
 		 * @param $location
 		 *
 		 * @return array{body: string, statusCode: int, headers: array}
+		 * @throws \Exception
 		 */
 		public function createEvent( $calendarUrl, $uid, $summary, $description, $start, $end, $allDay, $location ): array {
 				if ( ! is_string( $description ) ) {
-						$description = json_encode( $description );
+						$description = Yaml::dump( $description );
 				}
 				$ics = new ICS( [
 						'uid'         => $uid,
-						'location'    => $location,
-						'description' => $description,
+						'location'    => str_replace( "\n", '\n', $location ?? '' ),
+						'description' => str_replace( "\n", '\n', $description ?? '' ),
 						'dtstart'     => $start,
 						'dtend'       => $end,
-						'summary'     => $summary,
-						'allDay'      => $allDay, // Add this line
+						'summary'     => str_replace( "\n", '\n', $summary ?? '' ),
+						'allDay'      => $allDay,
 				] );
 
 				return $this->client->request( 'PUT', $calendarUrl . $uid . '.ics', $ics->to_string(), [
@@ -76,15 +77,15 @@ class CalDAV {
 
 		public function updateEvent( $calendarUrl, $uid, $summary, $description, $start, $end, $location ) {
 				if ( ! is_string( $description ) ) {
-						$description = json_encode( $description );
+						$description = Yaml::dump( $description );
 				}
 				$ics = new ICS( [
 						'uid'         => $uid,
-						'location'    => $location,
-						'description' => $description,
+						'location'    => str_replace( "\n", '\n', $location ?? '' ),
+						'description' => str_replace( "\n", '\n', $description ?? '' ),
 						'dtstart'     => $start,
 						'dtend'       => $end,
-						'summary'     => $summary,
+						'summary'     => str_replace( "\n", '\n', $summary ?? '' ),
 				] );
 
 				return $this->client->request( 'PUT', $calendarUrl . $uid . '.ics', $ics->to_string(), [

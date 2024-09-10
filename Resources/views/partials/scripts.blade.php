@@ -15,7 +15,7 @@
         const csrfToken = '{{ csrf_token() }}';
         let templates = {};
         @if ( Helper::isTimeFormat24())
-        templates = {
+            templates = {
             timegridDisplayPrimaryTime({time}) {
                 var hour = time.getHours();
                 var formattedHour = hour < 10 ? '0' + hour : hour;
@@ -80,6 +80,7 @@
                 createdBy: document.getElementById('event-details-created-by'),
                 hiddenCalendar: document.getElementById('hidden-event-details-calendar'),
                 hiddenUid: document.getElementById('hidden-event-details-uid'),
+                hiddenCustomFields: document.getElementById('hidden-event-details-custom-fields'),
                 updateButton: document.getElementById('update-button'),
                 deleteButton: document.getElementById('delete-button'),
             },
@@ -463,7 +464,6 @@
          * Event details modal
          */
         const openEventDetailsModal = async (event) => {
-            console.log(event)
             dom.eventDetailModal.modal.style.display = 'block';
 
             dom.eventDetailModal.title.value = event.title;
@@ -472,6 +472,11 @@
             dom.eventDetailModal.location.value = event.location;
             dom.eventDetailModal.body.value = event.body;
             dom.eventDetailModal.hiddenUid.value = event.id;
+            if (event.raw.hasOwnProperty('customFields')) {
+                dom.eventDetailModal.hiddenCustomFields.value = JSON.stringify(event.raw.customFields);
+            } else {
+                dom.eventDetailModal.hiddenCustomFields.value = '{}';
+            }
 
             // Clear previous options
             dom.eventDetailModal.calendar.innerHTML = '';
@@ -572,7 +577,6 @@
             }
         });
 
-
         document.querySelector('#event-details-modal form').addEventListener('submit', async (event) => {
             event.preventDefault();
 
@@ -587,6 +591,15 @@
                 customFieldsData[field.attr('name')] = field.attr('type') === 'checkbox' ? field.prop('checked') : field.val();
             }
 
+            const originalCustomFields = JSON.parse(dom.eventDetailModal.hiddenCustomFields.value);
+            let newCustomFields = originalCustomFields;
+
+            for (const key in customFieldsData) {
+                if (customFieldsData[key] !== originalCustomFields[key] || !originalCustomFields.hasOwnProperty(key)) {
+                    newCustomFields[key] = customFieldsData[key];
+                }
+            }
+
             const updatedEvent = {
                 uid: dom.eventDetailModal.hiddenUid.value,
                 calendarId: dom.eventDetailModal.hiddenCalendar.value,
@@ -595,8 +608,7 @@
                 end: moment(dom.eventDetailModal.end.value).toISOString(),
                 location: dom.eventDetailModal.location.value,
                 body: dom.eventDetailModal.body.value,
-                customFields: customFieldsData
-
+                customFields: newCustomFields
             };
 
             try {

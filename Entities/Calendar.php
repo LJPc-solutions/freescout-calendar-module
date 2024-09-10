@@ -4,6 +4,9 @@ namespace Modules\LJPcCalendarModule\Entities;
 
 use CalDAVClient\Facade\CalDavClient;
 use CalDAVClient\Facade\Requests\CalDAVRequestFactory;
+use Dallgoot\Yaml\Loader;
+use Dallgoot\Yaml\Yaml;
+use DateInterval;
 use DateTimeImmutable;
 use DateTimeZone;
 use Exception;
@@ -11,6 +14,7 @@ use ICal\Event;
 use ICal\ICal;
 use Illuminate\Database\Eloquent\Model;
 use JsonSerializable;
+use Log;
 use Modules\LJPcCalendarModule\Http\Helpers\CalDAV;
 use Modules\LJPcCalendarModule\Http\Helpers\DateTimeRange;
 
@@ -115,6 +119,8 @@ class Calendar extends Model implements JsonSerializable {
 								$caldavClient = new CalDAV( $baseUrl, $this->custom_fields['username'], $this->custom_fields['password'] );
 								$data         = implode( '', $caldavClient->getEvents( $remainingUrl ) );
 						} catch ( Exception $e ) {
+								Log::error( $e->getMessage(), [ 'exception' => $e ] );
+
 								return null;
 						}
 				}
@@ -126,6 +132,7 @@ class Calendar extends Model implements JsonSerializable {
 
 		/**
 		 * @return CalendarItem[]
+		 * @throws Exception
 		 */
 		public function events( DateTimeImmutable $start, DateTimeImmutable $end ): array {
 				if ( $this->type === 'normal' ) {
@@ -147,6 +154,7 @@ class Calendar extends Model implements JsonSerializable {
 
 		/**
 		 * @return CalendarItem[]
+		 * @throws Exception
 		 */
 		private function getICSAsCalendarItems( int $daysBeforeToday, int $daysAfterToday, bool $readOnly = true ): array {
 				$file = $this->getTemporaryFile();
@@ -170,9 +178,9 @@ class Calendar extends Model implements JsonSerializable {
 								$end = DateTimeImmutable::createFromMutable( $ical->iCalDateToDateTime( $event->dtend_array[3] )->setTimezone( new DateTimeZone( 'UTC' ) ) );
 						} else {
 								if ( ! empty( $event->duration ) ) {
-										$end = $start->add( new \DateInterval( $event->duration ) );
+										$end = $start->add( new DateInterval( $event->duration ) );
 								} else {
-										$end = $start->add( new \DateInterval( 'PT1H' ) );
+										$end = $start->add( new DateInterval( 'PT1H' ) );
 								}
 						}
 
@@ -181,18 +189,34 @@ class Calendar extends Model implements JsonSerializable {
 								$modifiedEnd = $end->modify( '-1 second' );
 						}
 
-						$newCalendarItem               = new CalendarItem();
-						$newCalendarItem->uid          = $event->uid;
-						$newCalendarItem->calendar_id  = $this->id;
-						$newCalendarItem->title        = $event->summary;
-						$newCalendarItem->location     = $event->location;
-						$newCalendarItem->body         = $event->description;
-						$newCalendarItem->state        = $event->status;
-						$newCalendarItem->start        = $start;
-						$newCalendarItem->end          = $modifiedEnd;
-						$newCalendarItem->is_all_day   = DateTimeRange::isAllDay( $start, $end );
-						$newCalendarItem->is_private   = false;
-						$newCalendarItem->is_read_only = $readOnly;
+						$body         = $event->description;
+						$customFields = [];
+						try {
+								if ( $body !== null ) {
+										$parsedYaml = Yaml::parse( $body, Loader::IGNORE_COMMENTS | Loader::IGNORE_DIRECTIVES | Loader::NO_OBJECT_FOR_DATE )->jsonSerialize();
+										if ( is_array( $parsedYaml ) && isset( $parsedYaml['body'] ) ) {
+												$body = $parsedYaml['body'];
+												if ( isset( $parsedYaml['custom_fields'] ) ) {
+														$customFields = $parsedYaml['custom_fields'];
+												}
+										}
+								}
+						} catch ( Exception $e ) {
+						}
+
+						$newCalendarItem                = new CalendarItem();
+						$newCalendarItem->uid           = $event->uid;
+						$newCalendarItem->calendar_id   = $this->id;
+						$newCalendarItem->title         = $event->summary;
+						$newCalendarItem->location      = $event->location;
+						$newCalendarItem->body          = $body;
+						$newCalendarItem->state         = $event->status;
+						$newCalendarItem->start         = $start;
+						$newCalendarItem->end           = $modifiedEnd;
+						$newCalendarItem->is_all_day    = DateTimeRange::isAllDay( $start, $end );
+						$newCalendarItem->is_private    = false;
+						$newCalendarItem->is_read_only  = $readOnly;
+						$newCalendarItem->custom_fields = $customFields;
 
 						$retArr[] = json_decode( $newCalendarItem->toJson(), true );
 				}

@@ -109,6 +109,7 @@
                         <div id="event-details-custom-fields">
                             <!-- Custom fields will be dynamically inserted here -->
                         </div>
+                        <input type="hidden" id="hidden-event-details-custom-fields">
                         <input type="hidden" id="hidden-event-details-calendar">
                         <input type="hidden" id="hidden-event-details-uid">
                         <button type="submit" id="update-button" class="btn btn-primary">{{__('Update')}}</button>
