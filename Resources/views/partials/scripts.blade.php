@@ -212,7 +212,8 @@
             } else if (currentView === VIEW_WEEK) {
                 dateFormat = `${moment(start).format(window.ljpccalendarmoduletranslations.dateFormat)} - ${moment(end).format(window.ljpccalendarmoduletranslations.dateFormat)}`;
             } else {
-                dateFormat = moment(start).format('MMMM YYYY');
+                const middle = new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
+                dateFormat = moment(middle).format('MMMM YYYY');
             }
 
             dom.topBar.currentDate.innerHTML = dateFormat;
