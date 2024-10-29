@@ -147,6 +147,10 @@ class LJPcCalendarModuleAPIController extends Controller {
 								'required' => (bool) $field['required'],
 						];
 
+						if ( $validatedField['type'] === 'source' ) {
+								$validatedField['required'] = false;
+						}
+
 						if ( in_array( $field['type'], [ 'dropdown', 'multiselect' ] ) ) {
 								if ( is_array( $field['options'] ) ) {
 										$validatedField['options'] = array_map( 'trim', array_map( 'strip_tags', $field['options'] ) );

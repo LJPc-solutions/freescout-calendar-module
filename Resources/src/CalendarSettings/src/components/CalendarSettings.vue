@@ -284,8 +284,10 @@ onMounted(() => {
                     <option value="email">{{ ljpccalendarmoduletranslations.email }}</option>
                     <option value="source">{{ ljpccalendarmoduletranslations.source }}</option>
                   </select>
-                  <input type="checkbox" v-model="element.required" :id="'required-' + element.id">
-                  <label :for="'required-' + element.id">{{ ljpccalendarmoduletranslations.required }}</label>
+                  <template v-if="element.type !== 'source'">
+                    <input type="checkbox" v-model="element.required" :id="'required-' + element.id">
+                    <label :for="'required-' + element.id">{{ ljpccalendarmoduletranslations.required }}</label>
+                  </template>
                   <button @click="removeField(index)" class="btn btn-danger btn-sm">{{ ljpccalendarmoduletranslations.remove }}</button>
                 </div>
                 <div v-if="element.type === 'dropdown' || element.type === 'multiselect'" class="field-options">
