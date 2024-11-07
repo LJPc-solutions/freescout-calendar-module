@@ -77,7 +77,7 @@ class ComposerStaticInitc927ae62bf16056cba11555aaf60873e
         ),
         'Psr\\Log\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/log/src',
+            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
         ),
         'Modules\\LJPcCalendarModule\\' => 
         array (

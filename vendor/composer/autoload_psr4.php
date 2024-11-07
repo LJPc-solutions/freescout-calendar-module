@@ -14,7 +14,7 @@ return array(
     'Sabre\\HTTP\\' => array($vendorDir . '/sabre/http/lib'),
     'Sabre\\Event\\' => array($vendorDir . '/sabre/event/lib'),
     'Sabre\\' => array($vendorDir . '/sabre/dav/lib'),
-    'Psr\\Log\\' => array($vendorDir . '/psr/log/src'),
+    'Psr\\Log\\' => array($vendorDir . '/psr/log/Psr/Log'),
     'Modules\\LJPcCalendarModule\\' => array($baseDir . '/'),
     'Dallgoot\\Yaml\\' => array($vendorDir . '/dallgoot/yaml/src'),
 );
