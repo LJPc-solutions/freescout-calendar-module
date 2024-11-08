@@ -1,36 +1,41 @@
 name: Release
 
 on:
-    push:
-        tags:
-            - '*'
+  push:
+    tags:
+      - '*'
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-        steps:
-            -   uses: actions/checkout@v3
+      - name: Prepare files
+        run: |
+          mkdir LJPcCalendarModule
+          # Move all files except .git, .github, and README.md into the LJPcCalendarModule folder
+          find . -maxdepth 1 ! -name .git ! -name .github ! -name LJPcCalendarModule ! -name . ! -name README.md -exec mv {} LJPcCalendarModule/ \;
 
-            -   name: Prepare files
-                run: |
-                    mkdir LJPcCalendarModule
-                    # Move everything except .git and README.md into the WHMCS folder
-                    find . -maxdepth 1 ! -name .git ! -name .github ! -name LJPcCalendarModule ! -name . ! -name README.md -exec mv {} LJPcCalendarModule/ \;
+      - name: Archive repository
+        run: |
+          zip -r "${GITHUB_REF_NAME}.zip" LJPcCalendarModule
+          cp "${GITHUB_REF_NAME}.zip" latest.zip
 
-            -   name: Archive repository
-                run: |
-                    zip -r "${GITHUB_REF_NAME}.zip" LJPcCalendarModule
-                    cp "${GITHUB_REF_NAME}.zip" latest.zip
+      - name: Create version.txt
+        run: echo "${GITHUB_REF_NAME}" > version.txt
 
-            -   name: Create version.txt
-                run: echo "${GITHUB_REF_NAME}" > version.txt
-
-            -   name: Upload to FTP
-                uses: SamKirkland/FTP-Deploy-Action@4.2.0
-                with:
-                    server: ${{ secrets.FTP_SERVER }}
-                    username: ${{ secrets.FTP_USERNAME }}
-                    password: ${{ secrets.FTP_PASSWORD }}
-                    local-dir: ./
-                    server-dir: './'
+      - name: Upload to FTP
+        uses: SamKirkland/FTP-Deploy-Action@4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./
+          server-dir: './'
+          exclude: |
+            **
+            !latest.zip
+            !${GITHUB_REF_NAME}.zip
+            !version.txt
