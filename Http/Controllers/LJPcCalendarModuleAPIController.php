@@ -280,6 +280,13 @@ class LJPcCalendarModuleAPIController extends Controller {
 
 						$calendarEvents = $calendar->events( $start, $end );
 						foreach ( $calendarEvents as $event ) {
+								// Generate mapping for used custom fields
+								if ( isset( $event['custom_fields'] ) && is_array( $event['custom_fields'] ) ) {
+										$event['custom_fields_mapping'] = $this->generateCustomFieldMapping(
+												$calendar->custom_fields,
+												$event['custom_fields']
+										);
+								}
 								$events[] = $event;
 						}
 				}
@@ -303,6 +310,14 @@ class LJPcCalendarModuleAPIController extends Controller {
 				return response()->json( $events );
 		}
 
+		/**
+		 * Update an event
+		 *
+		 * @param Request $request
+		 *
+		 * @return JsonResponse
+		 * @throws Exception
+		 */
 		/**
 		 * Update an event
 		 *
@@ -377,6 +392,7 @@ class LJPcCalendarModuleAPIController extends Controller {
 						if ( isset( $customFieldsData['conversation_id'] ) ) {
 								$processedCustomFields['conversation_id'] = $customFieldsData['conversation_id'];
 						}
+
 						if ( count( $processedCustomFields ) > 0 ) {
 								if ( ! is_array( $validatedData['body'] ) ) {
 										$validatedData['body'] = [ 'body' => $validatedData['body'] ];
@@ -386,15 +402,34 @@ class LJPcCalendarModuleAPIController extends Controller {
 										$validatedData['body']['custom_fields'] = [];
 								}
 
-								$validatedData['body']['custom_fields'] = array_merge( $validatedData['body']['custom_fields'], $processedCustomFields );
+								$validatedData['body']['custom_fields'] = array_merge(
+										$validatedData['body']['custom_fields'],
+										$processedCustomFields
+								);
+
+								// Add mapping for used custom fields
+								$validatedData['body']['custom_fields_mapping'] = $this->generateCustomFieldMapping(
+										$calendar->custom_fields,
+										$processedCustomFields
+								);
 						}
 
-						$response = $caldavClient->updateEvent( $remainingUrl, $validatedData['uid'], $validatedData['title'], $validatedData['body'], $start, $end, $validatedData['location'] );
+						$response = $caldavClient->updateEvent(
+								$remainingUrl,
+								$validatedData['uid'],
+								$validatedData['title'],
+								$validatedData['body'],
+								$start,
+								$end,
+								$validatedData['location']
+						);
+
 						if ( $response['statusCode'] < 200 || $response['statusCode'] > 300 ) {
 								Log::error( 'Error updating event', $response );
 
 								return response()->json( [ 'error' => 'Error updating event' ], 500 );
 						}
+
 						$calendar->getExternalContent( true );
 				}
 
@@ -452,6 +487,29 @@ class LJPcCalendarModuleAPIController extends Controller {
 				}
 
 				return response()->json( [ 'ok' => true, 'message' => 'Event deleted successfully' ] );
+		}
+
+		/**
+		 * Helper function to generate custom field mapping
+		 *
+		 * @param array $customFields Array of all possible custom fields
+		 * @param array $usedCustomFields Array of used custom field values
+		 *
+		 * @return array Mapping of used custom field IDs to their names
+		 */
+		private function generateCustomFieldMapping( array $customFields, array $usedCustomFields ): array {
+				$mapping = [];
+				$fields  = $customFields['fields'] ?? [];
+
+				foreach ( $fields as $field ) {
+						$fieldId = 'custom_field_' . $field['id'];
+						// Only include fields that are actually used in the item
+						if ( isset( $usedCustomFields[ $fieldId ] ) ) {
+								$mapping[ $fieldId ] = $field['name'];
+						}
+				}
+
+				return $mapping;
 		}
 
 		/**
@@ -515,6 +573,7 @@ class LJPcCalendarModuleAPIController extends Controller {
 						$calendarItem->location      = $validatedData['location'] ?? '';
 						$calendarItem->body          = $validatedData['body'] ?? '';
 						$calendarItem->custom_fields = $processedCustomFields;
+
 						$calendarItem->save();
 				} else if ( $calendar->type === 'caldav' ) {
 						$fullUrl      = $calendar->custom_fields['url'];
@@ -527,14 +586,32 @@ class LJPcCalendarModuleAPIController extends Controller {
 						if ( ! is_array( $validatedData['body'] ) ) {
 								$validatedData['body'] = [ 'body' => empty( $validatedData['body'] ) ? '-' : $validatedData['body'] ];
 						}
+
 						$validatedData['body']['custom_fields'] = $processedCustomFields;
 
-						$response = $caldavClient->createEvent( $remainingUrl, $uid, $validatedData['title'], $validatedData['body'], $start, $end, $isAllDay, $validatedData['location'] );
+						// Add mapping for used custom fields
+						$validatedData['body']['custom_fields_mapping'] = $this->generateCustomFieldMapping(
+								$calendar->custom_fields,
+								$processedCustomFields
+						);
+
+						$response = $caldavClient->createEvent(
+								$remainingUrl,
+								$uid,
+								$validatedData['title'],
+								$validatedData['body'],
+								$start,
+								$end,
+								$isAllDay,
+								$validatedData['location']
+						);
+
 						if ( $response['statusCode'] < 200 || $response['statusCode'] > 300 ) {
 								Log::error( 'Error creating event', $response );
 
 								return response()->json( [ 'error' => 'Error creating event' ], 500 );
 						}
+
 						$calendar->getExternalContent( true );
 				}
 
@@ -600,13 +677,24 @@ class LJPcCalendarModuleAPIController extends Controller {
 						$calendarItem->is_all_day  = $isAllDay;
 						$calendarItem->location    = $validatedData['location'] ?? '';
 						$calendarItem->body        = $validatedData['body'] ?? '';
-						$customFields              = $calendarItem->custom_fields;
+
+						// Merge all custom fields
+						$customFields = $calendarItem->custom_fields;
 						if ( ! is_array( $customFields ) ) {
 								$customFields = [];
 						}
-						$customFields['conversation_id'] = $conversation;
-						$customFields['author_id']       = auth()->user()->id;
-						$calendarItem->custom_fields     = array_merge( $customFields, $processedCustomFields );
+						$mergedCustomFields = array_merge( $customFields, [
+								'conversation_id' => $conversation,
+								'author_id'       => auth()->user()->id,
+						], $processedCustomFields );
+
+						$calendarItem->custom_fields = $mergedCustomFields;
+
+						// Add mapping for used custom fields
+						$calendarItem->custom_fields_mapping = $this->generateCustomFieldMapping(
+								$calendar->custom_fields,
+								$mergedCustomFields
+						);
 
 						$calendarItem->save();
 
@@ -622,17 +710,38 @@ class LJPcCalendarModuleAPIController extends Controller {
 						if ( ! is_array( $validatedData['body'] ) ) {
 								$validatedData['body'] = [ 'body' => empty( $validatedData['body'] ) ? '-' : $validatedData['body'] ];
 						}
-						$validatedData['body']['custom_fields'] = array_merge( [
+
+						// Merge all custom fields
+						$mergedCustomFields = array_merge( [
 								'conversation_id' => $conversation,
 								'author_id'       => auth()->user()->id,
 						], $processedCustomFields );
 
-						$response = $caldavClient->createEvent( $remainingUrl, $uid, $validatedData['title'], $validatedData['body'], $start, $end, $isAllDay, $validatedData['location'] );
+						$validatedData['body']['custom_fields'] = $mergedCustomFields;
+
+						// Add mapping for used custom fields
+						$validatedData['body']['custom_fields_mapping'] = $this->generateCustomFieldMapping(
+								$calendar->custom_fields,
+								$mergedCustomFields
+						);
+
+						$response = $caldavClient->createEvent(
+								$remainingUrl,
+								$uid,
+								$validatedData['title'],
+								$validatedData['body'],
+								$start,
+								$end,
+								$isAllDay,
+								$validatedData['location']
+						);
+
 						if ( $response['statusCode'] < 200 || $response['statusCode'] > 300 ) {
 								Log::error( 'Error creating event', $response );
 
 								return response()->json( [ 'error' => 'Error creating event' ], 500 );
 						}
+
 						$calendar->getExternalContent( true );
 				}
 
