@@ -16,7 +16,7 @@ This module adds a calendar module to FreeScout.
 
 - You can add unlimited calendars via the settings page.
 - It is possible to automatically import an external calendar via its an ICS link or sync via CalDAV. This way, you can import your Google Calendar, iCloud Calendar, or any other calendar that supports ICS or CalDAV.
-- Extra card on the dashboard to view the first 10 upcoming events.
+- Extra card on the dashboard to view the first 3 upcoming events.
 - Every dependency is added to this module, so there are no dependencies on CDNs.
 - Permissions are added to the module. You can set which users/teams cam view the events on the dashboard, can view the calendar, create events and edit events
 - Create events from a conversation. If the conversation includes an attachment with an ICS file, the event will be created with the data from the ICS file. Otherwise, you can specify the details yourself.
