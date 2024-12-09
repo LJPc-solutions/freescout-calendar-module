@@ -194,7 +194,7 @@ class Calendar extends Model implements JsonSerializable {
 						try {
 								if ( $body !== null ) {
 										$parsedYaml = Yaml::parse( $body, Loader::IGNORE_COMMENTS | Loader::IGNORE_DIRECTIVES | Loader::NO_OBJECT_FOR_DATE )->jsonSerialize();
-										if ( is_array( $parsedYaml ) && isset( $parsedYaml['body'] ) ) {
+										if ( is_array( $parsedYaml ) && array_has( $parsedYaml, 'body' ) ) {
 												$body = $parsedYaml['body'];
 												if ( isset( $parsedYaml['custom_fields'] ) ) {
 														$customFields = $parsedYaml['custom_fields'];
