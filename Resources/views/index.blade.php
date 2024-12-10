@@ -113,6 +113,7 @@
                         <input type="hidden" id="hidden-event-details-calendar">
                         <input type="hidden" id="hidden-event-details-uid">
                         <button type="submit" id="update-button" class="btn btn-primary">{{__('Update')}}</button>
+                        <button type="button" id="create-copy-button" class="btn btn-success" disabled>{{__('Create Copy')}}</button>
                         <button type="button" id="delete-button" class="btn btn-danger" disabled>{{__('Delete')}}</button>
 
                     </form>

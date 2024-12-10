@@ -83,6 +83,9 @@
                 hiddenCustomFields: document.getElementById('hidden-event-details-custom-fields'),
                 updateButton: document.getElementById('update-button'),
                 deleteButton: document.getElementById('delete-button'),
+                createCopyButton: document.getElementById('create-copy-button'),
+                originalStart: null,
+                originalEnd: null,
             },
             viewSelector: {
                 dayButton: document.getElementById('day-view-button'),
@@ -467,6 +470,10 @@
         const openEventDetailsModal = async (event) => {
             dom.eventDetailModal.modal.style.display = 'block';
 
+            // Store original times
+            dom.eventDetailModal.originalStart = event.start.toDate();
+            dom.eventDetailModal.originalEnd = event.end.toDate();
+
             dom.eventDetailModal.title.value = event.title;
             dom.eventDetailModal.start.value = moment(event.start.toDate()).format('YYYY-MM-DDTHH:mm');
             dom.eventDetailModal.end.value = moment(event.end.toDate()).format('YYYY-MM-DDTHH:mm');
@@ -495,6 +502,7 @@
                     }
 
                     const canEdit = hasPermissions(calendar.id, 'editItems') && (calendar.type === 'normal' || calendar.type === 'caldav');
+                    const canCreate = hasPermissions(calendar.id, 'createItems') && (calendar.type === 'normal' || calendar.type === 'caldav');
 
                     dom.eventDetailModal.title.readOnly = !canEdit;
                     dom.eventDetailModal.start.readOnly = !canEdit;
@@ -503,6 +511,7 @@
                     dom.eventDetailModal.body.readOnly = !canEdit;
                     dom.eventDetailModal.updateButton.disabled = !canEdit;
                     dom.eventDetailModal.deleteButton.disabled = !canEdit;
+                    dom.eventDetailModal.createCopyButton.disabled = !canCreate;
 
                     // Fetch and render custom fields
                     try {
@@ -563,12 +572,78 @@
             dom.eventDetailModal.location.value = '';
             dom.eventDetailModal.body.value = '';
             dom.eventDetailModal.calendar.innerHTML = '';
+            dom.eventDetailModal.originalStart = null;
+            dom.eventDetailModal.originalEnd = null;
+
 
             // Clear custom fields
             document.getElementById('event-details-custom-fields').innerHTML = '';
 
             jQuery('.event-details-created-by-form-group').show();
         }
+
+        dom.eventDetailModal.createCopyButton.addEventListener('click', async () => {
+            const calendarId = dom.eventDetailModal.hiddenCalendar.value;
+
+            if (!hasPermissions(calendarId, 'createItems')) {
+                showFloatingAlert('error', '{{__('You do not have permission to create events in this calendar')}}');
+                return;
+            }
+
+            // Disable buttons while processing
+            dom.eventDetailModal.createCopyButton.disabled = true;
+            dom.eventDetailModal.updateButton.disabled = true;
+            dom.eventDetailModal.deleteButton.disabled = true;
+
+            const customFieldsData = {};
+            const fields = jQuery('#event-details-custom-fields input, #event-details-custom-fields select');
+            for (const fieldId of fields) {
+                const field = jQuery(fieldId);
+                customFieldsData[field.attr('name')] = field.attr('type') === 'checkbox' ? field.prop('checked') : field.val();
+            }
+
+            // Remove conversation_id and author_id from custom fields if they exist
+            delete customFieldsData['conversation_id'];
+            delete customFieldsData['author_id'];
+
+            const currentStart = new Date(dom.eventDetailModal.start.value);
+            const currentEnd = new Date(dom.eventDetailModal.end.value);
+
+            // Determine if we need to modify the title
+            let title = dom.eventDetailModal.title.value;
+            if (dom.eventDetailModal.originalStart.getTime() === currentStart.getTime() &&
+                dom.eventDetailModal.originalEnd.getTime() === currentEnd.getTime()) {
+                title = '{{__('Copy of')}} ' + title;
+            }
+
+            try {
+                const response = await api.createEvent({
+                    calendarId: calendarId,
+                    title: title,
+                    start: moment(dom.eventDetailModal.start.value).toISOString(),
+                    end: moment(dom.eventDetailModal.end.value).toISOString(),
+                    location: dom.eventDetailModal.location.value,
+                    body: dom.eventDetailModal.body.value,
+                    customFields: customFieldsData
+                });
+
+                if (response.ok) {
+                    getEvents();
+                    closeEventDetailsModal();
+                    showFloatingAlert('success', '{{__('Event copy created successfully')}}');
+                } else {
+                    showFloatingAlert('error', '{{__('Failed to create event copy')}}');
+                }
+            } catch (error) {
+                showFloatingAlert('error', '{{__('Failed to create event copy')}}');
+                console.error(error);
+            } finally {
+                // Re-enable buttons
+                dom.eventDetailModal.createCopyButton.disabled = false;
+                dom.eventDetailModal.updateButton.disabled = false;
+                dom.eventDetailModal.deleteButton.disabled = false;
+            }
+        });
 
         dom.eventDetailModal.modalClose.addEventListener('click', closeEventDetailsModal);
 
