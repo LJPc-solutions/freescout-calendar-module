@@ -690,12 +690,6 @@ class LJPcCalendarModuleAPIController extends Controller {
 
 						$calendarItem->custom_fields = $mergedCustomFields;
 
-						// Add mapping for used custom fields
-						$calendarItem->custom_fields_mapping = $this->generateCustomFieldMapping(
-								$calendar->custom_fields,
-								$mergedCustomFields
-						);
-
 						$calendarItem->save();
 
 						$uid = $calendarItem->id;
