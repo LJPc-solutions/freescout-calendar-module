@@ -80,5 +80,11 @@
         confirmDeleteCalendar: '{{__('Are you sure you want to delete this calendar?')}}',
         calendarHasBeenDeleted: '{{__('Calendar has been deleted')}}',
         errorDeletingCalendar: '{{__('An error occurred while deleting the calendar')}}',
+
+        // Title template translations
+        titleTemplate: '{{__('Title Template')}}',
+        titleTemplatePlaceholder: '{{__('Leave empty to use ticket title')}}',
+        titleTemplateHelp: '{{__('You can use merge tags to customize the title of calendar entries created from tickets. Click a tag to insert it.')}}',
+        availableMergeTags: '{{__('Available merge tags')}}',
     }
 </script>

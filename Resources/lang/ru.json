@@ -100,5 +100,20 @@
   "Export": "Экспорт",
   "ICS with all details": "ICS со всеми деталями",
   "ICS with only free/busy information": "ICS только с информацией о свободном/занятом времени",
-  "Source:": "Источник:"
+  "Source:": "Источник:",
+  "Custom Fields": "Пользовательские поля",
+  "Text": "Текст",
+  "Number": "Число",
+  "Dropdown": "Выпадающий список",
+  "Boolean": "Логическое значение",
+  "Multiselect": "Множественный выбор",
+  "Date": "Дата",
+  "Email": "Электронная почта",
+  "Required": "Обязательно",
+  "Remove": "Удалить",
+  "Add custom field": "Добавить пользовательское поле",
+  "Title Template": "Шаблон заголовка",
+  "Leave empty to use ticket title": "Оставьте пустым, чтобы использовать заголовок тикета",
+  "You can use merge tags to customize the title of calendar entries created from tickets. Click a tag to insert it.": "Вы можете использовать теги слияния для настройки заголовка календарных записей, созданных из тикетов. Нажмите на тег, чтобы вставить его.",
+  "Available merge tags": "Доступные теги слияния"
 }

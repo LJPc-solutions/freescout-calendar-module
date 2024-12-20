@@ -100,5 +100,20 @@
   "Export": "Exportovať",
   "ICS with all details": "ICS so všetkými podrobnosťami",
   "ICS with only free/busy information": "ICS iba s informáciami o voľnom/obsadenom čase",
-  "Source:": "Zdroj:"
+  "Source:": "Zdroj:",
+  "Custom Fields": "Vlastné polia",
+  "Text": "Text",
+  "Number": "Číslo",
+  "Dropdown": "Rozbaľovací zoznam",
+  "Boolean": "Logická hodnota",
+  "Multiselect": "Viacnásobný výber",
+  "Date": "Dátum",
+  "Email": "E-mail",
+  "Required": "Povinné",
+  "Remove": "Odstrániť",
+  "Add custom field": "Pridať vlastné pole",
+  "Title Template": "Šablóna názvu",
+  "Leave empty to use ticket title": "Ponechajte prázdne pre použitie názvu tiketu",
+  "You can use merge tags to customize the title of calendar entries created from tickets. Click a tag to insert it.": "Môžete použiť zlučovacie značky na prispôsobenie názvu kalendárových záznamov vytvorených z tiketov. Kliknite na značku pre jej vloženie.",
+  "Available merge tags": "Dostupné zlučovacie značky"
 }

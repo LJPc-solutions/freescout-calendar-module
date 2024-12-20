@@ -100,5 +100,20 @@
   "Export": "Vie",
   "ICS with all details": "ICS kaikilla tiedoilla",
   "ICS with only free/busy information": "ICS vain vapaana/varattuna tiedoilla",
-  "Source:": "Lähde:"
+  "Source:": "Lähde:",
+  "Custom Fields": "Mukautetut kentät",
+  "Text": "Teksti",
+  "Number": "Numero",
+  "Dropdown": "Pudotusvalikko",
+  "Boolean": "Totuusarvo",
+  "Multiselect": "Monivalinta",
+  "Date": "Päivämäärä",
+  "Email": "Sähköposti",
+  "Required": "Pakollinen",
+  "Remove": "Poista",
+  "Add custom field": "Lisää mukautettu kenttä",
+  "Title Template": "Otsikkomalli",
+  "Leave empty to use ticket title": "Jätä tyhjäksi käyttääksesi tiketin otsikkoa",
+  "You can use merge tags to customize the title of calendar entries created from tickets. Click a tag to insert it.": "Voit käyttää yhdistämistunnisteita muokataksesi tiketeistä luotujen kalenterimerkintöjen otsikkoa. Napsauta tunnistetta lisätäksesi sen.",
+  "Available merge tags": "Käytettävissä olevat yhdistämistunnisteet"
 }

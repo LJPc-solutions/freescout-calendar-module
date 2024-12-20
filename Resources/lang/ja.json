@@ -100,5 +100,20 @@
   "Export": "エクスポート",
   "ICS with all details": "すべての詳細を含むICS",
   "ICS with only free/busy information": "空き時間/予定ありの情報のみを含むICS",
-  "Source:": "ソース:"
+  "Source:": "ソース:",
+  "Custom Fields": "カスタムフィールド",
+  "Text": "テキスト",
+  "Number": "数値",
+  "Dropdown": "ドロップダウン",
+  "Boolean": "真偽値",
+  "Multiselect": "複数選択",
+  "Date": "日付",
+  "Email": "メール",
+  "Required": "必須",
+  "Remove": "削除",
+  "Add custom field": "カスタムフィールドを追加",
+  "Title Template": "タイトルテンプレート",
+  "Leave empty to use ticket title": "チケットのタイトルを使用する場合は空白のままにしてください",
+  "You can use merge tags to customize the title of calendar entries created from tickets. Click a tag to insert it.": "チケットから作成されたカレンダーエントリのタイトルをカスタマイズするためにマージタグを使用できます。タグをクリックして挿入してください。",
+  "Available merge tags": "利用可能なマージタグ"
 }

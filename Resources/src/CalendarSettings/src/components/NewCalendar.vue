@@ -8,6 +8,7 @@ const emit = defineEmits(['save'])
 const name = ref('');
 const color = ref('#3498db');
 const calendarType = ref('normal');
+const titleTemplate = ref('');
 const icsURL = ref('');
 const syncFrequency = ref('5 minutes');
 const caldavUrl = ref('');
@@ -20,6 +21,10 @@ const ljpccalendarmoduletranslations = window.ljpccalendarmoduletranslations
 const loadingIndicator = ref(false);
 
 const customFields = ref([]);
+
+const insertMergeTag = (tag) => {
+  titleTemplate.value += tag;
+};
 
 const addCustomField = () => {
   customFields.value.push({
@@ -220,6 +225,24 @@ onMounted(() => {
       <template v-if="calendarType !== 'ics'">
         <hr>
         <div class="form-group">
+          <label><strong>{{ ljpccalendarmoduletranslations.titleTemplate }}:</strong></label>
+          <input type="text" class="form-control" v-model="titleTemplate" :placeholder="ljpccalendarmoduletranslations.titleTemplatePlaceholder">
+          <small class="form-text text-muted">
+            {{ ljpccalendarmoduletranslations.titleTemplateHelp }}
+            <br>
+            {{ ljpccalendarmoduletranslations.availableMergeTags }}:
+            <span class="merge-tag" @click="insertMergeTag('{{title}}')" style="margin-left: 5px;">Ticket title</span>
+            <template v-if="customFields && customFields.length > 0">
+              <template v-for="field in customFields" :key="field.id">
+                <span class="merge-tag-seperator"> | </span>
+                <span class="merge-tag" @click="insertMergeTag('{{' + field.name + '}}')">{{ field.name }}</span>
+              </template>
+            </template>
+          </small>
+        </div>
+
+        <hr>
+        <div class="form-group">
           <label><strong>{{ ljpccalendarmoduletranslations.customFields }}:</strong></label>
           <draggable v-model="customFields" group="customFields" item-key="id" handle=".drag-handle">
             <template #item="{ element, index }">
@@ -313,5 +336,14 @@ onMounted(() => {
 
 .drag-handle:hover {
   color: #333;
+}
+
+.merge-tag {
+  cursor: pointer;
+  color: #007bff;
+}
+
+.merge-tag:hover {
+  text-decoration: underline;
 }
 </style>

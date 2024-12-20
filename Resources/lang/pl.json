@@ -100,5 +100,20 @@
   "Export": "Eksportuj",
   "ICS with all details": "ICS ze wszystkimi szczegółami",
   "ICS with only free/busy information": "ICS tylko z informacjami o dostępności/zajętości",
-  "Source:": "Źródło:"
+  "Source:": "Źródło:",
+  "Custom Fields": "Pola niestandardowe",
+  "Text": "Tekst",
+  "Number": "Numer",
+  "Dropdown": "Lista rozwijana",
+  "Boolean": "Wartość logiczna",
+  "Multiselect": "Wybór wielokrotny",
+  "Date": "Data",
+  "Email": "E-mail",
+  "Required": "Wymagane",
+  "Remove": "Usuń",
+  "Add custom field": "Dodaj pole niestandardowe",
+  "Title Template": "Szablon tytułu",
+  "Leave empty to use ticket title": "Pozostaw puste, aby użyć tytułu zgłoszenia",
+  "You can use merge tags to customize the title of calendar entries created from tickets. Click a tag to insert it.": "Możesz użyć tagów scalania, aby dostosować tytuł wpisów kalendarza utworzonych ze zgłoszeń. Kliknij tag, aby go wstawić.",
+  "Available merge tags": "Dostępne tagi scalania"
 }

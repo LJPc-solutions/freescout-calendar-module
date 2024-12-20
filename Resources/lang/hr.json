@@ -100,5 +100,20 @@
   "Export": "Izvoz",
   "ICS with all details": "ICS sa svim detaljima",
   "ICS with only free/busy information": "ICS samo s informacijama o slobodno/zauzeto",
-  "Source:": "Izvor:"
+  "Source:": "Izvor:",
+  "Custom Fields": "Prilagođena polja",
+  "Text": "Tekst",
+  "Number": "Broj",
+  "Dropdown": "Padajući izbornik",
+  "Boolean": "Logička vrijednost",
+  "Multiselect": "Višestruki odabir",
+  "Date": "Datum",
+  "Email": "E-pošta",
+  "Required": "Obavezno",
+  "Remove": "Ukloni",
+  "Add custom field": "Dodaj prilagođeno polje",
+  "Title Template": "Predložak naslova",
+  "Leave empty to use ticket title": "Ostavite prazno za korištenje naslova tiketa",
+  "You can use merge tags to customize the title of calendar entries created from tickets. Click a tag to insert it.": "Možete koristiti oznake za spajanje kako biste prilagodili naslov kalendarskih unosa stvorenih iz tiketa. Kliknite na oznaku za umetanje.",
+  "Available merge tags": "Dostupne oznake za spajanje"
 }

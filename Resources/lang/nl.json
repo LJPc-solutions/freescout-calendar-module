@@ -100,5 +100,20 @@
   "Export": "Exporteren",
   "ICS with all details": "ICS met alle details",
   "ICS with only free/busy information": "ICS met alleen beschikbaar/bezet informatie",
-  "Source:": "Bron:"
+  "Source:": "Bron:",
+  "Custom Fields": "Aangepaste velden",
+  "Text": "Tekst",
+  "Number": "Nummer",
+  "Dropdown": "Dropdown",
+  "Boolean": "Boolean",
+  "Multiselect": "Meerkeuze",
+  "Date": "Datum",
+  "Email": "E-mail",
+  "Required": "Verplicht",
+  "Remove": "Verwijderen",
+  "Add custom field": "Aangepast veld toevoegen",
+  "Title Template": "Titel sjabloon",
+  "Leave empty to use ticket title": "Laat leeg om de tickettitel te gebruiken",
+  "You can use merge tags to customize the title of calendar entries created from tickets. Click a tag to insert it.": "Je kunt merge tags gebruiken om de titel van agenda-items aan te passen die zijn gemaakt van tickets. Klik op een code om deze in te voegen.",
+  "Available merge tags": "Beschikbare merge tags"
 }

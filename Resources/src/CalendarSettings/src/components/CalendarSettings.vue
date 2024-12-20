@@ -13,6 +13,7 @@ const permissions = ref({});
 const name = ref('');
 const color = ref('#3498db');
 const calendarType = ref('normal');
+const titleTemplate = ref('');
 const icsURL = ref('');
 const syncFrequency = ref('5 minutes');
 const caldavURL = ref('');
@@ -48,6 +49,12 @@ watch(customFields, (newValue) => {
   };
 }, {deep: true});
 
+const insertMergeTag = (tag) => {
+  const start = titleTemplate.value.length;
+  titleTemplate.value += tag;
+  // Focus will be handled by Vue's reactivity
+};
+
 onMounted(() => {
   // Initialize customFields from calendar.custom_fields
   if (props.calendar.custom_fields && props.calendar.custom_fields.fields) {
@@ -68,6 +75,7 @@ const handleSubmit = async (event) => {
     _token: token,
     name: name.value,
     color: color.value,
+    title_template: titleTemplate.value,
     permissions: permissions.value,
     custom_fields: {
       ...props.calendar.custom_fields,
@@ -145,6 +153,7 @@ onMounted(() => {
   name.value = props.calendar.name;
   color.value = props.calendar.color;
   calendarType.value = props.calendar.type;
+  titleTemplate.value = props.calendar.title_template || '';
   if (props.calendar.custom_fields) {
     icsURL.value = props.calendar.custom_fields.url;
     syncFrequency.value = props.calendar.custom_fields.refresh;
@@ -265,6 +274,24 @@ onMounted(() => {
       </template>
 
       <template v-if="calendarType !== 'ics'">
+        <hr>
+        <div class="form-group">
+          <label><strong>{{ ljpccalendarmoduletranslations.titleTemplate }}:</strong></label>
+          <input type="text" class="form-control" v-model="titleTemplate" :placeholder="ljpccalendarmoduletranslations.titleTemplatePlaceholder">
+          <small class="form-text text-muted">
+            {{ ljpccalendarmoduletranslations.titleTemplateHelp }}
+            <br>
+            {{ ljpccalendarmoduletranslations.availableMergeTags }}:
+            <span class="merge-tag" @click="insertMergeTag('{{title}}')" style="margin-left: 5px;">Ticket title</span>
+            <template v-if="customFields && customFields.length > 0">
+              <template v-for="field in customFields" :key="field.id">
+                <span class="merge-tag-seperator"> | </span>
+                <span class="merge-tag" @click="insertMergeTag('{{' + field.name + '}}')">{{ field.name }}</span>
+              </template>
+            </template>
+          </small>
+        </div>
+
         <hr>
         <div class="form-group">
           <label><strong>{{ ljpccalendarmoduletranslations.customFields }}:</strong></label>
@@ -412,5 +439,14 @@ small {
 
 .drag-handle:hover {
   color: #333;
+}
+
+.merge-tag {
+  cursor: pointer;
+  color: #007bff;
+}
+
+.merge-tag:hover {
+  text-decoration: underline;
 }
 </style>

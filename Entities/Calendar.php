@@ -29,6 +29,7 @@ use Modules\LJPcCalendarModule\Http\Helpers\DateTimeRange;
  * @property string $type
  * @property array $permissions
  * @property array $custom_fields
+ * @property string|null $title_template
  */
 class Calendar extends Model implements JsonSerializable {
 		protected $table = 'calendars';
@@ -39,6 +40,7 @@ class Calendar extends Model implements JsonSerializable {
 				'type',
 				'permissions',
 				'custom_fields',
+				'title_template',
 		];
 
 		protected $casts = [
@@ -56,6 +58,7 @@ class Calendar extends Model implements JsonSerializable {
 						'type'               => $this->type,
 						'permissions'        => $this->permissions,
 						'custom_fields'      => $this->custom_fields,
+						'title_template'     => $this->title_template,
 						'ics_url'            => url( '/calendar/' . $this->id . '/ics?token=' . md5( $this->id . getenv( 'APP_KEY' ) ) ),
 						'obfuscated_ics_url' => url( '/calendar/' . $this->id . '/ics?token=' . md5( $this->id . 'obfuscated' . getenv( 'APP_KEY' ) ) ),
 				];

@@ -6,6 +6,23 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         showModalDialog(addToCalendar.html, {
             on_show: function (modal) {
+                // Fetch calendar data and custom fields for the selected calendar
+                const calendarSelect = modal.find('#calendar-select');
+                const titleContainer = modal.find('#title-field-container');
+                const titleInput = modal.find('#calendar-item-title');
+                const customFieldsContainer = modal.find('#custom-fields-container');
+
+                // Initial check for template
+                const hasTemplate = calendarSelect.find('option:selected').data('has-template');
+                titleContainer.toggle(!hasTemplate);
+
+                // Update title when calendar is selected
+                calendarSelect.on('change', function () {
+                    const selectedOption = $(this).find('option:selected');
+                    const hasTemplate = selectedOption.data('has-template');
+                    titleContainer.toggle(!hasTemplate);
+                });
+
                 // Fetch custom fields for the selected calendar
                 const fetchCustomFields = async (calendarId) => {
                     try {
@@ -85,9 +102,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         container.appendChild(fieldElement);
                     });
                 };
-
-                const calendarSelect = modal.find('#calendar-select');
-                const customFieldsContainer = modal.find('#custom-fields-container');
 
                 // Function to update custom fields
                 const updateCustomFields = async () => {

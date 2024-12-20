@@ -93,8 +93,9 @@ class LJPcCalendarModuleAPIController extends Controller {
 						return response()->json( [ 'error' => 'Calendar not found' ], 404 );
 				}
 
-				$calendar->name  = $request->input( 'name' );
-				$calendar->color = $request->input( 'color' );
+				$calendar->name           = $request->input( 'name' );
+				$calendar->color          = $request->input( 'color' );
+				$calendar->title_template = $request->input( 'title_template' );
 
 				$customFields            = $request->input( 'custom_fields', [] );
 				$calendar->custom_fields = $this->validateCustomFields( $customFields );
@@ -175,9 +176,10 @@ class LJPcCalendarModuleAPIController extends Controller {
 		public function addCalendar( Request $request ) {
 				$calendar = new Calendar();
 
-				$calendar->name  = $request->input( 'name' );
-				$calendar->color = $request->input( 'color' );
-				$calendar->type  = $request->input( 'type' );
+				$calendar->name           = $request->input( 'name' );
+				$calendar->color          = $request->input( 'color' );
+				$calendar->type           = $request->input( 'type' );
+				$calendar->title_template = $request->input( 'title_template' );
 
 				$customFields            = $request->input( 'custom_fields', [] );
 				$calendar->custom_fields = $this->validateCustomFields( $customFields );
@@ -618,6 +620,33 @@ class LJPcCalendarModuleAPIController extends Controller {
 				return response()->json( [ 'ok' => true, 'message' => 'Event created successfully' ] );
 		}
 
+		private function processTemplate( string $template, Conversation $conversation, array $customFields = [], Calendar $calendar ): string {
+				$result = str_replace( '{{title}}', $conversation->subject, $template );
+
+				// Get the field name mapping from calendar's custom fields configuration
+				$fieldMapping = [];
+				if ( ! empty( $calendar->custom_fields['fields'] ) ) {
+						foreach ( $calendar->custom_fields['fields'] as $field ) {
+								$fieldMapping[ 'custom_field_' . $field['id'] ] = $field['name'];
+						}
+				}
+
+				// Process custom fields using the mapping
+				foreach ( $customFields as $fieldId => $value ) {
+						if ( is_array( $value ) ) {
+								$value = implode( ', ', $value );
+						}
+
+						// Only process if we have a mapping for this field ID
+						if ( isset( $fieldMapping[ $fieldId ] ) ) {
+								$fieldName = $fieldMapping[ $fieldId ];
+								$result    = str_replace( '{{' . $fieldName . '}}', $value ?? '', $result );
+						}
+				}
+
+				return $result;
+		}
+
 		/**
 		 * Create an event from a conversation
 		 *
@@ -630,7 +659,7 @@ class LJPcCalendarModuleAPIController extends Controller {
 		public function createEventFromConversation( int $conversation, Request $request ) {
 				try {
 						$validatedData = $request->validate( [
-								'title'        => 'required',
+								'title'        => 'required|nullable',
 								'start'        => 'required|date',
 								'end'          => 'required|date|after:start',
 								'location'     => 'nullable',
@@ -667,11 +696,15 @@ class LJPcCalendarModuleAPIController extends Controller {
 						}
 				}
 
+				if ( empty( $calendar->title_template ) ) {
+						$calendar->title_template = $request->input( 'title' );
+				}
+
 				$uid = null;
 				if ( $calendar->type === 'normal' ) {
 						$calendarItem              = new CalendarItem();
 						$calendarItem->calendar_id = $validatedData['calendarId'];
-						$calendarItem->title       = $validatedData['title'];
+						$calendarItem->title       = $this->processTemplate( $calendar->title_template, Conversation::find( $conversation ), $processedCustomFields, $calendar );
 						$calendarItem->start       = $start;
 						$calendarItem->end         = $end;
 						$calendarItem->is_all_day  = $isAllDay;
@@ -722,7 +755,7 @@ class LJPcCalendarModuleAPIController extends Controller {
 						$response = $caldavClient->createEvent(
 								$remainingUrl,
 								$uid,
-								$validatedData['title'],
+								$this->processTemplate( $calendar->title_template, Conversation::find( $conversation ), $processedCustomFields, $calendar ),
 								$validatedData['body'],
 								$start,
 								$end,

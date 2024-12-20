@@ -100,5 +100,20 @@
   "Export": "Eksporter",
   "ICS with all details": "ICS med alle detaljer",
   "ICS with only free/busy information": "ICS med bare ledig/opptatt informasjon",
-  "Source:": "Kilde:"
+  "Source:": "Kilde:",
+  "Custom Fields": "Egendefinerte felt",
+  "Text": "Tekst",
+  "Number": "Tall",
+  "Dropdown": "Nedtrekksmeny",
+  "Boolean": "Boolsk",
+  "Multiselect": "Flervalg",
+  "Date": "Dato",
+  "Email": "E-post",
+  "Required": "Påkrevd",
+  "Remove": "Fjern",
+  "Add custom field": "Legg til egendefinert felt",
+  "Title Template": "Tittelmal",
+  "Leave empty to use ticket title": "La stå tom for å bruke billettittel",
+  "You can use merge tags to customize the title of calendar entries created from tickets. Click a tag to insert it.": "Du kan bruke flettetagger for å tilpasse tittelen på kalenderoppføringer opprettet fra billetter. Klikk på en tagg for å sette den inn.",
+  "Available merge tags": "Tilgjengelige flettetagger"
 }

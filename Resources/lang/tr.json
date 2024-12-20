@@ -100,5 +100,20 @@
   "Export": "Dışa Aktar",
   "ICS with all details": "Tüm ayrıntıları içeren ICS",
   "ICS with only free/busy information": "Yalnızca müsait/meşgul bilgilerini içeren ICS",
-  "Source:": "Kaynak:"
+  "Source:": "Kaynak:",
+  "Custom Fields": "Özel Alanlar",
+  "Text": "Metin",
+  "Number": "Sayı",
+  "Dropdown": "Açılır Liste",
+  "Boolean": "Mantıksal",
+  "Multiselect": "Çoklu Seçim",
+  "Date": "Tarih",
+  "Email": "E-posta",
+  "Required": "Zorunlu",
+  "Remove": "Kaldır",
+  "Add custom field": "Özel alan ekle",
+  "Title Template": "Başlık Şablonu",
+  "Leave empty to use ticket title": "Destek talebi başlığını kullanmak için boş bırakın",
+  "You can use merge tags to customize the title of calendar entries created from tickets. Click a tag to insert it.": "Destek taleplerinden oluşturulan takvim girişlerinin başlığını özelleştirmek için birleştirme etiketlerini kullanabilirsiniz. Eklemek için bir etikete tıklayın.",
+  "Available merge tags": "Kullanılabilir birleştirme etiketleri"
 }

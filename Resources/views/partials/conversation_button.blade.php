@@ -1,9 +1,13 @@
 <span class="conv-add-to-calendar conv-action glyphicon glyphicon-calendar" data-toggle="tooltip"
-      data-placement="bottom" title="{{ __("Add to calendar") }}" aria-label="{{ __("Add to calendar") }}"
+      data-placement="bottom" title="{{ __('Add to calendar') }}" aria-label="{{ __('Add to calendar') }}"
       role="button"></span>
 <script {!! \Helper::cspNonceAttr() !!}>
     const addToCalendar = {
         'route': '{{route('ljpccalendarmodule.api.event.create_from_conversation', ['conversation' => $conversation->id])}}',
+        'conversation': {
+            'subject': '{{$conversation->getSubject()}}',
+            'user': {!! $conversation->user ? json_encode(['name' => $conversation->user->getFullName()]) : 'null' !!}
+        },
         'html': `
     <div>
             <div class="text-larger margin-top-10">{{__('Add to calendar')}}</div>
@@ -11,11 +15,11 @@
                 <label for="calendar-select">{{__('Calendar')}}*:</label>
                 <select required="required" class="form-control" id="calendar-select">
                     @foreach($calendars as $calendar)
-        <option value="{{$calendar->id}}">{{$calendar->name}}</option>
+        <option value="{{$calendar->id}}" data-has-template="{{!empty($calendar->title_template)}}">{{$calendar->name}}</option>
                     @endforeach
         </select>
     </div>
-    <div class="form-group">
+    <div class="form-group" id="title-field-container">
         <label for="calendar-item-title">{{__('Title')}}*:</label>
                 <input required="required" type="text" class="form-control" id="calendar-item-title" value="{{$conversation->user? '[' . $conversation->user->getFullName() . '] ': ''}}{{$conversation->getSubject()}}">
             </div>
@@ -30,7 +34,6 @@
                 <button class="btn btn-primary add-to-calendar-ok">{{__('Add')}}</button>
                 <button class="btn btn-link" data-dismiss="modal">{{__('Cancel')}}</button>
             </div>
-
     </div>
     `,
         'permissions': {

@@ -100,5 +100,20 @@
   "Export": "Exportieren",
   "ICS with all details": "ICS mit allen Details",
   "ICS with only free/busy information": "ICS nur mit Frei/Belegt-Informationen",
-  "Source:": "Quelle:"
+  "Source:": "Quelle:",
+  "Custom Fields": "Benutzerdefinierte Felder",
+  "Text": "Text",
+  "Number": "Nummer",
+  "Dropdown": "Dropdown",
+  "Boolean": "Boolescher Wert",
+  "Multiselect": "Mehrfachauswahl",
+  "Date": "Datum",
+  "Email": "E-Mail",
+  "Required": "Erforderlich",
+  "Remove": "Entfernen",
+  "Add custom field": "Benutzerdefiniertes Feld hinzufügen",
+  "Title Template": "Titelvorlage",
+  "Leave empty to use ticket title": "Leer lassen, um den Tickettitel zu verwenden",
+  "You can use merge tags to customize the title of calendar entries created from tickets. Click a tag to insert it.": "Sie können Merge-Tags verwenden, um den Titel von Kalendereinträgen aus Tickets anzupassen. Klicken Sie auf ein Tag, um es einzufügen.",
+  "Available merge tags": "Verfügbare Merge-Tags"
 }

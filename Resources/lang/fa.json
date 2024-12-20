@@ -100,5 +100,20 @@
   "Export": "صادر کردن",
   "ICS with all details": "ICS با تمام جزئیات",
   "ICS with only free/busy information": "ICS فقط با اطلاعات آزاد/مشغول",
-  "Source:": "منبع:"
+  "Source:": "منبع:",
+  "Custom Fields": "فیلدهای سفارشی",
+  "Text": "متن",
+  "Number": "عدد",
+  "Dropdown": "منوی کشویی",
+  "Boolean": "بولی",
+  "Multiselect": "چند انتخابی",
+  "Date": "تاریخ",
+  "Email": "ایمیل",
+  "Required": "اجباری",
+  "Remove": "حذف",
+  "Add custom field": "افزودن فیلد سفارشی",
+  "Title Template": "قالب عنوان",
+  "Leave empty to use ticket title": "برای استفاده از عنوان تیکت خالی بگذارید",
+  "You can use merge tags to customize the title of calendar entries created from tickets. Click a tag to insert it.": "می‌توانید از برچسب‌های ادغام برای سفارشی‌سازی عنوان رویدادهای تقویم ایجاد شده از تیکت‌ها استفاده کنید. برای درج یک برچسب روی آن کلیک کنید.",
+  "Available merge tags": "برچسب‌های ادغام موجود"
 }

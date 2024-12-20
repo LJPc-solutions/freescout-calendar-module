@@ -100,5 +100,39 @@
   "Export": "Exportar",
   "ICS with all details": "ICS com todos os detalhes",
   "ICS with only free/busy information": "ICS apenas com informações de livre/ocupado",
-  "Source:": "Fonte:"
+  "Source:": "Fonte:",
+{
+  "pt-BR": {
+    "Custom Fields": "Campos personalizados",
+    "Text": "Texto",
+    "Number": "Número",
+    "Dropdown": "Lista suspensa",
+    "Boolean": "Booleano",
+    "Multiselect": "Seleção múltipla",
+    "Date": "Data",
+    "Email": "E-mail",
+    "Required": "Obrigatório",
+    "Remove": "Remover",
+    "Add custom field": "Adicionar campo personalizado",
+    "Title Template": "Modelo de título",
+    "Leave empty to use ticket title": "Deixe em branco para usar o título do ticket",
+    "You can use merge tags to customize the title of calendar entries created from tickets. Click a tag to insert it.": "Você pode usar tags de mesclagem para personalizar o título das entradas do calendário criadas a partir de tickets. Clique em uma tag para inseri-la.",
+    "Available merge tags": "Tags de mesclagem disponíveis"
+  },
+  "pt-PT": {
+    "Custom Fields": "Campos personalizados",
+    "Text": "Texto",
+    "Number": "Número",
+    "Dropdown": "Lista pendente",
+    "Boolean": "Booleano",
+    "Multiselect": "Seleção múltipla",
+    "Date": "Data",
+    "Email": "E-mail",
+    "Required": "Obrigatório",
+    "Remove": "Remover",
+    "Add custom field": "Adicionar campo personalizado",
+    "Title Template": "Modelo de título",
+    "Leave empty to use ticket title": "Deixar vazio para usar o título do ticket",
+    "You can use merge tags to customize the title of calendar entries created from tickets. Click a tag to insert it.": "Pode usar etiquetas de união para personalizar o título das entradas do calendário criadas a partir de tickets. Clique numa etiqueta para a inserir.",
+    "Available merge tags": "Etiquetas de união disponíveis"
 }

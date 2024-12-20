@@ -100,5 +100,20 @@
   "Export": "导出",
   "ICS with all details": "包含所有详情的 ICS",
   "ICS with only free/busy information": "仅包含空闲/忙碌信息的 ICS",
-  "Source:": "来源:"
+  "Source:": "来源:",
+  "Custom Fields": "自定义字段",
+  "Text": "文本",
+  "Number": "数字",
+  "Dropdown": "下拉菜单",
+  "Boolean": "布尔值",
+  "Multiselect": "多选",
+  "Date": "日期",
+  "Email": "电子邮件",
+  "Required": "必填",
+  "Remove": "删除",
+  "Add custom field": "添加自定义字段",
+  "Title Template": "标题模板",
+  "Leave empty to use ticket title": "留空以使用工单标题",
+  "You can use merge tags to customize the title of calendar entries created from tickets. Click a tag to insert it.": "您可以使用合并标签来自定义从工单创建的日历条目的标题。点击标签即可插入。",
+  "Available merge tags": "可用的合并标签"
 }

@@ -100,5 +100,20 @@
   "Export": "내보내기",
   "ICS with all details": "모든 세부 정보가 포함된 ICS",
   "ICS with only free/busy information": "사용 가능/불가능 정보만 포함된 ICS",
-  "Source:": "출처:"
+  "Source:": "출처:",
+  "Custom Fields": "사용자 정의 필드",
+  "Text": "텍스트",
+  "Number": "숫자",
+  "Dropdown": "드롭다운",
+  "Boolean": "논리값",
+  "Multiselect": "다중 선택",
+  "Date": "날짜",
+  "Email": "이메일",
+  "Required": "필수",
+  "Remove": "제거",
+  "Add custom field": "사용자 정의 필드 추가",
+  "Title Template": "제목 템플릿",
+  "Leave empty to use ticket title": "티켓 제목을 사용하려면 비워두세요",
+  "You can use merge tags to customize the title of calendar entries created from tickets. Click a tag to insert it.": "티켓에서 생성된 캘린더 항목의 제목을 사용자 정의하기 위해 병합 태그를 사용할 수 있습니다. 태그를 클릭하여 삽입하세요.",
+  "Available merge tags": "사용 가능한 병합 태그"
 }

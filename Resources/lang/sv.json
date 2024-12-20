@@ -100,5 +100,20 @@
   "Export": "Exportera",
   "ICS with all details": "ICS med alla detaljer",
   "ICS with only free/busy information": "ICS med endast ledig/upptagen information",
-  "Source:": "Källa:"
+  "Source:": "Källa:",
+  "Custom Fields": "Anpassade fält",
+  "Text": "Text",
+  "Number": "Nummer",
+  "Dropdown": "Rullgardinsmeny",
+  "Boolean": "Boolesk",
+  "Multiselect": "Flerval",
+  "Date": "Datum",
+  "Email": "E-post",
+  "Required": "Obligatorisk",
+  "Remove": "Ta bort",
+  "Add custom field": "Lägg till anpassat fält",
+  "Title Template": "Titelmall",
+  "Leave empty to use ticket title": "Lämna tomt för att använda ärendetitel",
+  "You can use merge tags to customize the title of calendar entries created from tickets. Click a tag to insert it.": "Du kan använda sammanslagningstaggar för att anpassa titeln på kalenderposter som skapats från ärenden. Klicka på en tagg för att infoga den.",
+  "Available merge tags": "Tillgängliga sammanslagningstaggar"
 }
