@@ -620,7 +620,7 @@ class LJPcCalendarModuleAPIController extends Controller {
 				return response()->json( [ 'ok' => true, 'message' => 'Event created successfully' ] );
 		}
 
-		private function processTemplate( string $template, Conversation $conversation, array $customFields = [], Calendar $calendar ): string {
+		private function processTemplate( string $template, Conversation $conversation, Calendar $calendar, array $customFields = [] ): string {
 				$result = str_replace( '{{title}}', $conversation->subject, $template );
 
 				// Get the field name mapping from calendar's custom fields configuration
@@ -704,7 +704,7 @@ class LJPcCalendarModuleAPIController extends Controller {
 				if ( $calendar->type === 'normal' ) {
 						$calendarItem              = new CalendarItem();
 						$calendarItem->calendar_id = $validatedData['calendarId'];
-						$calendarItem->title       = $this->processTemplate( $calendar->title_template, Conversation::find( $conversation ), $processedCustomFields, $calendar );
+						$calendarItem->title       = $this->processTemplate( $calendar->title_template, Conversation::find( $conversation ), $calendar, $processedCustomFields );
 						$calendarItem->start       = $start;
 						$calendarItem->end         = $end;
 						$calendarItem->is_all_day  = $isAllDay;
@@ -755,7 +755,7 @@ class LJPcCalendarModuleAPIController extends Controller {
 						$response = $caldavClient->createEvent(
 								$remainingUrl,
 								$uid,
-								$this->processTemplate( $calendar->title_template, Conversation::find( $conversation ), $processedCustomFields, $calendar ),
+								$this->processTemplate( $calendar->title_template, Conversation::find( $conversation ), $calendar, $processedCustomFields ),
 								$validatedData['body'],
 								$start,
 								$end,
