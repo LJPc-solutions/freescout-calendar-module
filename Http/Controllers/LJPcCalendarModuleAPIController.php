@@ -303,6 +303,9 @@ class LJPcCalendarModuleAPIController extends Controller {
 						if ( empty( $event['uid'] ) && ! empty( $event['id'] ) ) {
 								$event['uid'] = $event['id'];
 						}
+						if ( empty( $event['title'] ) ) {
+								$event['title'] = '';
+						}
 
 						$event['start'] = ( new DateTimeImmutable( $event['start'], new DateTimeZone( 'UTC' ) ) )->setTimezone( new DateTimeZone( $defaultTimezone ) )->format( 'Y-m-d H:i:s' );
 						$event['end']   = ( new DateTimeImmutable( $event['end'], new DateTimeZone( 'UTC' ) ) )->setTimezone( new DateTimeZone( $defaultTimezone ) )->format( 'Y-m-d H:i:s' );
