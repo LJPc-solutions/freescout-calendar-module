@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref, watch} from 'vue';
+import {onMounted, ref, watch, computed} from 'vue';
 import draggable from 'vuedraggable';
 
 const props = defineProps({
@@ -26,6 +26,12 @@ const ljpccalendarmoduletranslations = window.ljpccalendarmoduletranslations
 
 const customFields = ref([]);
 const drag = ref(false);
+
+// Select all toggles for permissions
+const selectAllDashboard = ref(false);
+const selectAllCalendar = ref(false);
+const selectAllCreate = ref(false);
+const selectAllEdit = ref(false);
 
 const addCustomField = () => {
   customFields.value.push({
@@ -61,6 +67,31 @@ onMounted(() => {
     customFields.value = props.calendar.custom_fields.fields;
   }
 });
+
+// Functions to toggle all permissions
+const toggleAllDashboard = () => {
+  Object.keys(permissions.value).forEach(key => {
+    permissions.value[key].showInDashboard = selectAllDashboard.value;
+  });
+};
+
+const toggleAllCalendar = () => {
+  Object.keys(permissions.value).forEach(key => {
+    permissions.value[key].showInCalendar = selectAllCalendar.value;
+  });
+};
+
+const toggleAllCreate = () => {
+  Object.keys(permissions.value).forEach(key => {
+    permissions.value[key].createItems = selectAllCreate.value;
+  });
+};
+
+const toggleAllEdit = () => {
+  Object.keys(permissions.value).forEach(key => {
+    permissions.value[key].editItems = selectAllEdit.value;
+  });
+};
 
 
 const handleSubmit = async (event) => {
@@ -182,9 +213,24 @@ onMounted(() => {
             permissions.value[user.id].userTeam = user.text;
           }
         });
+        
+        // Initialize select all checkboxes based on existing permissions
+        updateSelectAllStates();
       })
       .catch(error => console.error(error));
 });
+
+// Function to update select all states based on current permissions
+const updateSelectAllStates = () => {
+  const keys = Object.keys(permissions.value);
+  if (keys.length === 0) return;
+  
+  // Only set select all to true if ALL items have that permission
+  selectAllDashboard.value = keys.every(key => permissions.value[key].showInDashboard);
+  selectAllCalendar.value = keys.every(key => permissions.value[key].showInCalendar);
+  selectAllCreate.value = keys.every(key => permissions.value[key].createItems);
+  selectAllEdit.value = keys.every(key => permissions.value[key].editItems);
+};
 
 </script>
 
@@ -335,10 +381,62 @@ onMounted(() => {
           <thead>
           <tr>
             <th>{{ ljpccalendarmoduletranslations.userTeam }}</th>
-            <th>{{ ljpccalendarmoduletranslations.showInDashboardWidget }}</th>
-            <th>{{ ljpccalendarmoduletranslations.showInCalendar }}</th>
-            <th v-if="calendarType !== 'ics'">{{ ljpccalendarmoduletranslations.createEvents }}</th>
-            <th v-if="calendarType !== 'ics'">{{ ljpccalendarmoduletranslations.editEvents }}</th>
+            <th>
+              <div class="permission-header">
+                {{ ljpccalendarmoduletranslations.showInDashboardWidget }}
+                <div class="select-all">
+                  <input 
+                    type="checkbox" 
+                    id="select-all-dashboard" 
+                    v-model="selectAllDashboard" 
+                    @change="toggleAllDashboard"
+                  >
+                  <label for="select-all-dashboard">{{ ljpccalendarmoduletranslations.all || 'All' }}</label>
+                </div>
+              </div>
+            </th>
+            <th>
+              <div class="permission-header">
+                {{ ljpccalendarmoduletranslations.showInCalendar }}
+                <div class="select-all">
+                  <input 
+                    type="checkbox" 
+                    id="select-all-calendar" 
+                    v-model="selectAllCalendar" 
+                    @change="toggleAllCalendar"
+                  >
+                  <label for="select-all-calendar">{{ ljpccalendarmoduletranslations.all || 'All' }}</label>
+                </div>
+              </div>
+            </th>
+            <th v-if="calendarType !== 'ics'">
+              <div class="permission-header">
+                {{ ljpccalendarmoduletranslations.createEvents }}
+                <div class="select-all">
+                  <input 
+                    type="checkbox" 
+                    id="select-all-create" 
+                    v-model="selectAllCreate" 
+                    @change="toggleAllCreate"
+                  >
+                  <label for="select-all-create">{{ ljpccalendarmoduletranslations.all || 'All' }}</label>
+                </div>
+              </div>
+            </th>
+            <th v-if="calendarType !== 'ics'">
+              <div class="permission-header">
+                {{ ljpccalendarmoduletranslations.editEvents }}
+                <div class="select-all">
+                  <input 
+                    type="checkbox" 
+                    id="select-all-edit" 
+                    v-model="selectAllEdit" 
+                    @change="toggleAllEdit"
+                  >
+                  <label for="select-all-edit">{{ ljpccalendarmoduletranslations.all || 'All' }}</label>
+                </div>
+              </div>
+            </th>
           </tr>
           </thead>
           <tbody>
@@ -448,5 +546,26 @@ small {
 
 .merge-tag:hover {
   text-decoration: underline;
+}
+
+.permission-header {
+  display: flex;
+  flex-direction: column;
+}
+
+.select-all {
+  font-size: 0.85em;
+  display: flex;
+  align-items: center;
+  margin-top: 3px;
+}
+
+.select-all input {
+  margin-right: 5px;
+}
+
+.select-all label {
+  margin-bottom: 0;
+  cursor: pointer;
 }
 </style>
