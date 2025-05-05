@@ -243,11 +243,8 @@ class LJPcCalendarModuleServiceProvider extends ServiceProvider {
 								return $settings;
 						}
 
-						$js  = basename( glob( __DIR__ . '/../Public/settings/*.js' )[0] );
-						$css = basename( glob( __DIR__ . '/../Public/settings/*.css' )[0] );
-
-						$settings['js']  = asset( Module::getPublicPath( LJPC_CALENDARS_MODULE ) . '/settings/' . $js );
-						$settings['css'] = asset( Module::getPublicPath( LJPC_CALENDARS_MODULE ) . '/settings/' . $css );
+						$settings['js']  = asset( Module::getPublicPath( LJPC_CALENDARS_MODULE ) . '/settings/settings.js' );
+						$settings['css'] = asset( Module::getPublicPath( LJPC_CALENDARS_MODULE ) . '/settings/settings.css' );
 
 						return $settings;
 				}, 20, 2 );
