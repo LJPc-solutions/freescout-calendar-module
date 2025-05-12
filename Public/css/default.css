@@ -123,3 +123,7 @@
 #calendar {
     border-bottom: 1px solid rgb(229, 229, 229);
 }
+
+#calendar .toastui-calendar-template-time {
+    text-wrap: auto;
+}
