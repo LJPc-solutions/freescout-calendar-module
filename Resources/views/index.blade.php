@@ -115,6 +115,7 @@
                         <button type="submit" id="update-button" class="btn btn-primary">{{__('Update')}}</button>
                         <button type="button" id="create-copy-button" class="btn btn-success" disabled>{{__('Create Copy')}}</button>
                         <button type="button" id="delete-button" class="btn btn-danger" disabled>{{__('Delete')}}</button>
+                        <button type="button" id="copy-permalink-button" class="btn btn-default">{{__('Copy Permalink')}}</button>
 
                     </form>
                 </div>

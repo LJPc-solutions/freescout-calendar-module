@@ -11,6 +11,26 @@
         const VIEW_WEEK = 'week';
         const VIEW_MONTH = 'month';
 
+        // Parse hash parameters for permalinks
+        let hashParams;
+        try {
+            // Get the hash portion (remove the # character)
+            const hashString = window.location.hash.substring(1);
+
+            // Also check for direct event=ID format without URLSearchParams
+            if (hashString && hashString.indexOf('=') === -1 && !isNaN(parseInt(hashString))) {
+                // If the hash is just a number, treat it as the event ID
+                const params = new URLSearchParams();
+                params.set('event', hashString);
+                hashParams = params;
+            } else {
+                // Normal URLSearchParams parsing
+                hashParams = new URLSearchParams(hashString);
+            }
+        } catch (err) {
+            hashParams = new URLSearchParams();
+        }
+
         const calendars = {!! json_encode($calendars) !!};
         const csrfToken = '{{ csrf_token() }}';
         let templates = {};
@@ -84,6 +104,7 @@
                 updateButton: document.getElementById('update-button'),
                 deleteButton: document.getElementById('delete-button'),
                 createCopyButton: document.getElementById('create-copy-button'),
+                copyPermalinkButton: document.getElementById('copy-permalink-button'),
                 originalStart: null,
                 originalEnd: null,
             },
@@ -173,6 +194,129 @@
         dom.viewSelector.monthButton.addEventListener('click', () => setCalendarView(VIEW_MONTH));
 
 
+        // Function to open event by ID from permalink
+        const openEventById = async (eventId) => {
+            if (!eventId) {
+                return false;
+            }
+
+            try {
+                // First try to find the event in the current view for efficiency
+                const start = moment(calendar.getDateRangeStart().toDate()).set({"hour": 0, "minute": 0}).toISOString();
+                const end = moment(calendar.getDateRangeEnd().toDate()).set({"hour": 23, "minute": 59}).toISOString();
+                const eventsInView = await api.getEvents(start, end);
+
+                // Try several ways to find the event
+                let event = null;
+
+                // Try exact match first
+                event = eventsInView.find(e => e.id === eventId);
+
+                // Then try with string conversion
+                if (!event) {
+                    event = eventsInView.find(e => String(e.id) === String(eventId));
+                }
+
+                // Then try with number conversion (if possible)
+                if (!event && !isNaN(parseInt(eventId))) {
+                    const numericId = parseInt(eventId);
+                    event = eventsInView.find(e => parseInt(e.id) === numericId);
+                }
+
+                // If not found in current view, try a wider date range first, then use our direct lookup API
+                if (!event) {
+                    try {
+                        // Try fetching events with a wider date range (1 year past to 1 year future)
+                        const wideStart = moment().subtract(1, 'year').startOf('year').toISOString();
+                        const wideEnd = moment().add(1, 'year').endOf('year').toISOString();
+                        // Use a wide date range to find older/future events
+
+                        const wideRangeEvents = await api.getEvents(wideStart, wideEnd);
+
+                        // Try all the matching methods
+                        event = wideRangeEvents.find(e => e.id === eventId);
+                        if (!event) event = wideRangeEvents.find(e => String(e.id) === String(eventId));
+                        if (!event && !isNaN(parseInt(eventId))) {
+                            const numericId = parseInt(eventId);
+                            event = wideRangeEvents.find(e => parseInt(e.id) === numericId);
+                        }
+
+                        if (!event) {
+                            // If still not found, use our direct lookup API
+                            const events = await api.getEventById(eventId);
+                            // The API returns an array, so get the first match
+                            if (events && events.length > 0) {
+                                event = events[0];
+                            }
+                        }
+                    } catch (error) {
+                        // Show a user-friendly error message
+                        showFloatingAlert('error', '{{__('Could not find calendar item')}}');
+                        return false;
+                    }
+                }
+
+                if (event && event.id && event.calendarId && event.start && event.end) {
+                    try {
+                        // Navigate calendar to event date
+                        const eventDate = new Date(event.start);
+                        calendar.setDate(eventDate);
+
+                        // Create view model for event detail modal
+                        const eventViewModel = {
+                            id: event.id,
+                            calendarId: event.calendarId,
+                            title: event.title || '',
+                            start: {toDate: () => new Date(event.start)},
+                            end: {toDate: () => new Date(event.end)},
+                            location: event.location || '',
+                            body: event.body || '',
+                            raw: event.raw || {customFields: {}}
+                        };
+
+                        // Make sure calendar for this event is visible
+                        let calendarFound = false;
+                        for (const calendarInstance of calendarInstances) {
+                            if (calendarInstance.id === parseInt(event.calendarId)) {
+                                calendarInstance.isVisible = true;
+                                calendarInstance.render();
+                                calendarFound = true;
+                                break;
+                            }
+                        }
+
+                        // Need to fully render the calendar before opening the modal
+                        setTimeout(() => {
+                            try {
+                                openEventDetailsModal(eventViewModel);
+                                getEvents(event.id);
+                                updateTime();
+                            } catch (err) {
+                                showFloatingAlert('error', '{{__('Error displaying event details')}}');
+                            }
+                        }, 300);
+
+                        return true;
+                    } catch (err) {
+                        showFloatingAlert('error', '{{__('Error processing event data')}}');
+                        return false;
+                    }
+                } else {
+                    // Check if the calendar module is installed
+                    const calendarExists = calendars && calendars.length > 0;
+                    if (!calendarExists) {
+                        showFloatingAlert('error', '{{__('Calendar module appears to not be fully installed or initialized')}}');
+                    } else {
+                        showFloatingAlert('error', '{{__('Event not found or you do not have access to it')}}');
+                    }
+                    return false;
+                }
+            } catch (error) {
+                showFloatingAlert('error', '{{__('Failed to load event')}}');
+                return false;
+            }
+        };
+
         // Rerender functions
         const rerender = () => {
             const navbarHeight = outerHeight(document.querySelector('.navbar'));
@@ -228,6 +372,32 @@
             getEvents: async (start, end) => {
                 return (await fetch(laroute.route('ljpccalendarmodule.api.events') + `?start=${start}&end=${end}`)).json();
             },
+            getEventById: async (eventId) => {
+                // Ensure eventId is properly encoded for URL
+                const safeEventId = encodeURIComponent(eventId);
+                const url = laroute.route('ljpccalendarmodule.api.events') + `?eventId=${safeEventId}`;
+
+                try {
+                    const response = await fetch(url);
+
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch event`);
+                    }
+
+                    const data = await response.json();
+
+                    // Check if response is empty
+                    if (!data || data.length === 0) {
+                        // Return empty array for consistent handling
+                        return [];
+                    }
+
+                    return data;
+                } catch (error) {
+                    // Return empty array for consistent handling
+                    return [];
+                }
+            },
             createEvent: async (event) => {
                 return (await fetch(laroute.route('ljpccalendarmodule.api.event.create'), {
                     method: 'POST',
@@ -258,17 +428,100 @@
             },
         }
 
-        const getEvents = () => {
+        const getEvents = (scrollToEventId) => {
             const start = moment(calendar.getDateRangeStart().toDate()).set({"hour": 0, "minute": 0}).toISOString();
             const end = moment(calendar.getDateRangeEnd().toDate()).set({"hour": 23, "minute": 59}).toISOString();
 
-            api.getEvents(start, end).then(data => {
+            return api.getEvents(start, end).then(data => {
                 calendar.clear();
                 calendar.createEvents(data);
 
                 for (const calendarInstance of calendarInstances) {
                     calendar.setCalendarVisibility(calendarInstance.id, calendarInstance.isVisible);
                 }
+
+                // Check if there's an event ID in the URL hash and open that event
+                const eventId = hashParams.get('event');
+                // replace url to remove the event id
+                if (eventId && eventId.length > 0) {
+                    const url = new URL(window.location.href);
+                    url.hash = ''; // Remove the hash
+                    window.history.replaceState({}, document.title, url.toString());
+                    hashParams = new URLSearchParams(); // Clear the hashParams
+                }
+
+                if (eventId && eventId.length > 0) {
+
+                    try {
+                        // Try to find the event in current view
+                        let event = null;
+
+                        // First look for exact match
+                        event = data.find(e => e.id === eventId);
+
+                        // If not found, try a more flexible approach (numeric comparison if the ID is a number)
+                        if (!event && !isNaN(parseInt(eventId))) {
+                            const numericId = parseInt(eventId);
+                            event = data.find(e => parseInt(e.id) === numericId);
+                        }
+
+                        if (event && event.id && event.calendarId) {
+                            // Event is in current view, open it
+                            const eventViewModel = {
+                                id: event.id,
+                                calendarId: event.calendarId,
+                                title: event.title || '',
+                                start: {toDate: () => new Date(event.start)},
+                                end: {toDate: () => new Date(event.end)},
+                                location: event.location || '',
+                                body: event.body || '',
+                                raw: event.raw || {customFields: {}}
+                            };
+
+                            // Make sure calendar for this event is visible
+                            let calendarFound = false;
+                            for (const calendarInstance of calendarInstances) {
+                                if (calendarInstance.id === parseInt(event.calendarId)) {
+                                    calendarInstance.isVisible = true;
+                                    calendarInstance.render();
+                                    calendarFound = true;
+                                    break;
+                                }
+                            }
+
+                            scrollToEventId = event.id;
+
+                            // Open event details modal
+                            setTimeout(() => {
+                                try {
+                                    openEventDetailsModal(eventViewModel);
+                                } catch (err) {
+                                    showFloatingAlert('error', '{{__('Error displaying event details')}}');
+                                }
+                            }, 300); // Short delay to ensure UI is ready
+                        } else {
+                            // Event not in current view, use direct method to fetch and open it
+                            openEventById(eventId);
+                        }
+                    } catch (err) {
+                        showFloatingAlert('error', '{{__('Error processing permalink')}}');
+                    }
+                }
+
+                if (scrollToEventId) {
+                    setTimeout(function () {
+                        const dom = document.querySelector('.toastui-calendar-time');
+                        const eventTop = document.querySelector('.toastui-calendar-event-time[data-event-id="' + scrollToEventId + '"]');
+                        const scrollTop = eventTop.offsetTop - dom.offsetTop - 100; // Adjust scroll position
+
+                        dom.scrollTo({top: scrollTop});
+                    }, 100);
+                }
+
+                return data;
+            }).catch(error => {
+                showFloatingAlert('error', '{{__('Failed to load calendar events')}}');
+                return [];
             });
         }
 
@@ -294,7 +547,6 @@
                 }
                 return calendar.custom_fields.fields || [];
             } catch (error) {
-                console.error('Error fetching custom fields:', error);
                 return [];
             }
         };
@@ -519,7 +771,6 @@
                         const customFieldsContainer = document.getElementById('event-details-custom-fields');
                         renderCustomFields(customFields, customFieldsContainer, canEdit, event.raw.customFields);
                     } catch (error) {
-                        console.error('Error fetching or rendering custom fields:', error);
                         showFloatingAlert('error', '{{__('Failed to load custom fields')}}');
                     }
 
@@ -556,7 +807,6 @@
                 }
             } catch (error) {
                 showFloatingAlert('error', '{{__('Failed to delete event')}}');
-                console.error(error);
             } finally {
                 // Enable delete and update buttons
                 dom.eventDetailModal.deleteButton.disabled = false;
@@ -581,6 +831,37 @@
 
             jQuery('.event-details-created-by-form-group').show();
         }
+
+        // Copy permalink button handler
+        dom.eventDetailModal.copyPermalinkButton.addEventListener('click', () => {
+            const eventId = dom.eventDetailModal.hiddenUid.value;
+            if (!eventId) {
+                showFloatingAlert('error', '{{__('Could not generate permalink')}}');
+                return;
+            }
+
+            // Create the permalink with the event ID - use simple #eventID format for better compatibility
+            const url = new URL(window.location.href);
+            url.hash = eventId; // Simple hash format that will be detected by our hash parser
+
+            const permalinkUrl = url.toString();
+
+            // Copy to clipboard
+            navigator.clipboard.writeText(url.toString())
+                .then(() => {
+                    showFloatingAlert('success', '{{__('Permalink copied to clipboard')}}');
+                })
+                .catch(() => {
+                    // Fallback for browsers that don't support clipboard API
+                    const tempInput = document.createElement('input');
+                    tempInput.value = url.toString();
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                    showFloatingAlert('success', '{{__('Permalink copied to clipboard')}}');
+                });
+        });
 
         dom.eventDetailModal.createCopyButton.addEventListener('click', async () => {
             const calendarId = dom.eventDetailModal.hiddenCalendar.value;
@@ -636,7 +917,6 @@
                 }
             } catch (error) {
                 showFloatingAlert('error', '{{__('Failed to create event copy')}}');
-                console.error(error);
             } finally {
                 // Re-enable buttons
                 dom.eventDetailModal.createCopyButton.disabled = false;
@@ -698,7 +978,6 @@
                 }
             } catch (error) {
                 showFloatingAlert('error', '{{__('Failed to update event')}}');
-                console.error(error);
             } finally {
                 // Enable update and delete buttons
                 dom.eventDetailModal.updateButton.disabled = false;

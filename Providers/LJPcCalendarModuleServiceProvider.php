@@ -216,12 +216,21 @@ class LJPcCalendarModuleServiceProvider extends ServiceProvider {
 						$person = $thread->getActionPerson( $conversation_number );
 
 						$defaultTimezone = config( 'app.timezone' );
+						
+						// Generate the view event link
+						$eventLink = '';
+						if (isset($meta['calendar_item_id'])) {
+								// Generate permalink URL with the format we created (#eventID)
+								$calendarUrl = route('ljpccalendarmodule.index');
+								$permalink = $calendarUrl . '#' . $meta['calendar_item_id'];
+								$eventLink = ' <a href="' . $permalink . '" target="_blank" class="link-blue">' . __('View event') . '</a>';
+						}
 
 						return __( 'Added to calendar ":calendar" by :person. Starts at :start.', [
 								'calendar' => $calendar->name,
 								'person'   => $person,
 								'start'    => $start->setTimezone( new DateTimeZone( $defaultTimezone ) )->format( __( 'd-m-Y H:i' ) ),
-						] );
+						] ) . $eventLink;
 				}, 20, 4 );
 
 				Eventy::addAction( 'thread.attachments_list_append', function ( $thread, $conversation, $mailbox ) {

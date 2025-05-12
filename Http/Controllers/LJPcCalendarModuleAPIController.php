@@ -255,74 +255,194 @@ class LJPcCalendarModuleAPIController extends Controller {
 		 * @throws Exception
 		 */
 		public function getEvents( Request $request ) {
-				$request->validate( [
-						'start' => 'required|date',
-						'end'   => 'required|date',
-				] );
-
-				$defaultTimezone = config( 'app.timezone' );
-
-				$start = ( new DateTimeImmutable( $request->input( 'start' ), new DateTimeZone( $defaultTimezone ) ) )->setTimezone( new DateTimeZone( 'UTC' ) );
-				$end   = ( new DateTimeImmutable( $request->input( 'end' ), new DateTimeZone( $defaultTimezone ) ) )->setTimezone( new DateTimeZone( 'UTC' ) );
-
-				$calendars = Calendar::all();
-				$events    = [];
-
-				foreach ( $calendars as $calendar ) {
-						if ( $calendar->enabled === false ) {
-								continue;
-						}
-						$permissions = $calendar->permissionsForCurrentUser();
-						if ( $permissions === null ) {
-								continue;
-						}
-						if ( $permissions['showInCalendar'] !== true ) {
-								continue;
-						}
-
-						$calendarEvents = $calendar->events( $start, $end );
-						foreach ( $calendarEvents as $event ) {
-								// Generate mapping for used custom fields
-								if ( isset( $event['custom_fields'] ) && is_array( $event['custom_fields'] ) ) {
-										$event['custom_fields_mapping'] = $this->generateCustomFieldMapping(
-												$calendar->custom_fields,
-												$event['custom_fields']
-										);
+				// Special case: If looking for a specific event by ID
+				$eventId = $request->input( 'eventId' );
+				if ( $eventId ) {
+						try {
+								// Check if tables exist first
+								if ( ! \Schema::hasTable( 'calendars' ) || ! \Schema::hasTable( 'calendar_items' ) ) {
+										return response()->json( [] );
 								}
-								$events[] = $event;
+
+								$events    = [];
+								$calendars = Calendar::all();
+
+								foreach ( $calendars as $calendar ) {
+										if ( $calendar->enabled === false ) {
+												continue;
+										}
+										$permissions = $calendar->permissionsForCurrentUser();
+										if ( $permissions === null ) {
+												continue;
+										}
+										if ( $permissions['showInCalendar'] !== true ) {
+												continue;
+										}
+
+										// For normal calendars, try to find the specific event
+										if ( $calendar->type === 'normal' ) {
+												$event = CalendarItem::where( 'uid', $eventId )
+												                     ->orWhere( 'id', $eventId )
+												                     ->where( 'calendar_id', $calendar->id )
+												                     ->first();
+
+												if ( $event ) {
+														// Found the event, return it
+														$eventData = json_decode( $event->toJson(), true );
+
+														// Generate mapping for used custom fields
+														if ( isset( $eventData['custom_fields'] ) && is_array( $eventData['custom_fields'] ) ) {
+																$eventData['custom_fields_mapping'] = $this->generateCustomFieldMapping(
+																		$calendar->custom_fields,
+																		$eventData['custom_fields']
+																);
+														}
+
+														// Set default timezone
+														$defaultTimezone    = config( 'app.timezone' );
+														$eventData['start'] = ( new DateTimeImmutable( $eventData['start'], new DateTimeZone( 'UTC' ) ) )->setTimezone( new DateTimeZone( $defaultTimezone ) )->format( 'Y-m-d H:i:s' );
+														$eventData['end']   = ( new DateTimeImmutable( $eventData['end'], new DateTimeZone( 'UTC' ) ) )->setTimezone( new DateTimeZone( $defaultTimezone ) )->format( 'Y-m-d H:i:s' );
+
+														if ( empty( $eventData['id'] ) && ! empty( $eventData['uid'] ) ) {
+																$eventData['id'] = $eventData['uid'];
+														}
+														if ( empty( $eventData['uid'] ) && ! empty( $eventData['id'] ) ) {
+																$eventData['uid'] = $eventData['id'];
+														}
+														if ( empty( $eventData['title'] ) ) {
+																$eventData['title'] = '';
+														}
+
+														$events[] = $eventData;
+														break;
+												}
+										}
+
+										// For external calendars, we need to look through all events
+										if ( $calendar->type === 'ics' || $calendar->type === 'caldav' ) {
+												// Use a wider date range when searching for a specific event
+												// Use an extremely wide date range to find any event, regardless of when it occurred
+												// 5 years in past, 5 years in future
+												$wideStart = ( new DateTimeImmutable() )->sub( new DateInterval( 'P5Y' ) )->setTimezone( new DateTimeZone( 'UTC' ) );
+												$wideEnd   = ( new DateTimeImmutable() )->add( new DateInterval( 'P5Y' ) )->setTimezone( new DateTimeZone( 'UTC' ) );
+
+												try {
+														$calendarEvents = $calendar->events( $wideStart, $wideEnd );
+														foreach ( $calendarEvents as $event ) {
+																if ( isset( $event['id'] ) && $event['id'] === $eventId ) {
+																		// Found the event, prepare it for return
+																		if ( isset( $event['custom_fields'] ) && is_array( $event['custom_fields'] ) ) {
+																				$event['custom_fields_mapping'] = $this->generateCustomFieldMapping(
+																						$calendar->custom_fields,
+																						$event['custom_fields']
+																				);
+																		}
+																		$events[] = $event;
+																		break;
+																}
+														}
+												} catch ( \Exception $e ) {
+														// Log and continue - we don't want a single calendar to break the entire request
+														\Log::error( 'Error fetching events from external calendar: ' . $e->getMessage() );
+												}
+										}
+								}
+
+								// Restore timezones
+								$defaultTimezone = config( 'app.timezone' );
+								foreach ( $events as &$event ) {
+										$event['start'] = ( new DateTimeImmutable( $event['start'], new DateTimeZone( 'UTC' ) ) )->setTimezone( new DateTimeZone( $defaultTimezone ) )->format( 'Y-m-d H:i:s' );
+										$event['end']   = ( new DateTimeImmutable( $event['end'], new DateTimeZone( 'UTC' ) ) )->setTimezone( new DateTimeZone( $defaultTimezone ) )->format( 'Y-m-d H:i:s' );
+								}
+								unset( $event );
+
+								return response()->json( $events );
+						} catch ( \Exception $e ) {
+								// Log the error but return a valid response
+								\Log::error( 'Error in getEvents by ID: ' . $e->getMessage() );
+
+								return response()->json( [] );
 						}
 				}
 
-				/**
-				 * Restore timezones
-				 */
-				foreach ( $events as &$event ) {
-						if ( empty( $event['id'] ) && ! empty( $event['uid'] ) ) {
-								$event['id'] = $event['uid'];
-						}
-						if ( empty( $event['uid'] ) && ! empty( $event['id'] ) ) {
-								$event['uid'] = $event['id'];
-						}
-						if ( empty( $event['title'] ) ) {
-								$event['title'] = '';
+				try {
+						// Regular date range query
+						$request->validate( [
+								'start' => 'required|date',
+								'end'   => 'required|date',
+						] );
+
+						// Check if tables exist first
+						if ( ! \Schema::hasTable( 'calendars' ) || ! \Schema::hasTable( 'calendar_items' ) ) {
+								return response()->json( [] );
 						}
 
-						$event['start'] = ( new DateTimeImmutable( $event['start'], new DateTimeZone( 'UTC' ) ) )->setTimezone( new DateTimeZone( $defaultTimezone ) )->format( 'Y-m-d H:i:s' );
-						$event['end']   = ( new DateTimeImmutable( $event['end'], new DateTimeZone( 'UTC' ) ) )->setTimezone( new DateTimeZone( $defaultTimezone ) )->format( 'Y-m-d H:i:s' );
+						$defaultTimezone = config( 'app.timezone' );
+
+						$start = ( new DateTimeImmutable( $request->input( 'start' ), new DateTimeZone( $defaultTimezone ) ) )->setTimezone( new DateTimeZone( 'UTC' ) );
+						$end   = ( new DateTimeImmutable( $request->input( 'end' ), new DateTimeZone( $defaultTimezone ) ) )->setTimezone( new DateTimeZone( 'UTC' ) );
+
+						$calendars = Calendar::all();
+						$events    = [];
+
+						foreach ( $calendars as $calendar ) {
+								if ( $calendar->enabled === false ) {
+										continue;
+								}
+								$permissions = $calendar->permissionsForCurrentUser();
+								if ( $permissions === null ) {
+										continue;
+								}
+								if ( $permissions['showInCalendar'] !== true ) {
+										continue;
+								}
+
+								try {
+										$calendarEvents = $calendar->events( $start, $end );
+										foreach ( $calendarEvents as $event ) {
+												// Generate mapping for used custom fields
+												if ( isset( $event['custom_fields'] ) && is_array( $event['custom_fields'] ) ) {
+														$event['custom_fields_mapping'] = $this->generateCustomFieldMapping(
+																$calendar->custom_fields,
+																$event['custom_fields']
+														);
+												}
+												$events[] = $event;
+										}
+								} catch ( \Exception $e ) {
+										// Log and continue - we don't want a single calendar to break the entire request
+										\Log::error( 'Error fetching events from calendar ' . $calendar->id . ': ' . $e->getMessage() );
+								}
+						}
+
+						/**
+						 * Restore timezones
+						 */
+						foreach ( $events as &$event ) {
+								if ( empty( $event['id'] ) && ! empty( $event['uid'] ) ) {
+										$event['id'] = $event['uid'];
+								}
+								if ( empty( $event['uid'] ) && ! empty( $event['id'] ) ) {
+										$event['uid'] = $event['id'];
+								}
+								if ( empty( $event['title'] ) ) {
+										$event['title'] = '';
+								}
+
+								$event['start'] = ( new DateTimeImmutable( $event['start'], new DateTimeZone( 'UTC' ) ) )->setTimezone( new DateTimeZone( $defaultTimezone ) )->format( 'Y-m-d H:i:s' );
+								$event['end']   = ( new DateTimeImmutable( $event['end'], new DateTimeZone( 'UTC' ) ) )->setTimezone( new DateTimeZone( $defaultTimezone ) )->format( 'Y-m-d H:i:s' );
+						}
+						unset( $event );
+
+						return response()->json( $events );
+				} catch ( \Exception $e ) {
+						// Log the error but return a valid response
+						\Log::error( 'Error in getEvents date range: ' . $e->getMessage() );
+
+						return response()->json( [] );
 				}
-				unset( $event );
-
-				return response()->json( $events );
 		}
 
-		/**
-		 * Update an event
-		 *
-		 * @param Request $request
-		 *
-		 * @return JsonResponse
-		 * @throws Exception
-		 */
 		/**
 		 * Update an event
 		 *
