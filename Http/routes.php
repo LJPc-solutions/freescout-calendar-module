@@ -102,5 +102,11 @@ Route::group( [ 'middleware' => 'web', 'prefix' => Helper::getSubdirectory(), 'n
 				'roles'      => $roles,
 				'laroute'    => true,
 		] )->name( 'ljpccalendarmodule.api.calendar.get' );
+		Route::get( '/calendar/api/event/{eventId}', [
+				'uses'       => 'LJPcCalendarModuleAPIController@getEventById',
+				'middleware' => $middleWare,
+				'roles'      => $roles,
+				'laroute'    => true,
+		] )->name( 'ljpccalendarmodule.api.event.get' );
 
 } );

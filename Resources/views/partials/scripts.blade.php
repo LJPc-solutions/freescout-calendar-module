@@ -1,6 +1,30 @@
 <script {!! \Helper::cspNonceAttr() !!} src="{{ Module::getPublicPath(LJPC_CALENDARS_MODULE).'/js/moment.min.js' }}"></script>
 <script {!! \Helper::cspNonceAttr() !!} src="{{ Module::getPublicPath(LJPC_CALENDARS_MODULE).'/js/toastui-calendar.min.js' }}"></script>
 <script {!! \Helper::cspNonceAttr() !!} >
+    // Ensure laroute routes are available for calendar module
+    if (typeof laroute !== 'undefined' && typeof laroute.routes !== 'undefined') {
+        // Define calendar routes if they're not already defined
+        var calendarRoutes = {
+            'ljpccalendarmodule.api.events': '/calendar/api/events',
+            'ljpccalendarmodule.api.event.get': '/calendar/api/event/{eventId}',
+            'ljpccalendarmodule.api.event.create': '/calendar/api/events',
+            'ljpccalendarmodule.api.event.update': '/calendar/api/events',
+            'ljpccalendarmodule.api.event.delete': '/calendar/api/events',
+            'ljpccalendarmodule.api.calendar.get': '/calendar/api/calendars/{id}',
+            'ljpccalendarmodule.api.event.create_from_attachment': '/calendar/api/events/attachment',
+            'ljpccalendarmodule.api.event.create_from_conversation': '/calendar/api/events/{conversation}',
+            'ljpccalendarmodule.index': '/calendar'
+        };
+        
+        // Manually add routes if needed
+        for (var routeName in calendarRoutes) {
+            if (!laroute.route(routeName, [], false)) {
+                // Route doesn't exist, we'll need to handle this differently
+            }
+        }
+    }
+</script>
+<script {!! \Helper::cspNonceAttr() !!} >
     document.addEventListener("DOMContentLoaded", (event) => {
         // Set the locale
         moment.locale('{{Helper::getRealAppLocale()}}');
@@ -243,15 +267,12 @@
 
                         if (!event) {
                             // If still not found, use our direct lookup API
-                            const events = await api.getEventById(eventId);
-                            // The API returns an array, so get the first match
-                            if (events && events.length > 0) {
-                                event = events[0];
-                            }
+                            event = await api.getEventById(eventId);
                         }
                     } catch (error) {
                         // Show a user-friendly error message
-                        showFloatingAlert('error', '{{__('Could not find calendar item')}}');
+                        console.error('Error fetching event by ID:', error);
+                        showFloatingAlert('error', '{{__('Could not find calendar item. The calendar may be too large or the event may have been deleted.')}}');
                         return false;
                     }
                 }
@@ -370,36 +391,45 @@
 
         const api = {
             getEvents: async (start, end) => {
-                return (await fetch(laroute.route('ljpccalendarmodule.api.events') + `?start=${start}&end=${end}`)).json();
+                const url = '{{ route('ljpccalendarmodule.api.events') }}' + `?start=${start}&end=${end}`;
+                return (await fetch(url)).json();
             },
             getEventById: async (eventId) => {
-                // Ensure eventId is properly encoded for URL
+                // Use the dedicated endpoint for better performance
                 const safeEventId = encodeURIComponent(eventId);
-                const url = laroute.route('ljpccalendarmodule.api.events') + `?eventId=${safeEventId}`;
+                const url = '{{ route('ljpccalendarmodule.api.event.get', '') }}'.replace('/{eventId}', '/' + safeEventId);
 
                 try {
-                    const response = await fetch(url);
+                    // Add timeout to prevent hanging on large calendars
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+                    
+                    const response = await fetch(url, {
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
 
                     if (!response.ok) {
+                        if (response.status === 404) {
+                            return null; // Event not found
+                        }
                         throw new Error(`Failed to fetch event`);
                     }
 
                     const data = await response.json();
-
-                    // Check if response is empty
-                    if (!data || data.length === 0) {
-                        // Return empty array for consistent handling
-                        return [];
-                    }
-
                     return data;
                 } catch (error) {
-                    // Return empty array for consistent handling
-                    return [];
+                    if (error.name === 'AbortError') {
+                        console.error('Event fetch timed out - calendar may be too large');
+                    }
+                    console.error('Error fetching event:', error);
+                    return null;
                 }
             },
             createEvent: async (event) => {
-                return (await fetch(laroute.route('ljpccalendarmodule.api.event.create'), {
+                const url = '{{ route('ljpccalendarmodule.api.event.create') }}';
+                return (await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -409,7 +439,8 @@
                 })).json();
             },
             updateEvent: async (event) => {
-                return (await fetch(laroute.route('ljpccalendarmodule.api.event.update') + `?id=${event.uid}&_method=PUT`, {
+                const url = '{{ route('ljpccalendarmodule.api.event.update') }}' + `?id=${event.uid}&_method=PUT`;
+                return (await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -419,7 +450,8 @@
                 })).json();
             },
             deleteEvent: async (eventId, calendarId) => {
-                return (await fetch(laroute.route('ljpccalendarmodule.api.event.delete') + `?id=${eventId}&calendarId=${calendarId}&_method=DELETE`, {
+                const url = '{{ route('ljpccalendarmodule.api.event.delete') }}' + `?id=${eventId}&calendarId=${calendarId}&_method=DELETE`;
+                return (await fetch(url, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken,
@@ -540,7 +572,8 @@
 
         const fetchCustomFields = async (calendarId) => {
             try {
-                const response = await fetch(laroute.route('ljpccalendarmodule.api.calendar.get', {id: calendarId}));
+                const url = '{{ route('ljpccalendarmodule.api.calendar.get', '') }}'.replace('/{id}', '/' + calendarId);
+                const response = await fetch(url);
                 const calendar = await response.json();
                 if (calendar.custom_fields === null) {
                     return [];

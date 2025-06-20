@@ -51,6 +51,10 @@
     {
         "uri": "calendar\/api\/calendars\/{id}",
         "name": "ljpccalendarmodule.api.calendar.get"
+    },
+    {
+        "uri": "calendar\/api\/event\/{eventId}",
+        "name": "ljpccalendarmodule.api.event.get"
     }
 ];
 

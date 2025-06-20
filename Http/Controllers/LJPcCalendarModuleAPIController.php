@@ -248,10 +248,14 @@ class LJPcCalendarModuleAPIController extends Controller {
 
 		/**
 		 * Get events
+		 * 
+		 * This method handles both date range queries and specific event ID lookups.
+		 * For event ID lookups on external calendars, it uses an optimized approach
+		 * that avoids loading unnecessary date ranges, improving performance for large calendars.
 		 *
-		 * @param Request $request
+		 * @param Request $request The request containing either date range (start/end) or eventId
 		 *
-		 * @return JsonResponse
+		 * @return JsonResponse Array of events matching the criteria
 		 * @throws Exception
 		 */
 		public function getEvents( Request $request ) {
@@ -318,32 +322,26 @@ class LJPcCalendarModuleAPIController extends Controller {
 												}
 										}
 
-										// For external calendars, we need to look through all events
+										// For external calendars, use optimized single event lookup
 										if ( $calendar->type === 'ics' || $calendar->type === 'caldav' ) {
-												// Use a wider date range when searching for a specific event
-												// Use an extremely wide date range to find any event, regardless of when it occurred
-												// 5 years in past, 5 years in future
-												$wideStart = ( new DateTimeImmutable() )->sub( new DateInterval( 'P5Y' ) )->setTimezone( new DateTimeZone( 'UTC' ) );
-												$wideEnd   = ( new DateTimeImmutable() )->add( new DateInterval( 'P5Y' ) )->setTimezone( new DateTimeZone( 'UTC' ) );
-
 												try {
-														$calendarEvents = $calendar->events( $wideStart, $wideEnd );
-														foreach ( $calendarEvents as $event ) {
-																if ( isset( $event['id'] ) && $event['id'] === $eventId ) {
-																		// Found the event, prepare it for return
-																		if ( isset( $event['custom_fields'] ) && is_array( $event['custom_fields'] ) ) {
-																				$event['custom_fields_mapping'] = $this->generateCustomFieldMapping(
-																						$calendar->custom_fields,
-																						$event['custom_fields']
-																				);
-																		}
-																		$events[] = $event;
-																		break;
+														// Use the new optimized method for finding a single event
+														$event = $calendar->findEventById( $eventId );
+														
+														if ( $event ) {
+																// Found the event, prepare it for return
+																if ( isset( $event['custom_fields'] ) && is_array( $event['custom_fields'] ) ) {
+																		$event['custom_fields_mapping'] = $this->generateCustomFieldMapping(
+																				$calendar->custom_fields,
+																				$event['custom_fields']
+																		);
 																}
+																$events[] = $event;
+																break;
 														}
 												} catch ( \Exception $e ) {
 														// Log and continue - we don't want a single calendar to break the entire request
-														\Log::error( 'Error fetching events from external calendar: ' . $e->getMessage() );
+														\Log::error( 'Error fetching event from external calendar: ' . $e->getMessage() );
 												}
 										}
 								}
@@ -900,17 +898,27 @@ class LJPcCalendarModuleAPIController extends Controller {
 						if ( $conversation !== null ) {
 								$action_type        = CalendarItem::ACTION_TYPE_ADD_TO_CALENDAR;
 								$created_by_user_id = auth()->user()->id;
+								
+								// Store the event UID for better permalink support
+								$meta = [
+										'calendar_item_id' => $uid,
+										'calendar_id'      => $calendar->id,
+										'calendar_type'    => $calendar->type,
+										'start'            => ( new DateTimeImmutable( $validatedData['start'] ) )->setTimezone( new DateTimeZone( 'UTC' ) )->format( DATE_ATOM ),
+								];
+								
+								// For external calendars, also store the event UID
+								if ( $calendar->type === 'caldav' || $calendar->type === 'ics' ) {
+										$meta['event_uid'] = $uid;
+								}
+								
 								Thread::create( $conversation, Thread::TYPE_LINEITEM, '', [
 										'user_id'            => $conversation->user_id,
 										'created_by_user_id' => $created_by_user_id,
 										'action_type'        => $action_type,
 										'source_via'         => Thread::PERSON_USER,
 										'source_type'        => Thread::SOURCE_TYPE_WEB,
-										'meta'               => [
-												'calendar_item_id' => $uid,
-												'calendar_id'      => $calendar->id,
-												'start'            => ( new DateTimeImmutable( $validatedData['start'] ) )->setTimezone( new DateTimeZone( 'UTC' ) )->format( DATE_ATOM ),
-										],
+										'meta'               => $meta,
 								] );
 						}
 				}
@@ -932,6 +940,111 @@ class LJPcCalendarModuleAPIController extends Controller {
 				}
 
 				return response()->json( $calendar );
+		}
+
+		/**
+		 * Get a single event by ID - optimized endpoint for permalinks
+		 *
+		 * @param string $eventId The event ID to retrieve
+		 *
+		 * @return JsonResponse
+		 */
+		public function getEventById( string $eventId ): JsonResponse {
+				try {
+						// Check if tables exist first
+						if ( ! \Schema::hasTable( 'calendars' ) || ! \Schema::hasTable( 'calendar_items' ) ) {
+								return response()->json( [ 'error' => 'Calendar module not properly initialized' ], 500 );
+						}
+
+						$calendars = Calendar::all();
+						
+						foreach ( $calendars as $calendar ) {
+								if ( $calendar->enabled === false ) {
+										continue;
+								}
+								
+								$permissions = $calendar->permissionsForCurrentUser();
+								if ( $permissions === null || ! $permissions['showInCalendar'] ) {
+										continue;
+								}
+
+								// For normal calendars, try to find the specific event
+								if ( $calendar->type === 'normal' ) {
+										$event = CalendarItem::where( 'uid', $eventId )
+										                     ->orWhere( 'id', $eventId )
+										                     ->where( 'calendar_id', $calendar->id )
+										                     ->first();
+
+										if ( $event ) {
+												$eventData = json_decode( $event->toJson(), true );
+
+												// Generate mapping for used custom fields
+												if ( isset( $eventData['custom_fields'] ) && is_array( $eventData['custom_fields'] ) ) {
+														$eventData['custom_fields_mapping'] = $this->generateCustomFieldMapping(
+																$calendar->custom_fields,
+																$eventData['custom_fields']
+														);
+												}
+
+												// Set default timezone
+												$defaultTimezone    = config( 'app.timezone' );
+												$eventData['start'] = ( new DateTimeImmutable( $eventData['start'], new DateTimeZone( 'UTC' ) ) )
+														->setTimezone( new DateTimeZone( $defaultTimezone ) )->format( 'Y-m-d H:i:s' );
+												$eventData['end']   = ( new DateTimeImmutable( $eventData['end'], new DateTimeZone( 'UTC' ) ) )
+														->setTimezone( new DateTimeZone( $defaultTimezone ) )->format( 'Y-m-d H:i:s' );
+
+												// Ensure IDs are set
+												if ( empty( $eventData['id'] ) && ! empty( $eventData['uid'] ) ) {
+														$eventData['id'] = $eventData['uid'];
+												}
+												if ( empty( $eventData['uid'] ) && ! empty( $eventData['id'] ) ) {
+														$eventData['uid'] = $eventData['id'];
+												}
+												if ( empty( $eventData['title'] ) ) {
+														$eventData['title'] = '';
+												}
+
+												return response()->json( $eventData );
+										}
+								}
+
+								// For external calendars, use optimized single event lookup
+								if ( $calendar->type === 'ics' || $calendar->type === 'caldav' ) {
+										try {
+												$event = $calendar->findEventById( $eventId );
+												
+												if ( $event ) {
+														// Generate mapping for used custom fields
+														if ( isset( $event['custom_fields'] ) && is_array( $event['custom_fields'] ) ) {
+																$event['custom_fields_mapping'] = $this->generateCustomFieldMapping(
+																		$calendar->custom_fields,
+																		$event['custom_fields']
+																);
+														}
+														
+														// Ensure timezone conversion is done
+														$defaultTimezone = config( 'app.timezone' );
+														$event['start'] = ( new DateTimeImmutable( $event['start'], new DateTimeZone( 'UTC' ) ) )
+																->setTimezone( new DateTimeZone( $defaultTimezone ) )->format( 'Y-m-d H:i:s' );
+														$event['end']   = ( new DateTimeImmutable( $event['end'], new DateTimeZone( 'UTC' ) ) )
+																->setTimezone( new DateTimeZone( $defaultTimezone ) )->format( 'Y-m-d H:i:s' );
+														
+														return response()->json( $event );
+												}
+										} catch ( \Exception $e ) {
+												// Log and continue checking other calendars
+												\Log::error( 'Error fetching event from external calendar: ' . $e->getMessage() );
+										}
+								}
+						}
+
+						// Event not found in any calendar
+						return response()->json( [ 'error' => 'Event not found' ], 404 );
+						
+				} catch ( \Exception $e ) {
+						\Log::error( 'Error in getEventById: ' . $e->getMessage() );
+						return response()->json( [ 'error' => 'Failed to retrieve event' ], 500 );
+				}
 		}
 
 		/**

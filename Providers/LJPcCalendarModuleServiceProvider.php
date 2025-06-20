@@ -220,9 +220,12 @@ class LJPcCalendarModuleServiceProvider extends ServiceProvider {
 						// Generate the view event link
 						$eventLink = '';
 						if (isset($meta['calendar_item_id'])) {
+								// Use the event UID for external calendars, calendar_item_id for normal calendars
+								$eventId = isset($meta['event_uid']) ? $meta['event_uid'] : $meta['calendar_item_id'];
+								
 								// Generate permalink URL with the format we created (#eventID)
 								$calendarUrl = route('ljpccalendarmodule.index');
-								$permalink = $calendarUrl . '#' . $meta['calendar_item_id'];
+								$permalink = $calendarUrl . '#' . $eventId;
 								$eventLink = ' <a href="' . $permalink . '" target="_blank" class="link-blue">' . __('View event') . '</a>';
 						}
 
