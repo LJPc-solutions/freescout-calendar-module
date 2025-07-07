@@ -21,6 +21,26 @@ This module adds a calendar module to FreeScout.
 - Permissions are added to the module. You can set which users/teams cam view the events on the dashboard, can view the calendar, create events and edit events
 - Create events from a conversation. If the conversation includes an attachment with an ICS file, the event will be created with the data from the ICS file. Otherwise, you can specify the details yourself.
 - Fully responsive calendar view.
+- Performance optimizations for large calendars with instant event lookups via database indexing and CalDAV REPORT queries.
+
+## Configuration
+
+### Performance Feature Flags
+
+The calendar module includes performance optimization features that can be enabled via environment variables:
+
+```bash
+# Enable database indexing for instant event lookups (recommended)
+CALENDAR_ENABLE_EVENT_INDEX=true
+
+# Enable CalDAV REPORT queries for targeted event fetching
+CALENDAR_ENABLE_CALDAV_REPORTS=true
+
+# Force legacy parsing mode (disable all optimizations)
+CALENDAR_FORCE_LEGACY_MODE=false
+```
+
+Add these to your `.env` file to enable the performance features. The event index dramatically improves event lookup speed from 10+ seconds to ~1.5ms for large calendars.
 
 ## Installation
 

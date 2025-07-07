@@ -41,14 +41,14 @@
             // Get the hash portion (remove the # character)
             const hashString = window.location.hash.substring(1);
 
-            // Also check for direct event=ID format without URLSearchParams
-            if (hashString && hashString.indexOf('=') === -1 && !isNaN(parseInt(hashString))) {
-                // If the hash is just a number, treat it as the event ID
+            // Check for direct event ID format (just the ID without event= prefix)
+            if (hashString && hashString.indexOf('=') === -1 && hashString.length > 0) {
+                // If the hash doesn't contain '=', treat it as the event ID directly
                 const params = new URLSearchParams();
                 params.set('event', hashString);
                 hashParams = params;
             } else {
-                // Normal URLSearchParams parsing
+                // Normal URLSearchParams parsing for event=ID format
                 hashParams = new URLSearchParams(hashString);
             }
         } catch (err) {

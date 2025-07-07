@@ -42,12 +42,17 @@ class Calendar extends Model implements JsonSerializable {
 				'permissions',
 				'custom_fields',
 				'title_template',
+				'sync_version',
+				'last_full_sync',
+				'force_legacy_mode',
 		];
 
 		protected $casts = [
 				'enabled'       => 'boolean',
 				'permissions'   => 'array',
 				'custom_fields' => 'array',
+				'force_legacy_mode' => 'boolean',
+				'last_full_sync' => 'datetime',
 		];
 
 		/**
@@ -247,9 +252,82 @@ class Calendar extends Model implements JsonSerializable {
 		 * @throws Exception
 		 */
 		public function findEventById( string $eventId ): ?array {
+				// Check if we should use legacy mode
+				$forceLegacy = config('ljpccalendarmodule.performance.force_legacy_mode', false) || $this->force_legacy_mode;
+				$enableEventIndex = config('ljpccalendarmodule.performance.enable_event_index', false);
+				$enableCalDAVReports = config('ljpccalendarmodule.performance.enable_caldav_reports', false);
+				
 				if ( $this->type === 'normal' ) {
 						// This case is already handled efficiently in the controller
 						return null;
+				}
+
+				// Step 1: Try database index if enabled and not in legacy mode
+				if ( !$forceLegacy && $enableEventIndex ) {
+						try {
+								$startTime = microtime(true);
+								
+								$indexedEvent = CalendarEventIndex::where('calendar_id', $this->id)
+										->where('event_uid', $eventId)
+										->first();
+								
+								if ( $indexedEvent ) {
+										// Check if the data is fresh based on refresh interval
+										$refreshString = $this->custom_fields['refresh'] ?? '1 hour';
+										$refreshInterval = $this->getRefreshIntervalInSeconds($refreshString);
+										if ( $indexedEvent->isFresh($refreshInterval) ) {
+												$indexedEvent->recordAccess();
+												
+												// Log performance metrics
+												if ( config('ljpccalendarmodule.performance.enable_metrics', false) ) {
+														Log::info('Calendar event found in index', [
+																'calendar_id' => $this->id,
+																'event_uid' => $eventId,
+																'lookup_time_ms' => round((microtime(true) - $startTime) * 1000, 2),
+																'cache_hit' => true
+														]);
+												}
+												
+												return $indexedEvent->toCalendarItemArray();
+										}
+								}
+						} catch ( \Exception $e ) {
+								Log::error('Error accessing event index', [
+										'calendar_id' => $this->id,
+										'event_uid' => $eventId,
+										'error' => $e->getMessage()
+								]);
+								// Continue to other methods
+						}
+				}
+
+				// Step 2: For CalDAV, try REPORT query if enabled
+				if ( !$forceLegacy && $this->type === 'caldav' && $enableCalDAVReports ) {
+						try {
+								$eventData = $this->fetchCalDAVEventByUid( $eventId );
+								if ( $eventData !== null ) {
+										// Update index if enabled
+										if ( $enableEventIndex ) {
+												try {
+														CalendarEventIndex::updateFromEventData( $this->id, $eventData, $this->sync_version );
+												} catch ( \Exception $e ) {
+														Log::warning('Failed to update event index after CalDAV fetch', [
+																'calendar_id' => $this->id,
+																'event_uid' => $eventId,
+																'error' => $e->getMessage()
+														]);
+												}
+										}
+										
+										return $eventData;
+								}
+						} catch ( \Exception $e ) {
+								Log::warning('CalDAV REPORT query failed, falling back to full fetch', [
+										'calendar_id' => $this->id,
+										'event_uid' => $eventId,
+										'error' => $e->getMessage()
+								]);
+						}
 				}
 
 				if ( $this->type === 'ics' || $this->type === 'caldav' ) {
@@ -432,6 +510,142 @@ class Calendar extends Model implements JsonSerializable {
 				}
 
 				return null;
+		}
+
+		/**
+		 * Fetch a single CalDAV event by UID using REPORT query
+		 * 
+		 * @param string $eventId The event UID
+		 * @return array|null The event data or null if not found
+		 */
+		protected function fetchCalDAVEventByUid( string $eventId ): ?array {
+				$fullUrl = $this->custom_fields['url'];
+				$baseUrl = substr( $fullUrl, 0, strpos( $fullUrl, '/', 8 ) );
+				$remainingUrl = substr( $fullUrl, strpos( $fullUrl, '/', 8 ) );
+				
+				$caldavClient = new CalDAV( $baseUrl, $this->custom_fields['username'], $this->custom_fields['password'] );
+				
+				// Check if server supports REPORT queries
+				if ( !$caldavClient->supportsReportQuery( $remainingUrl ) ) {
+						Log::info('CalDAV server does not support REPORT queries', [
+								'calendar_id' => $this->id,
+								'url' => $fullUrl
+						]);
+						return null;
+				}
+				
+				// Try to fetch the specific event
+				$icsData = $caldavClient->getEventByUid( $remainingUrl, $eventId );
+				
+				if ( $icsData === null ) {
+						return null;
+				}
+				
+				// Parse the ICS data
+				try {
+						$ical = new ICal();
+						$ical->initString( $icsData );
+						
+						$events = $ical->events();
+						if ( empty( $events ) ) {
+								return null;
+						}
+						
+						// Process the first (and should be only) event
+						$event = $events[0];
+						
+						$start = DateTimeImmutable::createFromMutable( 
+								$ical->iCalDateToDateTime( $event->dtstart_array[3] )->setTimezone( new DateTimeZone( 'UTC' ) ) 
+						);
+						
+						if ( ! empty( $event->dtend ) ) {
+								$end = DateTimeImmutable::createFromMutable( 
+										$ical->iCalDateToDateTime( $event->dtend_array[3] )->setTimezone( new DateTimeZone( 'UTC' ) ) 
+								);
+						} else {
+								if ( ! empty( $event->duration ) ) {
+										$end = $start->add( new DateInterval( $event->duration ) );
+								} else {
+										$end = $start->add( new DateInterval( 'PT1H' ) );
+								}
+						}
+
+						$modifiedEnd = $end;
+						if ( DateTimeRange::isAllDay( $start, $end ) ) {
+								$modifiedEnd = $end->modify( '-1 second' );
+						}
+
+						$body = $event->description;
+						$customFields = [];
+						
+						// Parse YAML from description if present
+						try {
+								if ( $body !== null ) {
+										$parsedResult = Yaml::parse( $body, Loader::IGNORE_COMMENTS | Loader::IGNORE_DIRECTIVES | Loader::NO_OBJECT_FOR_DATE );
+										// Handle both array and object results
+										if ( is_object( $parsedResult ) && method_exists( $parsedResult, 'jsonSerialize' ) ) {
+												$parsedYaml = $parsedResult->jsonSerialize();
+										} else {
+												$parsedYaml = $parsedResult;
+										}
+										if ( is_array( $parsedYaml ) && array_has( $parsedYaml, 'body' ) ) {
+												$body = $parsedYaml['body'];
+												if ( isset( $parsedYaml['custom_fields'] ) ) {
+														$customFields = $parsedYaml['custom_fields'];
+												}
+										}
+								}
+						} catch ( Exception $e ) {
+								// Ignore parsing errors
+						}
+
+						// Create CalendarItem-compatible array
+						return [
+								'id' => $event->uid,
+								'uid' => $event->uid,
+								'calendar_id' => $this->id,
+								'title' => $event->summary,
+								'location' => $event->location,
+								'body' => $body,
+								'state' => $event->status,
+								'start' => $start->format( 'Y-m-d H:i:s' ),
+								'end' => $modifiedEnd->format( 'Y-m-d H:i:s' ),
+								'is_all_day' => DateTimeRange::isAllDay( $start, $end ),
+								'is_private' => false,
+								'is_read_only' => false, // CalDAV events can be edited
+								'custom_fields' => $customFields,
+						];
+						
+				} catch ( \Exception $e ) {
+						Log::error('Failed to parse CalDAV event data', [
+								'calendar_id' => $this->id,
+								'event_uid' => $eventId,
+								'error' => $e->getMessage()
+						]);
+						return null;
+				}
+		}
+
+		/**
+		 * Convert refresh interval string to seconds
+		 * 
+		 * @param string $refreshString
+		 * @return int
+		 */
+		protected function getRefreshIntervalInSeconds( string $refreshString ): int {
+				$intervals = [
+						'1 minute'   => 60,
+						'5 minutes'  => 300,
+						'15 minutes' => 900,
+						'30 minutes' => 1800,
+						'1 hour'     => 3600,
+						'2 hours'    => 7200,
+						'6 hours'    => 21600,
+						'12 hours'   => 43200,
+						'daily'      => 86400,
+				];
+				
+				return $intervals[$refreshString] ?? 3600; // Default to 1 hour
 		}
 
 

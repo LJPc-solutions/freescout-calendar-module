@@ -97,4 +97,96 @@ class CalDAV {
 				return $this->client->request( 'DELETE', $calendarUrl . $uid . '.ics' );
 		}
 
+		/**
+		 * Get a single event by UID using CalDAV REPORT query
+		 * This is much more efficient than fetching all events
+		 * 
+		 * @param string $calendarUrl The calendar URL
+		 * @param string $uid The event UID to fetch
+		 * @return array|null The event data or null if not found
+		 */
+		public function getEventByUid( $calendarUrl, $uid ) {
+				$xmlBody = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
+				           '<C:calendar-query xmlns:C="urn:ietf:params:xml:ns:caldav" xmlns:D="DAV:">' . "\n" .
+				           '  <D:prop>' . "\n" .
+				           '    <D:getetag/>' . "\n" .
+				           '    <C:calendar-data/>' . "\n" .
+				           '  </D:prop>' . "\n" .
+				           '  <C:filter>' . "\n" .
+				           '    <C:comp-filter name="VCALENDAR">' . "\n" .
+				           '      <C:comp-filter name="VEVENT">' . "\n" .
+				           '        <C:prop-filter name="UID">' . "\n" .
+				           '          <C:text-match>' . htmlspecialchars( $uid, ENT_XML1, 'UTF-8' ) . '</C:text-match>' . "\n" .
+				           '        </C:prop-filter>' . "\n" .
+				           '      </C:comp-filter>' . "\n" .
+				           '    </C:comp-filter>' . "\n" .
+				           '  </C:filter>' . "\n" .
+				           '</C:calendar-query>';
+
+				try {
+						$response = $this->client->request( 'REPORT', $calendarUrl, $xmlBody, [
+								'Content-Type' => 'application/xml; charset=utf-8',
+								'Depth' => '1',
+						] );
+
+						// Check if we got a successful response
+						if ( isset( $response['statusCode'] ) && $response['statusCode'] >= 200 && $response['statusCode'] < 300 ) {
+								// Parse the response body if available
+								if ( isset( $response['body'] ) && ! empty( $response['body'] ) ) {
+										// The response should contain the calendar data
+										// We need to extract it from the XML response
+										$matches = [];
+										if ( preg_match( '/<cal:calendar-data[^>]*>(.*?)<\/cal:calendar-data>/s', $response['body'], $matches ) ||
+										     preg_match( '/<C:calendar-data[^>]*>(.*?)<\/C:calendar-data>/s', $response['body'], $matches ) ||
+										     preg_match( '/<calendar-data[^>]*>(.*?)<\/calendar-data>/s', $response['body'], $matches ) ) {
+												return html_entity_decode( $matches[1], ENT_XML1, 'UTF-8' );
+										}
+								}
+						}
+				} catch ( \Exception $e ) {
+						// Log the error but don't throw - we'll fall back to the old method
+						\Log::info( 'CalDAV REPORT query failed, will fall back to full fetch', [
+								'error' => $e->getMessage(),
+								'calendar_url' => $calendarUrl,
+								'uid' => $uid
+						] );
+				}
+
+				return null;
+		}
+
+		/**
+		 * Check if the CalDAV server supports REPORT queries
+		 * 
+		 * @param string $calendarUrl
+		 * @return bool
+		 */
+		public function supportsReportQuery( $calendarUrl ) {
+				try {
+						$response = $this->client->options( $calendarUrl );
+						
+						if ( isset( $response['headers']['allow'] ) ) {
+								$allow = is_array( $response['headers']['allow'] ) 
+										? implode( ',', $response['headers']['allow'] ) 
+										: $response['headers']['allow'];
+								return stripos( $allow, 'REPORT' ) !== false;
+						}
+						
+						// Also check DAV header for calendar-access
+						if ( isset( $response['headers']['dav'] ) ) {
+								$dav = is_array( $response['headers']['dav'] ) 
+										? implode( ',', $response['headers']['dav'] ) 
+										: $response['headers']['dav'];
+								return stripos( $dav, 'calendar-access' ) !== false;
+						}
+				} catch ( \Exception $e ) {
+						\Log::debug( 'Failed to check CalDAV server capabilities', [
+								'error' => $e->getMessage(),
+								'calendar_url' => $calendarUrl
+						] );
+				}
+				
+				return false;
+		}
+
 }
