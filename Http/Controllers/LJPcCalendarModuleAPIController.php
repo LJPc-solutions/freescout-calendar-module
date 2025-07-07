@@ -968,11 +968,10 @@ class LJPcCalendarModuleAPIController extends Controller {
 										continue;
 								}
 
-								// For normal calendars, try to find the specific event
+								// For normal calendars, try to find the specific event by ID only
 								if ( $calendar->type === 'normal' ) {
-										$event = CalendarItem::where( 'uid', $eventId )
-										                     ->orWhere( 'id', $eventId )
-										                     ->where( 'calendar_id', $calendar->id )
+										$event = CalendarItem::where( 'calendar_id', $calendar->id )
+										                     ->where( 'id', $eventId )
 										                     ->first();
 
 										if ( $event ) {
