@@ -976,6 +976,9 @@ class LJPcCalendarModuleAPIController extends Controller {
 
 										if ( $event ) {
 												$eventData = json_decode( $event->toJson(), true );
+												
+												// Ensure calendar ID is present
+												$eventData['calendarId'] = $calendar->id;
 
 												// Generate mapping for used custom fields
 												if ( isset( $eventData['custom_fields'] ) && is_array( $eventData['custom_fields'] ) ) {
@@ -1013,6 +1016,10 @@ class LJPcCalendarModuleAPIController extends Controller {
 												$event = $calendar->findEventById( $eventId );
 												
 												if ( $event ) {
+														// Add calendar ID to the event data
+														$event['calendarId'] = $calendar->id;
+														$event['calendar_id'] = $calendar->id;
+														
 														// Generate mapping for used custom fields
 														if ( isset( $event['custom_fields'] ) && is_array( $event['custom_fields'] ) ) {
 																$event['custom_fields_mapping'] = $this->generateCustomFieldMapping(
