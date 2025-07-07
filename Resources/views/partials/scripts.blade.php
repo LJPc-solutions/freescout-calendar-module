@@ -225,55 +225,31 @@
             }
 
             try {
-                // First try to find the event in the current view for efficiency
-                const start = moment(calendar.getDateRangeStart().toDate()).set({"hour": 0, "minute": 0}).toISOString();
-                const end = moment(calendar.getDateRangeEnd().toDate()).set({"hour": 23, "minute": 59}).toISOString();
-                const eventsInView = await api.getEvents(start, end);
-
-                // Try several ways to find the event
+                // Use the optimized direct lookup API first for best performance
                 let event = null;
+                
+                try {
+                    event = await api.getEventById(eventId);
+                } catch (directLookupError) {
+                    // If direct lookup fails, fall back to searching in current view
+                    console.warn('Direct event lookup failed, falling back to view search:', directLookupError);
+                    
+                    const start = moment(calendar.getDateRangeStart().toDate()).set({"hour": 0, "minute": 0}).toISOString();
+                    const end = moment(calendar.getDateRangeEnd().toDate()).set({"hour": 23, "minute": 59}).toISOString();
+                    const eventsInView = await api.getEvents(start, end);
 
-                // Try exact match first
-                event = eventsInView.find(e => e.id === eventId);
+                    // Try exact match first
+                    event = eventsInView.find(e => e.id === eventId);
 
-                // Then try with string conversion
-                if (!event) {
-                    event = eventsInView.find(e => String(e.id) === String(eventId));
-                }
+                    // Then try with string conversion
+                    if (!event) {
+                        event = eventsInView.find(e => String(e.id) === String(eventId));
+                    }
 
-                // Then try with number conversion (if possible)
-                if (!event && !isNaN(parseInt(eventId))) {
-                    const numericId = parseInt(eventId);
-                    event = eventsInView.find(e => parseInt(e.id) === numericId);
-                }
-
-                // If not found in current view, try a wider date range first, then use our direct lookup API
-                if (!event) {
-                    try {
-                        // Try fetching events with a wider date range (1 year past to 1 year future)
-                        const wideStart = moment().subtract(1, 'year').startOf('year').toISOString();
-                        const wideEnd = moment().add(1, 'year').endOf('year').toISOString();
-                        // Use a wide date range to find older/future events
-
-                        const wideRangeEvents = await api.getEvents(wideStart, wideEnd);
-
-                        // Try all the matching methods
-                        event = wideRangeEvents.find(e => e.id === eventId);
-                        if (!event) event = wideRangeEvents.find(e => String(e.id) === String(eventId));
-                        if (!event && !isNaN(parseInt(eventId))) {
-                            const numericId = parseInt(eventId);
-                            event = wideRangeEvents.find(e => parseInt(e.id) === numericId);
-                        }
-
-                        if (!event) {
-                            // If still not found, use our direct lookup API
-                            event = await api.getEventById(eventId);
-                        }
-                    } catch (error) {
-                        // Show a user-friendly error message
-                        console.error('Error fetching event by ID:', error);
-                        showFloatingAlert('error', '{{__('Could not find calendar item. The calendar may be too large or the event may have been deleted.')}}');
-                        return false;
+                    // Then try with number conversion (if possible)
+                    if (!event && !isNaN(parseInt(eventId))) {
+                        const numericId = parseInt(eventId);
+                        event = eventsInView.find(e => parseInt(e.id) === numericId);
                     }
                 }
 
