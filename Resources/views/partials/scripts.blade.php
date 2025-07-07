@@ -373,7 +373,7 @@
             getEventById: async (eventId) => {
                 // Use the dedicated endpoint for better performance
                 const safeEventId = encodeURIComponent(eventId);
-                const url = '{{ route('ljpccalendarmodule.api.event.get', '') }}'.replace('/{eventId}', '/' + safeEventId);
+                const url = '/calendar/api/event/' + safeEventId;
 
                 try {
                     // Add timeout to prevent hanging on large calendars
