@@ -548,13 +548,19 @@
 
         const fetchCustomFields = async (calendarId) => {
             try {
-                const url = '{{ route('ljpccalendarmodule.api.calendar.get', '') }}'.replace('/{id}', '/' + calendarId);
+                const baseUrl = '{{ route('ljpccalendarmodule.api.calendar.get', '') }}';
+                // Remove any trailing placeholders and construct the proper URL
+                const url = baseUrl.replace(/\{.*?\}$/, '') + '/' + calendarId;
                 const response = await fetch(url);
-                const calendar = await response.json();
-                if (calendar.custom_fields === null) {
+                if (!response.ok) {
                     return [];
                 }
-                return calendar.custom_fields.fields || [];
+                const calendar = await response.json();
+                if (!calendar.custom_fields || calendar.custom_fields === null) {
+                    return [];
+                }
+                const fields = calendar.custom_fields.fields || [];
+                return fields;
             } catch (error) {
                 return [];
             }
@@ -756,7 +762,7 @@
                     dom.eventDetailModal.calendar.innerHTML = calendar.name;
                     dom.eventDetailModal.hiddenCalendar.value = calendar.id;
 
-                    if (event.raw.customFields.hasOwnProperty('author_name')) {
+                    if (event.raw.customFields && event.raw.customFields.hasOwnProperty('author_name')) {
                         dom.eventDetailModal.createdBy.innerHTML = event.raw.customFields.author_name;
                     } else {
                         jQuery('.event-details-created-by-form-group').hide();
@@ -778,7 +784,8 @@
                     try {
                         const customFields = await fetchCustomFields(calendar.id);
                         const customFieldsContainer = document.getElementById('event-details-custom-fields');
-                        renderCustomFields(customFields, customFieldsContainer, canEdit, event.raw.customFields);
+                        const customFieldValues = (event.raw && event.raw.customFields) ? event.raw.customFields : {};
+                        renderCustomFields(customFields, customFieldsContainer, canEdit, customFieldValues);
                     } catch (error) {
                         showFloatingAlert('error', '{{__('Failed to load custom fields')}}');
                     }
