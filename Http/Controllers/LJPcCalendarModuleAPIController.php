@@ -7,6 +7,7 @@ use App\Conversation;
 use App\Misc\Helper;
 use App\Thread;
 use App\User;
+use Carbon\Carbon;
 use DateInterval;
 use DateTimeImmutable;
 use DateTimeZone;
@@ -25,6 +26,14 @@ use Modules\LJPcCalendarModule\Jobs\UpdateExternalCalendarJob;
 use Modules\Teams\Providers\TeamsServiceProvider as Teams;
 
 class LJPcCalendarModuleAPIController extends Controller {
+		private function requireAuthUserId(): int {
+				$userId = auth()->id();
+				if ( ! $userId ) {
+						abort( 401, 'Unauthenticated' );
+				}
+				return (int) $userId;
+		}
+
 		/**
 		 * Get users for the settings
 		 *
@@ -115,12 +124,12 @@ class LJPcCalendarModuleAPIController extends Controller {
 				}
 
 				$permissions = [];
-				foreach ( $request->input( 'permissions' ) as $id => $permission ) {
+				foreach ( (array) $request->input( 'permissions', [] ) as $id => $permission ) {
 						$permissions[ $id ] = [
-								'showInDashboard' => $permission['showInDashboard'],
-								'showInCalendar'  => $permission['showInCalendar'],
-								'createItems'     => $permission['createItems'] ?? false,
-								'editItems'       => $permission['editItems'] ?? false,
+							'showInDashboard' => $permission['showInDashboard'] ?? false,
+							'showInCalendar'  => $permission['showInCalendar'] ?? false,
+							'createItems'     => $permission['createItems'] ?? false,
+							'editItems'       => $permission['editItems'] ?? false,
 						];
 				}
 				$calendar->permissions = $permissions;
@@ -138,14 +147,17 @@ class LJPcCalendarModuleAPIController extends Controller {
 		 * @return array The validated and sanitized custom fields
 		 */
 		private function validateCustomFields( array $customFields ): array {
+												if ( empty($customFields['fields']) || !is_array($customFields['fields']) ) {
+																return [ 'fields' => [] ];
+}
 				$validatedFields = [];
 
 				foreach ( $customFields['fields'] as $field ) {
 						$validatedField = [
-								'id'       => $field['id'],
-								'name'     => strip_tags( $field['name'] ),
+								'id'       => $field['id'] ?? null,
+								'name' => strip_tags($field['name'] ?? ''),
 								'type'     => in_array( $field['type'], [ 'text', 'number', 'dropdown', 'boolean', 'multiselect', 'date', 'email', 'source' ] ) ? $field['type'] : 'text',
-								'required' => (bool) $field['required'],
+								'required' => (bool) ($field['required'] ?? false),
 						];
 
 						if ( $validatedField['type'] === 'source' ) {
@@ -153,11 +165,11 @@ class LJPcCalendarModuleAPIController extends Controller {
 						}
 
 						if ( in_array( $field['type'], [ 'dropdown', 'multiselect' ] ) ) {
-								if ( is_array( $field['options'] ) ) {
-										$validatedField['options'] = array_map( 'trim', array_map( 'strip_tags', $field['options'] ) );
-								} else {
-										$validatedField['options'] = array_map( 'trim', array_map( 'strip_tags', explode( ',', $field['options'] ) ) );
-								}
+																$options = $field['options'] ?? [];
+																if (!is_array($options)) {
+																   $options = explode(',', $options);
+																}
+										    $validatedField['options'] = array_map('trim', array_map(fn($opt) => strip_tags((string)$opt), $options));				
 						}
 
 						$validatedFields[] = $validatedField;
@@ -199,8 +211,8 @@ class LJPcCalendarModuleAPIController extends Controller {
 				}
 
 				$permissions = [];
-				foreach ( $request->input( 'permissions' ) as $id => $permission ) {
-						$permissions[ $id ] = [
+				foreach ( (array) $request->input( 'permissions', [] ) as $id => $permission ) {
+							$permissions[ $id ] = [
 								'showInDashboard' => $permission['showInDashboard'],
 								'showInCalendar'  => $permission['showInCalendar'],
 								'createItems'     => $permission['createItems'] ?? false,
@@ -501,7 +513,15 @@ class LJPcCalendarModuleAPIController extends Controller {
 
 						$calendarItem->save();
 				} else if ( $calendar->type === 'caldav' ) {
-						$fullUrl      = $calendar->custom_fields['url'];
+						$fullUrl = $calendar->custom_fields['url'] ?? '';
+
+						if ( ! is_string( $fullUrl ) || $fullUrl === '' ) {
+							return response()->json( [
+								'status'  => 'error',
+								'message' => 'CalDAV calendar is not properly configured (missing URL).',
+							], 422 );
+						}
+
 						$baseUrl      = substr( $fullUrl, 0, strpos( $fullUrl, '/', 8 ) );
 						$remainingUrl = substr( $fullUrl, strpos( $fullUrl, '/', 8 ) );
 						$caldavClient = new CalDAV( $baseUrl, $calendar->custom_fields['username'], $calendar->custom_fields['password'] );
@@ -595,7 +615,15 @@ class LJPcCalendarModuleAPIController extends Controller {
 						}
 						$calendarItem->delete();
 				} else if ( $calendar->type === 'caldav' ) {
-						$fullUrl      = $calendar->custom_fields['url'];
+						$fullUrl = $calendar->custom_fields['url'] ?? '';
+
+						if ( ! is_string( $fullUrl ) || $fullUrl === '' ) {
+							return response()->json( [
+								'status'  => 'error',
+								'message' => 'CalDAV calendar is not properly configured (missing URL).',
+							], 422 );
+						}
+
 						$baseUrl      = substr( $fullUrl, 0, strpos( $fullUrl, '/', 8 ) );
 						$remainingUrl = substr( $fullUrl, strpos( $fullUrl, '/', 8 ) );
 						$caldavClient = new CalDAV( $baseUrl, $calendar->custom_fields['username'], $calendar->custom_fields['password'] );
@@ -663,10 +691,12 @@ class LJPcCalendarModuleAPIController extends Controller {
 						return response()->json( [ 'error' => 'Calendar not found' ], 404 );
 				}
 
+				$userId = $this->requireAuthUserId();
+
 				$customFieldsData      = $validatedData['customFields'] ?? [];
 				$customFields          = $calendar->custom_fields['fields'] ?? [];
 				$processedCustomFields = [
-						'author_id' => auth()->id(),
+						'author_id' => $userId,
 				];
 
 				foreach ( $customFields as $field ) {
@@ -690,10 +720,10 @@ class LJPcCalendarModuleAPIController extends Controller {
 $calendarItem = new CalendarItem();
 
 $calendarItem->calendar_id = $validatedData['calendarId'] ?? null;
-$calendarItem->author_id   = auth()->id() ?? 1; // default to current user or 1
+$calendarItem->author_id   = $userId; // default to current user or 1
 $calendarItem->title       = $validatedData['title'] ?? 'Untitled Event';
-$calendarItem->start       = $start ?? Carbon\Carbon::now();
-$calendarItem->end         = $end ?? Carbon\Carbon::now()->addHour();
+$calendarItem->start       = $start ?? Carbon::now();
+$calendarItem->end         = $end ?? Carbon::now()->addHour();
 $calendarItem->is_all_day  = $isAllDay ?? false;
 $calendarItem->is_private  = $validatedData['is_private'] ?? false;
 $calendarItem->state       = $validatedData['state'] ?? 'active';
@@ -704,7 +734,15 @@ $calendarItem->custom_fields = $processedCustomFields ?? [];
 
 $calendarItem->save();
 				} else if ( $calendar->type === 'caldav' ) {
-						$fullUrl      = $calendar->custom_fields['url'];
+						$fullUrl = $calendar->custom_fields['url'] ?? '';
+
+						if ( ! is_string( $fullUrl ) || $fullUrl === '' ) {
+							return response()->json( [
+								'status'  => 'error',
+								'message' => 'CalDAV calendar is not properly configured (missing URL).',
+							], 422 );
+						}
+
 						$baseUrl      = substr( $fullUrl, 0, strpos( $fullUrl, '/', 8 ) );
 						$remainingUrl = substr( $fullUrl, strpos( $fullUrl, '/', 8 ) );
 						$caldavClient = new CalDAV( $baseUrl, $calendar->custom_fields['username'], $calendar->custom_fields['password'] );
@@ -747,39 +785,39 @@ $calendarItem->save();
 		}
 
 		private function processTemplate(
-    string $template,
-    ?Conversation $conversation,
-    Calendar $calendar,
-    array $customFields = []
+	string $template,
+	?Conversation $conversation,
+	Calendar $calendar,
+	array $customFields = []
 ): string {
-    if (!$conversation) {
-        return $template;
-    }
+	if (!$conversation) {
+		return $template;
+	}
 
-    $result = str_replace('{{title}}', $conversation->subject, $template);
+	$result = str_replace('{{title}}', $conversation->subject, $template);
 
-    // Get the field name mapping from calendar's custom fields configuration
-    $fieldMapping = [];
+	// Get the field name mapping from calendar's custom fields configuration
+	$fieldMapping = [];
 
-    if (!empty($calendar->custom_fields['fields'])) {
-        foreach ($calendar->custom_fields['fields'] as $field) {
-            $fieldMapping['custom_field_' . $field['id']] = $field['name'];
-        }
-    }
+	if (!empty($calendar->custom_fields['fields'])) {
+		foreach ($calendar->custom_fields['fields'] as $field) {
+			$fieldMapping['custom_field_' . $field['id']] = $field['name'];
+		}
+	}
 
-    // Process custom fields using the mapping
-    foreach ($customFields as $fieldId => $value) {
-        if (is_array($value)) {
-            $value = implode(', ', $value);
-        }
+	// Process custom fields using the mapping
+	foreach ($customFields as $fieldId => $value) {
+		if (is_array($value)) {
+			$value = implode(', ', $value);
+		}
 
-        if (isset($fieldMapping[$fieldId])) {
-            $fieldName = $fieldMapping[$fieldId];
-            $result = str_replace('{{' . $fieldName . '}}', $value ?? '', $result);
-        }
-    }
+		if (isset($fieldMapping[$fieldId])) {
+			$fieldName = $fieldMapping[$fieldId];
+			$result = str_replace('{{' . $fieldName . '}}', $value ?? '', $result);
+		}
+	}
 
-    return $result;
+	return $result;
 }
 
 
@@ -812,6 +850,9 @@ $calendarItem->save();
 						return response()->json( [ 'error' => 'Calendar not found' ], 404 );
 				}
 
+				$userId = $this->requireAuthUserId();
+				$conversationObj = Conversation::find( $conversation );
+
 				$start = ( new DateTimeImmutable( $validatedData['start'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
 				$end   = ( new DateTimeImmutable( $validatedData['end'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
 				if ( $start->getTimestamp() === $end->getTimestamp() ) {
@@ -840,43 +881,51 @@ $calendarItem->save();
 				if ( $calendar->type === 'normal' ) {
 						$calendarItem = new CalendarItem();
 
-                                $calendarItem->calendar_id = $validatedData['calendarId'] ?? null;
-                                $calendarItem->author_id   = auth()->id() ?? 1;
-                                $calendarItem->title       = $this->processTemplate(
-                                $calendar->title_template,
-                                isset($conversation) && $conversation instanceof App\Conversation ? $conversation : null,
-                                $calendar,
-                                $processedCustomFields ?? []
-                                );
-                                $calendarItem->start      = $start ?? Carbon\Carbon::now();
-                                $calendarItem->end        = $end ?? Carbon\Carbon::now()->addHour();
-                                $calendarItem->is_all_day = $isAllDay ?? false;
-                                $calendarItem->is_private = false;
-                                $calendarItem->state      = 'active';
-                                $calendarItem->location   = $validatedData['location'] ?? '';
-                                $calendarItem->body       = $validatedData['body'] ?? '';
+								$calendarItem->calendar_id = $validatedData['calendarId'] ?? null;
+								$calendarItem->author_id   = $userId;
+								$calendarItem->title       = $this->processTemplate(
+								$calendar->title_template,
+								$conversationObj,
+								$calendar,
+								$processedCustomFields ?? []
+								);
+								$calendarItem->start      = $start ?? Carbon::now();
+								$calendarItem->end        = $end ?? Carbon::now()->addHour();
+								$calendarItem->is_all_day = $isAllDay ?? false;
+								$calendarItem->is_private = false;
+								$calendarItem->state      = 'active';
+								$calendarItem->location   = $validatedData['location'] ?? '';
+								$calendarItem->body       = $validatedData['body'] ?? '';
 
-                                // Merge all custom fields safely
-                                $customFields = $calendarItem->custom_fields;
-                                if (!is_array($customFields)) {
-                                $customFields = [];
-                                }
+								// Merge all custom fields safely
+								$customFields = $calendarItem->custom_fields;
+								if (!is_array($customFields)) {
+								$customFields = [];
+								}
 
-                                $mergedCustomFields = array_merge(
-                                $customFields,
-                                [
-                                'conversation_id' => isset($conversation) ? ($conversation->id ?? $conversation) : null,
-                                'author_id'       => auth()->id() ?? 1,
-                                ],
-                                $processedCustomFields ?? []
-                                );
+								$mergedCustomFields = array_merge(
+								$customFields,
+								[
+								'conversation_id' => isset($conversation) ? ($conversation->id ?? $conversation) : null,
+								'author_id'       => $userId,
+								],
+								$processedCustomFields ?? []
+								);
 
-                                $calendarItem->custom_fields = $mergedCustomFields;
+								$calendarItem->custom_fields = $mergedCustomFields;
 
-                                $calendarItem->save();
+								$calendarItem->save();
 						$uid = $calendarItem->id;
 				} else if ( $calendar->type === 'caldav' ) {
-						$fullUrl      = $calendar->custom_fields['url'];
+						$fullUrl = $calendar->custom_fields['url'] ?? '';
+
+						if ( ! is_string( $fullUrl ) || $fullUrl === '' ) {
+							return response()->json( [
+								'status'  => 'error',
+								'message' => 'CalDAV calendar is not properly configured (missing URL).',
+							], 422 );
+						}
+
 						$baseUrl      = substr( $fullUrl, 0, strpos( $fullUrl, '/', 8 ) );
 						$remainingUrl = substr( $fullUrl, strpos( $fullUrl, '/', 8 ) );
 						$caldavClient = new CalDAV( $baseUrl, $calendar->custom_fields['username'], $calendar->custom_fields['password'] );
@@ -890,7 +939,7 @@ $calendarItem->save();
 						// Merge all custom fields
 						$mergedCustomFields = array_merge( [
 								'conversation_id' => $conversation,
-								'author_id'       => auth()->user()->id,
+								'author_id'       => $userId,
 						], $processedCustomFields );
 
 						$validatedData['body']['custom_fields'] = $mergedCustomFields;
@@ -925,7 +974,7 @@ $calendarItem->save();
 						$conversation = Conversation::find( $conversation );
 						if ( $conversation !== null ) {
 								$action_type        = CalendarItem::ACTION_TYPE_ADD_TO_CALENDAR;
-								$created_by_user_id = auth()->user()->id;
+								$created_by_user_id = $userId;
 								
 								// Store the event UID for better permalink support
 								$meta = [
@@ -1105,6 +1154,8 @@ $calendarItem->save();
 						return response()->json( [ 'error' => 'Calendar not found' ], 404 );
 				}
 
+				$userId = $this->requireAuthUserId();
+
 				$conversation = Conversation::find( $validatedData['conversationId'] );
 				if ( ! $conversation ) {
 						return response()->json( [ 'error' => 'Conversation not found' ], 404 );
@@ -1144,27 +1195,27 @@ $calendarItem->save();
 						if ( $calendar->type === 'normal' ) {
 								$calendarItem = new CalendarItem();
 
-                                                $calendarItem->calendar_id = $validatedData['calendarId'] ?? null;
-                                                $calendarItem->author_id   = auth()->id() ?? 1;
-                                                $calendarItem->title       = $event->summary ?? 'Untitled Event';
-                                                $calendarItem->start       = $start ?? Carbon\Carbon::now();
-                                                $calendarItem->end         = $end ?? Carbon\Carbon::now()->addHour();
-                                                $calendarItem->is_all_day  = $isAllDay ?? false;
-                                                $calendarItem->location    = $event->location ?? '';
-                                                $calendarItem->body        = $event->description ?? '';
+												$calendarItem->calendar_id = $validatedData['calendarId'] ?? null;
+												$calendarItem->author_id   = $userId;
+												$calendarItem->title       = $event->summary ?? 'Untitled Event';
+												$calendarItem->start       = $start ?? Carbon::now();
+												$calendarItem->end         = $end ?? Carbon::now()->addHour();
+												$calendarItem->is_all_day  = $isAllDay ?? false;
+												$calendarItem->location    = $event->location ?? '';
+												$calendarItem->body        = $event->description ?? '';
 
-                                                 // Merge custom fields safely
-                                                $customFields = $calendarItem->custom_fields;
-                                                if (!is_array($customFields)) {
-                                                $customFields = [];
-                                                }
+												 // Merge custom fields safely
+												$customFields = $calendarItem->custom_fields;
+												if (!is_array($customFields)) {
+												$customFields = [];
+												}
 
-                                                $customFields['conversation_id'] = isset($conversation) ? ($conversation->id ?? $conversation) : null;
-                                                $customFields['author_id']       = auth()->id() ?? 1;
+												$customFields['conversation_id'] = isset($conversation) ? ($conversation->id ?? $conversation) : null;
+												$customFields['author_id']       = $userId;
 
-                                                $calendarItem->custom_fields = $customFields;
+												$calendarItem->custom_fields = $customFields;
 
-                                                $calendarItem->save();
+												$calendarItem->save();
 								$uid = $calendarItem->id;
 						} else if ( $calendar->type === 'caldav' ) {
 								$fullUrl      = $calendar->custom_fields['url'];
@@ -1178,7 +1229,7 @@ $calendarItem->save();
 										'body'          => empty( $event->description ) ? '-' : $event->description,
 										'custom_fields' => [
 												'conversation_id' => $conversation->id,
-												'author_id'       => auth()->user()->id,
+												'author_id'       => $userId,
 										],
 								];
 
@@ -1193,7 +1244,7 @@ $calendarItem->save();
 
 						if ( $uid !== null ) {
 								$action_type        = CalendarItem::ACTION_TYPE_ADD_TO_CALENDAR;
-								$created_by_user_id = auth()->user()->id;
+								$created_by_user_id = $userId;
 								Thread::create( $conversation, Thread::TYPE_LINEITEM, '', [
 										'user_id'            => $conversation->user_id,
 										'created_by_user_id' => $created_by_user_id,
