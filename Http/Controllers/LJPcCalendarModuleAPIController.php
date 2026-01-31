@@ -720,7 +720,7 @@ class LJPcCalendarModuleAPIController extends Controller {
 $calendarItem = new CalendarItem();
 
 $calendarItem->calendar_id = $validatedData['calendarId'] ?? null;
-$calendarItem->author_id   = $userId; // default to current user or 1
+$calendarItem->author_id   = $userId;
 $calendarItem->title       = $validatedData['title'] ?? 'Untitled Event';
 $calendarItem->start       = $start ?? Carbon::now();
 $calendarItem->end         = $end ?? Carbon::now()->addHour();
@@ -851,7 +851,9 @@ $calendarItem->save();
 				}
 
 				$userId = $this->requireAuthUserId();
-				$conversationObj = Conversation::find( $conversation );
+				
+        $conversationId  = is_numeric($conversation) ? (int) $conversation : null;
+$conversationObj = Conversation::find($conversationId);
 
 				$start = ( new DateTimeImmutable( $validatedData['start'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
 				$end   = ( new DateTimeImmutable( $validatedData['end'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
@@ -906,7 +908,7 @@ $calendarItem->save();
 								$mergedCustomFields = array_merge(
 								$customFields,
 								[
-								'conversation_id' => isset($conversation) ? ($conversation->id ?? $conversation) : null,
+								'conversation_id' => $conversationId,
 								'author_id'       => $userId,
 								],
 								$processedCustomFields ?? []
