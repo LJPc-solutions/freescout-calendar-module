@@ -852,7 +852,7 @@ $calendarItem->save();
 
 				$userId = $this->requireAuthUserId();
 				
-$conversationObj = Conversation::find( $conversation );
+				$conversationObj = Conversation::find( $conversation );
 
 				$start = ( new DateTimeImmutable( $validatedData['start'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
 				$end   = ( new DateTimeImmutable( $validatedData['end'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
@@ -1211,7 +1211,7 @@ $conversationObj = Conversation::find( $conversation );
 												$customFields = [];
 												}
 
-												$customFields['conversation_id'] = isset($conversation) ? ($conversation) : null;
+												$customFields['conversation_id'] = $conversation ? $conversation->id : null;
 												$customFields['author_id']       = $userId;
 
 												$calendarItem->custom_fields = $customFields;
