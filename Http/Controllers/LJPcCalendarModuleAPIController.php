@@ -852,8 +852,7 @@ $calendarItem->save();
 
 				$userId = $this->requireAuthUserId();
 				
-        $conversationId  = is_numeric($conversation) ? (int) $conversation : null;
-$conversationObj = Conversation::find($conversationId);
+$conversationObj = Conversation::find( $conversation );
 
 				$start = ( new DateTimeImmutable( $validatedData['start'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
 				$end   = ( new DateTimeImmutable( $validatedData['end'] ) )->setTimezone( new DateTimeZone( 'UTC' ) );
@@ -908,7 +907,7 @@ $conversationObj = Conversation::find($conversationId);
 								$mergedCustomFields = array_merge(
 								$customFields,
 								[
-								'conversation_id' => $conversationId,
+								'conversation_id' => $conversation,
 								'author_id'       => $userId,
 								],
 								$processedCustomFields ?? []
@@ -1212,7 +1211,7 @@ $conversationObj = Conversation::find($conversationId);
 												$customFields = [];
 												}
 
-												$customFields['conversation_id'] = isset($conversation) ? ($conversation->id ?? $conversation) : null;
+												$customFields['conversation_id'] = isset($conversation) ? ($conversation) : null;
 												$customFields['author_id']       = $userId;
 
 												$calendarItem->custom_fields = $customFields;
