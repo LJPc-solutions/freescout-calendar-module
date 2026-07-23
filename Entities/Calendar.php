@@ -131,7 +131,8 @@ class Calendar extends Model implements JsonSerializable {
 								$remainingUrl = substr( $fullUrl, strpos( $fullUrl, '/', 8 ) );
 
 								$caldavClient = new CalDAV( $baseUrl, $this->custom_fields['username'], $this->custom_fields['password'] );
-								$data         = implode( '', $caldavClient->getEvents( $remainingUrl ) );
+								// Keep event payloads separated to preserve valid ICS line boundaries.
+								$data         = implode( "\r\n", $caldavClient->getEvents( $remainingUrl ) );
 						} catch ( Exception $e ) {
 								Log::error( $e->getMessage(), [ 'exception' => $e ] );
 
