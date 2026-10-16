@@ -2417,13 +2417,15 @@ class ICal
 
         foreach ($tza as $zone) {
             foreach ($zone as $item) {
-                $valid[$item['timezone_id']] = true;
+                if (!empty($item['timezone_id'])) {
+                    $valid[$item['timezone_id']] = true;
+                }
             }
         }
 
         unset($valid['']);
 
-        if (isset($valid[$timeZone]) || in_array($timeZone, timezone_identifiers_list(\DateTimeZone::ALL_WITH_BC))) {
+        if (!empty($timeZone) && (isset($valid[$timeZone]) || in_array($timeZone, timezone_identifiers_list(\DateTimeZone::ALL_WITH_BC)))) {
             $this->validIanaTimeZones[] = $timeZone;
 
             return true;
