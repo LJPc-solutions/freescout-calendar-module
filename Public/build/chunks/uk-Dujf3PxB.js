@@ -1,0 +1,2 @@
+var e={code:`uk`,week:{dow:1,doy:7},prevText:`Попередній`,nextText:`далі`,todayText:`Сьогодні`,yearText:`рік`,monthText:`Місяць`,weekTextLong:`Тиждень`,weekTextShort:`Тиж`,dayText:`День`,listText:`Порядок денний`,allDayText:`Увесь
+день`,moreLinkText(e){return`+ще `+e+`...`},noEventsText:`Немає подій для відображення`};export{e as default};

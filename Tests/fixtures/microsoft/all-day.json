@@ -1,0 +1,41 @@
+{
+  "@odata.etag": "W/\"DwAAABYAAABExampleAllDayKey01\"",
+  "id": "AAMkADExampleAllDay0001AAA=",
+  "lastModifiedDateTime": "2026-10-02T07:15:00.0000000Z",
+  "changeKey": "DwAAABYAAABExampleAllDayKey01",
+  "originalStartTimeZone": "W. Europe Standard Time",
+  "originalEndTimeZone": "W. Europe Standard Time",
+  "iCalUId": "040000008200E00074C5B7101A82E00800000000000000000000000000000000000000000000000000000000000002",
+  "subject": "Trade fair",
+  "body": {
+    "contentType": "text",
+    "content": ""
+  },
+  "start": {
+    "dateTime": "2026-10-19T00:00:00.0000000",
+    "timeZone": "UTC"
+  },
+  "end": {
+    "dateTime": "2026-10-22T00:00:00.0000000",
+    "timeZone": "UTC"
+  },
+  "location": {
+    "displayName": "",
+    "locationType": "default"
+  },
+  "isAllDay": true,
+  "isCancelled": false,
+  "isOrganizer": true,
+  "sensitivity": "normal",
+  "showAs": "free",
+  "type": "singleInstance",
+  "seriesMasterId": null,
+  "recurrence": null,
+  "organizer": {
+    "emailAddress": {
+      "name": "Support Agent",
+      "address": "agent@example.com"
+    }
+  },
+  "attendees": []
+}

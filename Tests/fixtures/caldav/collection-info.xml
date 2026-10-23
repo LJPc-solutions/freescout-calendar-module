@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<d:multistatus xmlns:d="DAV:" xmlns:cs="http://calendarserver.org/ns/">
+  <d:response>
+    <d:href>/dav/calendars/calendar-user/work/</d:href>
+    <d:propstat>
+      <d:prop>
+        <cs:getctag>"ctag-7"</cs:getctag>
+        <d:sync-token>http://sabre.io/ns/sync/7</d:sync-token>
+        <d:supported-report-set>
+          <d:supported-report><d:report><d:expand-property/></d:report></d:supported-report>
+          <d:supported-report><d:report><d:sync-collection/></d:report></d:supported-report>
+        </d:supported-report-set>
+      </d:prop>
+      <d:status>HTTP/1.1 200 OK</d:status>
+    </d:propstat>
+  </d:response>
+</d:multistatus>

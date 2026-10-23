@@ -1,0 +1,59 @@
+{
+  "@odata.etag": "W/\"DwAAABYAAABExampleMonthlyKey01\"",
+  "id": "AAMkADExampleMonthly0001AAA=",
+  "lastModifiedDateTime": "2026-10-04T15:00:00.0000000Z",
+  "changeKey": "DwAAABYAAABExampleMonthlyKey01",
+  "originalStartTimeZone": "Eastern Standard Time",
+  "originalEndTimeZone": "Eastern Standard Time",
+  "iCalUId": "040000008200E00074C5B7101A82E00800000000000000000000000000000000000000000000000000000000000005",
+  "subject": "Customer review",
+  "body": {
+    "contentType": "text",
+    "content": "Second Tuesday of every month."
+  },
+  "start": {
+    "dateTime": "2026-10-13T13:00:00.0000000",
+    "timeZone": "UTC"
+  },
+  "end": {
+    "dateTime": "2026-10-13T14:30:00.0000000",
+    "timeZone": "UTC"
+  },
+  "location": {
+    "displayName": "Online"
+  },
+  "isAllDay": false,
+  "isCancelled": false,
+  "isOrganizer": true,
+  "sensitivity": "normal",
+  "showAs": "busy",
+  "type": "seriesMaster",
+  "seriesMasterId": null,
+  "recurrence": {
+    "pattern": {
+      "type": "relativeMonthly",
+      "interval": 1,
+      "month": 0,
+      "dayOfMonth": 0,
+      "daysOfWeek": [
+        "tuesday"
+      ],
+      "firstDayOfWeek": "sunday",
+      "index": "second"
+    },
+    "range": {
+      "type": "endDate",
+      "startDate": "2026-10-13",
+      "endDate": "2027-03-09",
+      "recurrenceTimeZone": "Eastern Standard Time",
+      "numberOfOccurrences": 0
+    }
+  },
+  "organizer": {
+    "emailAddress": {
+      "name": "Support Agent",
+      "address": "agent@example.com"
+    }
+  },
+  "attendees": []
+}

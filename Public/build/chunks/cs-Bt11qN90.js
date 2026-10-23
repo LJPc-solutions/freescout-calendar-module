@@ -1,0 +1,1 @@
+var e={code:`cs`,week:{dow:1,doy:4},prevText:`Dříve`,nextText:`Později`,todayText:`Nyní`,yearText:`Rok`,monthText:`Měsíc`,weekTextLong:`Týden`,weekTextShort:`Týd`,dayText:`Den`,listText:`Agenda`,allDayText:`Celý den`,moreLinkText(e){return`+další: `+e},noEventsText:`Žádné akce k zobrazení`};export{e as default};

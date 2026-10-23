@@ -1,3 +1,0 @@
-export const DEFAULT_RESIZER_LENGTH = 3;
-
-export const DEFAULT_DUPLICATE_EVENT_CID = -1;

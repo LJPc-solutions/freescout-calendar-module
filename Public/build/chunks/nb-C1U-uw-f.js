@@ -1,0 +1,2 @@
+var e={code:`nb`,week:{dow:1,doy:4},prevText:`Forrige`,nextText:`Neste`,todayText:`I dag`,yearText:`År`,monthText:`Måned`,weekTextLong:`Uke`,dayText:`Dag`,listText:`Agenda`,allDayText:`Hele
+dagen`,moreLinkText:`til`,noEventsText:`Ingen hendelser å vise`,prevHint:`Forrige $0`,nextHint:`Neste $0`,todayHint:`Nåværende $0`,viewHint:`$0 visning`,navLinkHint:`Gå til $0`,moreLinkHint(e){return`Vis ${e} flere hendelse${e===1?``:`r`}`}};export{e as default};

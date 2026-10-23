@@ -1,0 +1,2 @@
+var e={code:`it`,week:{dow:1,doy:4},prevText:`Prec`,nextText:`Succ`,todayText:`Oggi`,yearText:`Anno`,monthText:`Mese`,weekTextLong:`Settimana`,weekTextShort:`Sm`,dayText:`Giorno`,listText:`Agenda`,allDayText:`Tutto
+il giorno`,moreLinkText(e){return`+altri `+e},noEventsText:`Non ci sono eventi da visualizzare`};export{e as default};

@@ -1,8 +1,0 @@
-mergekeyrefdef:
-    a: foo
-    <<: &quux
-        b: bar
-        c: baz
-mergekeyderef:
-    d: quux
-    <<: *quux

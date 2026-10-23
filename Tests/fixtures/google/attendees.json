@@ -1,0 +1,62 @@
+{
+  "kind": "calendar#event",
+  "etag": "\"3561234567896000\"",
+  "id": "3a5c7e9g1i3k5m7o9q1s3u5v7b",
+  "status": "tentative",
+  "htmlLink": "https://www.google.com/calendar/event?eid=M2E1YzdlOWcxaTNrNW03bzlxMXMzdTV2N2I",
+  "created": "2026-09-25T09:00:00.000Z",
+  "updated": "2026-10-04T16:45:30.000Z",
+  "summary": "Quarterly review",
+  "description": "<b>Agenda</b><br>1. Numbers<br>2. Plans<br><br>Notes: <a href=\"https://docs.example.com/review\">review document</a> &amp; slides",
+  "creator": {
+    "email": "manager@example.com"
+  },
+  "organizer": {
+    "email": "manager@example.com",
+    "displayName": "Morgan Manager"
+  },
+  "start": {
+    "dateTime": "2026-10-16T13:00:00Z",
+    "timeZone": "UTC"
+  },
+  "end": {
+    "dateTime": "2026-10-16T14:00:00Z",
+    "timeZone": "UTC"
+  },
+  "iCalUID": "3a5c7e9g1i3k5m7o9q1s3u5v7b@google.com",
+  "sequence": 3,
+  "attendees": [
+    {
+      "email": "manager@example.com",
+      "displayName": "Morgan Manager",
+      "organizer": true,
+      "responseStatus": "accepted"
+    },
+    {
+      "email": "agent@example.com",
+      "self": true,
+      "responseStatus": "needsAction"
+    },
+    {
+      "email": "colleague@example.com",
+      "displayName": "Casey Colleague",
+      "responseStatus": "declined"
+    },
+    {
+      "email": "advisor@example.com",
+      "optional": true,
+      "responseStatus": "tentative"
+    },
+    {
+      "email": "c_1883abcdef0123456789@resource.calendar.google.com",
+      "displayName": "Meeting room 4",
+      "resource": true,
+      "responseStatus": "accepted"
+    }
+  ],
+  "guestsCanModify": false,
+  "reminders": {
+    "useDefault": true
+  },
+  "eventType": "default"
+}

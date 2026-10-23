@@ -1,0 +1,18 @@
+# Radicale for FreeScout's CalDAV integration tests (local development only).
+[server]
+hosts = 0.0.0.0:5232
+
+[auth]
+type = htpasswd
+htpasswd_filename = /config/users
+htpasswd_encryption = plain
+
+[rights]
+type = from_file
+file = /config/rights
+
+[storage]
+filesystem_folder = /data/collections
+
+[logging]
+level = warning

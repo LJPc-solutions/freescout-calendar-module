@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<d:multistatus xmlns:d="DAV:">
+  <d:response>
+    <d:href>/dav/calendars/calendar-user/work/standup.ics</d:href>
+    <d:propstat>
+      <d:prop>
+        <d:getetag>"standup-v2"</d:getetag>
+        <d:getcontenttype>text/calendar; charset=utf-8; component=vevent</d:getcontenttype>
+        <d:resourcetype/>
+      </d:prop>
+      <d:status>HTTP/1.1 200 OK</d:status>
+    </d:propstat>
+  </d:response>
+  <d:response>
+    <d:href>/dav/calendars/calendar-user/work/visit%40example.com.ics</d:href>
+    <d:propstat>
+      <d:prop>
+        <d:getetag>"visit-v1"</d:getetag>
+        <d:resourcetype/>
+      </d:prop>
+      <d:status>HTTP/1.1 200 OK</d:status>
+    </d:propstat>
+  </d:response>
+  <d:response>
+    <d:href>/dav/calendars/calendar-user/work/todo.ics</d:href>
+    <d:propstat>
+      <d:prop>
+        <d:getetag>"todo-v1"</d:getetag>
+        <d:getcontenttype>text/calendar;charset=utf-8;component=VTODO</d:getcontenttype>
+      </d:prop>
+      <d:status>HTTP/1.1 200 OK</d:status>
+    </d:propstat>
+  </d:response>
+  <d:response>
+    <d:href>/dav/calendars/calendar-user/work/cancelled.ics</d:href>
+    <d:status>HTTP/1.1 404 Not Found</d:status>
+  </d:response>
+  <d:sync-token>http://sabre.io/ns/sync/8</d:sync-token>
+</d:multistatus>

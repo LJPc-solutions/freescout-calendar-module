@@ -1,21 +1,19 @@
 <?php
 
 return [
-	'name'          => 'Calendar',
-	'calendar_list' => env( 'CALENDAR_LIST', '' ),
-	
-	// Performance optimization feature flags
-	'performance' => [
-		// Enable optimized event lookup using database index
-		'enable_event_index' => env('CALENDAR_ENABLE_EVENT_INDEX', false),
-		
-		// Enable CalDAV REPORT queries for single event fetching
-		'enable_caldav_reports' => env('CALENDAR_ENABLE_CALDAV_REPORTS', false),
-		
-		// Force legacy mode for all calendars (emergency override)
-		'force_legacy_mode' => env('CALENDAR_FORCE_LEGACY_MODE', false),
-		
-		// Enable performance metrics tracking
-		'enable_metrics' => env('CALENDAR_ENABLE_METRICS', false),
-	],
+    'name' => 'Calendar',
+
+    // OAuth endpoints and scopes of the calendar providers. The endpoints can point at a relay through .env.
+    'oauth' => [
+        'google'    => [
+            'authorize_url' => env('CALENDAR_GOOGLE_AUTHORIZE_URL', 'https://accounts.google.com/o/oauth2/v2/auth'),
+            'token_url'     => env('CALENDAR_GOOGLE_TOKEN_URL', 'https://oauth2.googleapis.com/token'),
+            'scopes'        => 'https://www.googleapis.com/auth/calendar.calendarlist.readonly https://www.googleapis.com/auth/calendar.events',
+        ],
+        'microsoft' => [
+            // The authorize and token URLs are {authority}/{tenant}/oauth2/v2.0/authorize and .../token.
+            'authority' => env('CALENDAR_MICROSOFT_AUTHORITY', 'https://login.microsoftonline.com'),
+            'scopes'    => 'offline_access User.Read Calendars.ReadWrite Calendars.ReadWrite.Shared',
+        ],
+    ],
 ];

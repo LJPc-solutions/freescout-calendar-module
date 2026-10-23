@@ -1,0 +1,34 @@
+{
+  "kind": "calendar#event",
+  "etag": "\"3561234567895000\"",
+  "id": "9p1r3t5v7a0c2e4g6i8k0m2o4q",
+  "status": "confirmed",
+  "htmlLink": "https://www.google.com/calendar/event?eid=OXAxcjN0NXY3YTBjMmU0ZzZpOGswbTJvNHE",
+  "created": "2026-09-20T10:00:00.000Z",
+  "updated": "2026-09-20T10:00:00.000Z",
+  "summary": "Doctor's appointment",
+  "description": "Bring the insurance card.",
+  "creator": {
+    "email": "agent@example.com",
+    "self": true
+  },
+  "organizer": {
+    "email": "agent@example.com",
+    "self": true
+  },
+  "start": {
+    "dateTime": "2026-10-15T14:00:00+02:00",
+    "timeZone": "Europe/Amsterdam"
+  },
+  "end": {
+    "dateTime": "2026-10-15T15:00:00+02:00",
+    "timeZone": "Europe/Amsterdam"
+  },
+  "visibility": "private",
+  "iCalUID": "9p1r3t5v7a0c2e4g6i8k0m2o4q@google.com",
+  "sequence": 0,
+  "reminders": {
+    "useDefault": true
+  },
+  "eventType": "default"
+}

@@ -1,0 +1,30 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('agent%40example.com')/calendars(id,name,hexColor,canEdit,isDefaultCalendar)",
+  "value": [
+    {
+      "@odata.etag": "W/\"DwAAABYAAABExampleCalendarKey1\"",
+      "id": "AAMkADExampleCalendar01AAA=",
+      "name": "Calendar",
+      "hexColor": "",
+      "canEdit": true,
+      "isDefaultCalendar": true
+    },
+    {
+      "@odata.etag": "W/\"DwAAABYAAABExampleCalendarKey2\"",
+      "id": "AAMkADExampleCalendar02AAA=",
+      "name": "Support rota",
+      "hexColor": "#9FE1E7",
+      "canEdit": true,
+      "isDefaultCalendar": false
+    },
+    {
+      "@odata.etag": "W/\"DwAAABYAAABExampleCalendarKey3\"",
+      "id": "AAMkADExampleCalendar03AAA=",
+      "name": "Colleague's calendar",
+      "hexColor": "blue",
+      "canEdit": false,
+      "isDefaultCalendar": false
+    }
+  ],
+  "@odata.nextLink": "https://graph.microsoft.com/v1.0/me/calendars?%24select=id%2Cname%2ChexColor%2CcanEdit%2CisDefaultCalendar&%24top=100&%24skip=3"
+}

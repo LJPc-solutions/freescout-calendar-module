@@ -1,0 +1,2 @@
+var e={code:`ca`,week:{dow:1,doy:4},prevText:`Anterior`,nextText:`Següent`,todayText:`Avui`,yearText:`Any`,monthText:`Mes`,weekTextLong:`Setmana`,weekTextShort:`Set`,dayText:`Dia`,listText:`Agenda`,allDayText:`Tot
+el dia`,moreLinkText:`més`,noEventsText:`No hi ha esdeveniments per mostrar`};export{e as default};

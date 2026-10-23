@@ -1,0 +1,23 @@
+# Radicale rights for FreeScout's tests (local development only). The first section that matches decides.
+
+# Like owner_only: every user reads and writes their own collections.
+[root]
+user: .+
+collection:
+permissions: R
+
+[principal]
+user: .+
+collection: {user}
+permissions: RW
+
+[calendars]
+user: .+
+collection: {user}/[^/]+
+permissions: rw
+
+# The e2e suite subscribes to this collection as an ICS feed, which has no login: anyone may read it.
+[e2e-feed]
+user: .*
+collection: calendar-test/e2e-feed
+permissions: r

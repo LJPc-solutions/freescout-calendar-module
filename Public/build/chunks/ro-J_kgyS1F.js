@@ -1,0 +1,2 @@
+var e={code:`ro`,week:{dow:1,doy:7},prevText:`precedentă`,nextText:`următoare`,todayText:`Azi`,yearText:`An`,monthText:`Lună`,weekTextLong:`Săptămână`,weekTextShort:`Săpt`,dayText:`Zi`,listText:`Agendă`,allDayText:`Toată
+ziua`,moreLinkText(e){return`+alte `+e},noEventsText:`Nu există evenimente de afișat`};export{e as default};

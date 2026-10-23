@@ -1,0 +1,31 @@
+{
+  "kind": "calendar#event",
+  "etag": "\"3561234567891000\"",
+  "id": "0a2b4c6d8e0f1g3h5i7j9k1l3m",
+  "status": "confirmed",
+  "htmlLink": "https://www.google.com/calendar/event?eid=MGEyYjRjNmQ4ZTBmMWczaDVpN2o5azFsM20",
+  "created": "2026-09-28T14:00:00.000Z",
+  "updated": "2026-09-28T14:05:10.000Z",
+  "summary": "Trade fair",
+  "creator": {
+    "email": "agent@example.com",
+    "self": true
+  },
+  "organizer": {
+    "email": "agent@example.com",
+    "self": true
+  },
+  "start": {
+    "date": "2026-10-19"
+  },
+  "end": {
+    "date": "2026-10-22"
+  },
+  "transparency": "transparent",
+  "iCalUID": "0a2b4c6d8e0f1g3h5i7j9k1l3m@google.com",
+  "sequence": 0,
+  "reminders": {
+    "useDefault": false
+  },
+  "eventType": "default"
+}

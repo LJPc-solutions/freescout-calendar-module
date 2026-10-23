@@ -1,0 +1,11 @@
+{
+  "kind": "calendar#event",
+  "etag": "\"3561234567894000\"",
+  "id": "7r3c9u1v5n2k8m4p6q0s2t4u6v_20261012T080000Z",
+  "status": "cancelled",
+  "recurringEventId": "7r3c9u1v5n2k8m4p6q0s2t4u6v",
+  "originalStartTime": {
+    "dateTime": "2026-10-12T10:00:00+02:00",
+    "timeZone": "Europe/Amsterdam"
+  }
+}

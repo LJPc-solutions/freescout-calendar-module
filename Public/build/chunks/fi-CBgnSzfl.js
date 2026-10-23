@@ -1,0 +1,2 @@
+var e={code:`fi`,week:{dow:1,doy:4},prevText:`Edellinen`,nextText:`Seuraava`,todayText:`Tänään`,yearText:`Vuosi`,monthText:`Kuukausi`,weekTextLong:`Viikko`,weekTextShort:`Vk`,dayText:`Päivä`,listText:`Tapahtumat`,allDayText:`Koko
+päivä`,moreLinkText:`lisää`,noEventsText:`Ei näytettäviä tapahtumia`};export{e as default};

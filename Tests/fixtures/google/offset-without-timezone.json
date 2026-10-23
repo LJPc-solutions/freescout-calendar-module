@@ -1,0 +1,30 @@
+{
+  "kind": "calendar#event",
+  "etag": "\"3561234567897000\"",
+  "id": "1b3d5f7h9j1l3n5p7r9t1v3a5c",
+  "status": "confirmed",
+  "htmlLink": "https://www.google.com/calendar/event?eid=MWIzZDVmN2g5ajFsM241cDdyOXQxdjNhNWM",
+  "created": "2026-10-01T06:00:00.000Z",
+  "updated": "2026-10-01T06:00:00.000Z",
+  "summary": "Call with the Pune office",
+  "creator": {
+    "email": "agent@example.com",
+    "self": true
+  },
+  "organizer": {
+    "email": "agent@example.com",
+    "self": true
+  },
+  "start": {
+    "dateTime": "2026-10-14T16:00:00+05:30"
+  },
+  "end": {
+    "dateTime": "2026-10-14T17:00:00+05:30"
+  },
+  "iCalUID": "1b3d5f7h9j1l3n5p7r9t1v3a5c@google.com",
+  "sequence": 0,
+  "reminders": {
+    "useDefault": true
+  },
+  "eventType": "default"
+}

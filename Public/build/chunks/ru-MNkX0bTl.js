@@ -1,0 +1,2 @@
+var e={code:`ru`,week:{dow:1,doy:4},prevText:`Пред`,nextText:`След`,todayText:`Сегодня`,yearText:`Год`,monthText:`Месяц`,weekTextLong:`Неделя`,weekTextShort:`Нед`,dayText:`День`,listText:`Повестка дня`,allDayText:`Весь
+день`,moreLinkText(e){return`+ ещё `+e},noEventsText:`Нет событий для отображения`};export{e as default};

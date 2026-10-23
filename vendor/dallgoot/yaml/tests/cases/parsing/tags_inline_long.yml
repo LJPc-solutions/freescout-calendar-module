@@ -1,4 +1,0 @@
-foo: !inline bar
-quz: !long >
-  this is a long
-  text

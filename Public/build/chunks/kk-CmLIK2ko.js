@@ -1,0 +1,2 @@
+var e={code:`kk`,week:{dow:1,doy:7},prevText:`Алдыңғы`,nextText:`Келесі`,todayText:`Бүгін`,yearText:`Жыл`,monthText:`Ай`,weekTextLong:`Апта`,dayText:`Күн`,listText:`Күн тәртібі`,allDayText:`Күні
+бойы`,moreLinkText(e){return`+ тағы `+e},noEventsText:`Көрсету үшін оқиғалар жоқ`};export{e as default};

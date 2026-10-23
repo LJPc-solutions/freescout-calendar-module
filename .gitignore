@@ -1,0 +1,10 @@
+/vendor/
+/*.zip
+/version.txt
+/dist/
+.phpunit.result.cache
+/Resources/frontend/node_modules/
+/Resources/frontend/e2e/.seed.json
+/Resources/frontend/e2e/.seed-used
+/Resources/frontend/test-results/
+/Resources/frontend/playwright-report/

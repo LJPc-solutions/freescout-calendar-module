@@ -3,9 +3,8 @@
 use App\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Modules\LJPcCalendarModule\Entities\Calendar;
-use Modules\LJPcCalendarModule\Entities\CalendarItem;
 use Modules\Teams\Providers\TeamsServiceProvider as Teams;
 
 class UpdateCalendarsTable extends Migration {
@@ -38,18 +37,18 @@ class UpdateCalendarsTable extends Migration {
         $permissions = $this->buildPermissions();
 
         //migrate data
-        $calendars = Calendar::all();
-        foreach ( $calendars as $i => $calendar ) {
-            if ( $calendar->url ) {
-                CalendarItem::where( 'calendar_id', $calendar->id )->forceDelete();
-
-                $calendar->type          = 'ics';
-                $calendar->custom_fields = [ 'url' => $calendar->url, 'refresh' => 'daily' ];
+        $calendars = DB::table('calendars')->orderBy('id')->get();
+        foreach ($calendars as $i => $calendar) {
+            $update = [
+                'color'       => $colors[$i % count($colors)],
+                'permissions' => json_encode($permissions),
+            ];
+            if ($calendar->url) {
+                DB::table('calendar_items')->where('calendar_id', $calendar->id)->delete();
+                $update['type']          = 'ics';
+                $update['custom_fields'] = json_encode(['url' => $calendar->url, 'refresh' => 'daily']);
             }
-            $calendar->color       = $colors[ $i % count( $colors ) ];
-            $calendar->permissions = $permissions;
-
-            $calendar->save();
+            DB::table('calendars')->where('id', $calendar->id)->update($update);
         }
 
         Schema::table( 'calendars', function ( Blueprint $table ) {
@@ -71,12 +70,9 @@ class UpdateCalendarsTable extends Migration {
             $table->text( 'synchronization_token' )->nullable();
         } );
 
-        $calendars = Calendar::all();
-        foreach ( $calendars as $calendar ) {
-            if ( $calendar->type === 'ics' ) {
-                $calendar->url = $calendar->custom_fields['url'];
-            }
-            $calendar->save();
+        foreach (DB::table('calendars')->where('type', 'ics')->get() as $calendar) {
+            $customFields = json_decode($calendar->custom_fields ?? '{}', true) ?: [];
+            DB::table('calendars')->where('id', $calendar->id)->update(['url' => $customFields['url'] ?? null]);
         }
 
         Schema::table( 'calendars', function ( Blueprint $table ) {
@@ -97,9 +93,7 @@ class UpdateCalendarsTable extends Migration {
         }
 
         // Get all users that are active
-        $allUsers = User::where( 'status', User::STATUS_ACTIVE )
-                        ->remember( Helper::cacheTime() )
-                        ->get();
+        $allUsers = User::where( 'status', User::STATUS_ACTIVE )->get();
 
         /** @var Team $team */
         foreach ( $allTeams as $team ) {

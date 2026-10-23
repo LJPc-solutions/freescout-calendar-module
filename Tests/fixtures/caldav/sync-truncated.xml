@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<d:multistatus xmlns:d="DAV:">
+  <d:response>
+    <d:href>/dav/calendars/calendar-user/work/</d:href>
+    <d:status>HTTP/1.1 507 Insufficient Storage</d:status>
+    <d:error><d:number-of-matches-within-limits/></d:error>
+  </d:response>
+  <d:response>
+    <d:href>/dav/calendars/calendar-user/work/standup.ics</d:href>
+    <d:propstat>
+      <d:prop><d:getetag>"standup-v2"</d:getetag></d:prop>
+      <d:status>HTTP/1.1 200 OK</d:status>
+    </d:propstat>
+  </d:response>
+  <d:sync-token>http://sabre.io/ns/sync/8</d:sync-token>
+</d:multistatus>

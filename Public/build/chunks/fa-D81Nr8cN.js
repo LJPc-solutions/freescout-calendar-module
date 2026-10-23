@@ -1,0 +1,1 @@
+var e={code:`fa`,week:{dow:6,doy:12},direction:`rtl`,prevText:`قبلی`,nextText:`بعدی`,todayText:`امروز`,yearText:`سال`,monthText:`ماه`,weekTextLong:`هفته`,weekTextShort:`هف`,dayText:`روز`,listText:`برنامه`,allDayText:`تمام روز`,moreLinkText(e){return`بیش از `+e},noEventsText:`هیچ رویدادی به نمایش`};export{e as default};

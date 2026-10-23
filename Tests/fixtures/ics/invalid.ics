@@ -1,0 +1,5 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><title>Sign in</title></head>
+<body><form method="post" action="/login"><input name="password" type="password"></form></body>
+</html>

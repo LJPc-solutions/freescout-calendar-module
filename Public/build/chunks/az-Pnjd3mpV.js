@@ -1,0 +1,2 @@
+var e={code:`az`,week:{dow:1,doy:4},prevText:`Əvvəl`,nextText:`Sonra`,todayText:`Bu Gün`,yearText:`Il`,monthText:`Ay`,weekTextLong:`Həftə`,dayText:`Gün`,listText:`Gündəm`,allDayText:`Bütün
+Gün`,moreLinkText(e){return`+ daha çox `+e},noEventsText:`Göstərmək üçün hadisə yoxdur`};export{e as default};

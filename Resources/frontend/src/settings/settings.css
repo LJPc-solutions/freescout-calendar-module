@@ -1,0 +1,292 @@
+.ljpc-settings .ljpc-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+
+.ljpc-settings .ljpc-drag-handle {
+  color: #93a1af;
+  cursor: grab;
+}
+
+.ljpc-settings .is-removed input[type='text'],
+.ljpc-settings .is-removed select,
+.ljpc-settings .is-removed textarea {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+.ljpc-settings .ljpc-matrix th,
+.ljpc-settings .ljpc-matrix td {
+  text-align: center;
+}
+
+.ljpc-settings .ljpc-matrix th:first-child,
+.ljpc-settings .ljpc-matrix td:first-child {
+  text-align: left;
+}
+
+.ljpc-settings .ljpc-template-preview {
+  color: #4f5d6b;
+}
+
+.ljpc-settings .ljpc-chips .btn {
+  margin: 0 4px 4px 0;
+}
+
+.ljpc-settings .ljpc-report pre {
+  max-height: 200px;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+.ljpc-settings summary {
+  display: list-item;
+  cursor: pointer;
+}
+
+/* Keep the column when a row has no options: hiding the cell would shift the Remove checkbox under "Options". */
+.ljpc-settings td[data-ljpc-field-options].hidden {
+  display: table-cell !important;
+  visibility: hidden;
+}
+
+.ljpc-settings .ljpc-tabs {
+  margin-bottom: 20px;
+}
+
+.ljpc-settings .ljpc-legend {
+  margin-bottom: 10px;
+  border: 0;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* The new-calendar types as cards; the radio stays the real control, so keyboard and screen readers work as usual. */
+.ljpc-settings .ljpc-type-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  max-width: 860px;
+  margin-bottom: 12px;
+}
+
+.ljpc-settings .ljpc-type-card {
+  position: relative;
+  display: block;
+  margin: 0;
+  padding: 12px 14px 12px 38px;
+  border: 1px solid #d6dde3;
+  border-radius: 4px;
+  background: #fff;
+  font-weight: normal;
+  cursor: pointer;
+}
+
+.ljpc-settings .ljpc-type-card input {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  margin: 0;
+}
+
+.ljpc-settings .ljpc-type-card:has(input:checked) {
+  border-color: #3197d6;
+  box-shadow: 0 0 0 1px #3197d6;
+}
+
+.ljpc-settings .ljpc-type-card:has(input:focus-visible) {
+  outline: 2px solid #3197d6;
+  outline-offset: 2px;
+}
+
+.ljpc-settings .ljpc-type-title {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+.ljpc-settings .ljpc-type-text {
+  display: block;
+  color: #72808e;
+}
+
+/* The error of a failing calendar sits right under its row. */
+.ljpc-settings .ljpc-sync-error td {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.ljpc-settings .ljpc-address {
+  word-break: break-all;
+}
+
+/* Connections tab: account actions, the app and CalDAV panels, the pick screen. */
+.ljpc-settings .ljpc-actions {
+  min-width: 260px;
+  text-align: right;
+}
+
+.ljpc-settings .ljpc-inline {
+  display: inline;
+}
+
+.ljpc-settings .ljpc-delete {
+  color: #d9534f;
+}
+
+.ljpc-settings .ljpc-action {
+  margin-top: 6px;
+}
+
+.ljpc-settings .ljpc-action > summary {
+  display: inline-block;
+  list-style: none;
+}
+
+.ljpc-settings .ljpc-action > summary::-webkit-details-marker {
+  display: none;
+}
+
+.ljpc-settings .ljpc-action-form {
+  max-width: 320px;
+  margin: 8px 0 0 auto;
+  padding: 10px 12px;
+  border: 1px solid #d6dde3;
+  border-radius: 4px;
+  background: #f9fafa;
+  text-align: left;
+}
+
+.ljpc-settings .ljpc-provider {
+  max-width: 860px;
+}
+
+.ljpc-settings .ljpc-provider .panel-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.ljpc-settings .ljpc-connect-action {
+  padding-top: 15px;
+  border-top: 1px solid #e3e8eb;
+}
+
+.ljpc-settings .ljpc-pick-list {
+  margin: 10px 0 15px;
+}
+
+.ljpc-settings .ljpc-pick-list .checkbox {
+  margin: 0;
+  padding: 6px 0;
+  border-bottom: 1px solid #e3e8eb;
+}
+
+.ljpc-settings .ljpc-pick-list .label {
+  margin-left: 4px;
+}
+
+.ljpc-settings .ljpc-swatch-none {
+  border: 1px dashed #a5b2bd;
+}
+
+/* The calendar problems above the tabs: one link per problem under a short heading. */
+.ljpc-settings .ljpc-health p {
+  margin-bottom: 4px;
+}
+
+.ljpc-settings .ljpc-health ul {
+  margin-bottom: 0;
+  padding-left: 20px;
+}
+
+/* The calendar list: FreeScout's entity cards (core's .card, as on Manage > Mailboxes), grown to fit a status and an
+   error line. The name's link covers the whole card; a link in the status sits above it. */
+.ljpc-settings .ljpc-calendar-cards {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.ljpc-settings .ljpc-calendar-card {
+  float: none;
+  height: auto;
+  min-height: 82px;
+}
+
+.ljpc-settings .ljpc-calendar-card > h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ljpc-settings .ljpc-card-link {
+  overflow: hidden;
+  color: #2a3b47;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ljpc-settings .ljpc-card-link::after {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  content: '';
+}
+
+.ljpc-settings .ljpc-card-link:focus {
+  outline: none;
+}
+
+.ljpc-settings .ljpc-card-link:focus-visible::after {
+  outline: 2px solid #0078d7;
+  outline-offset: 2px;
+}
+
+.ljpc-settings .ljpc-card-status a {
+  position: relative;
+  z-index: 1;
+}
+
+.ljpc-settings .ljpc-calendar-card > .ljpc-sync-error {
+  display: -webkit-box;
+  color: #a94442;
+  overflow: hidden;
+  margin-top: 4px;
+  font-size: 13px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+@media (max-width: 767px) {
+  .ljpc-settings .ljpc-calendar-card {
+    width: 100%;
+    margin-right: 0;
+  }
+}
+
+/* "Sync now" on a card sits above the card's covering link; the icon turns while a sync runs. */
+.ljpc-settings .ljpc-card-sync {
+  position: relative;
+  z-index: 1;
+  margin-top: 8px;
+}
+
+.ljpc-settings .ljpc-spin {
+  animation: ljpc-spin 1s linear infinite;
+}
+
+@keyframes ljpc-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ljpc-settings .ljpc-spin {
+    animation: none;
+  }
+}

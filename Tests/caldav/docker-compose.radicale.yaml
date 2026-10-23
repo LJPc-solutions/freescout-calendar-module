@@ -1,0 +1,22 @@
+# Radicale for the CalDAV integration tests and the e2e suite: local development only, never shipped.
+# Tests/caldav/install.sh copies this file into FreeScout's .ddev folder and the config into .ddev/radicale.
+# Inside ddev the server is http://radicale:5232 (user calendar-test, password calendar-test); the e2e suite reaches it
+# from the host through ddev's router at http://freescout.ddev.site:5232.
+services:
+  radicale:
+    container_name: ddev-${DDEV_SITENAME}-radicale
+    image: tomsquest/docker-radicale:3.8.1.1
+    restart: "no"
+    expose:
+      - "5232"
+    environment:
+      - VIRTUAL_HOST=$DDEV_HOSTNAME
+      - HTTP_EXPOSE=5232:5232
+    labels:
+      com.ddev.site-name: ${DDEV_SITENAME}
+      com.ddev.approot: $DDEV_APPROOT
+    volumes:
+      - "radicale_data:/data"
+      - "./radicale:/config:ro"
+volumes:
+  radicale_data:

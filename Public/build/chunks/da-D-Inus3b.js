@@ -1,0 +1,2 @@
+var e={code:`da`,week:{dow:1,doy:4},prevText:`Forrige`,nextText:`Næste`,todayText:`I dag`,yearText:`År`,monthText:`Måned`,weekTextLong:`Uge`,dayText:`Dag`,listText:`Agenda`,allDayText:`Hele
+dagen`,moreLinkText:`flere`,noEventsText:`Ingen arrangementer at vise`};export{e as default};

@@ -1,0 +1,1 @@
+function e(e,t){typeof window.showFloatingAlert==`function`?e===`warning`?window.showFloatingAlert(`error`,t,!0):window.showFloatingAlert(e,t):window.alert(t)}export{e as t};

@@ -10,23 +10,57 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Prepare files
+      # Old servers load these files before the PHP guard can pause the module, so they must parse on core's minimum PHP.
+      - name: Check that the guard files parse on PHP 7.1
         run: |
-          mkdir LJPcCalendarModule
-          # Move all files except .git, .github, and README.md into the LJPcCalendarModule folder
-          find . -maxdepth 1 ! -name .git ! -name .github ! -name LJPcCalendarModule ! -name . ! -name README.md -exec mv {} LJPcCalendarModule/ \;
+          docker run --rm -v "$PWD":/module:ro -w /module php:7.1-cli sh -c \
+            'failed=0; for file in Database/Migrations/*.php Providers/LJPcCalendarModuleServiceProvider.php start.php; do php -l "$file" || failed=1; done; exit $failed'
 
-      - name: Archive repository
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+
+      - name: Install PHP dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction
+
+      - name: Check for packages FreeScout already ships
+        run: php .github/scripts/check-shared-packages.php
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: Resources/frontend/package-lock.json
+
+      # Public/build is committed so installs need no Node; the release must ship exactly what the sources build.
+      - name: Check, build and compare the frontend
+        working-directory: Resources/frontend
         run: |
-          zip -r "${GITHUB_REF_NAME}.zip" LJPcCalendarModule
-          cp "${GITHUB_REF_NAME}.zip" latest.zip
+          npm ci --include=dev
+          npm run check
+          npm run build
+          git diff --exit-code -- ../../Public/build
+          test -z "$(git status --porcelain -- ../../Public/build)"
 
-      - name: Create version.txt
-        run: echo "${GITHUB_REF_NAME}" > version.txt
+      - name: Build release zip
+        run: bash .github/scripts/build-release.sh "${GITHUB_REF_NAME}"
+
+      - name: Keep pre-release zip as artifact
+        if: ${{ contains(github.ref_name, '-') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.ref_name }}
+          path: ${{ github.ref_name }}.zip
 
       - name: Upload to FTP
+        if: ${{ !contains(github.ref_name, '-') }}
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -37,5 +71,5 @@ jobs:
           exclude: |
             **
             !latest.zip
-            !${GITHUB_REF_NAME}.zip
+            !${{ github.ref_name }}.zip
             !version.txt

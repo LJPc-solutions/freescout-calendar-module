@@ -1,0 +1,145 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('agent%40example.com')/calendars('AAMkADExampleCalendar01AAA%3D')/events('AAMkADExampleSeries0001AAA%3D')/instances",
+  "value": [
+    {
+      "@odata.etag": "W/\"DwAAABYAAABExampleSeriesKey01\"",
+      "id": "AAMkADExampleSeries0001AAABExampleOccurrence20261005",
+      "changeKey": "DwAAABYAAABExampleSeriesKey01",
+      "type": "occurrence",
+      "seriesMasterId": "AAMkADExampleSeries0001AAA=",
+      "originalStart": "2026-10-05T08:00:00Z",
+      "subject": "Weekly planning",
+      "body": {
+        "contentType": "text",
+        "content": "Plan the support week."
+      },
+      "start": {
+        "dateTime": "2026-10-05T08:00:00.0000000",
+        "timeZone": "UTC"
+      },
+      "end": {
+        "dateTime": "2026-10-05T09:00:00.0000000",
+        "timeZone": "UTC"
+      },
+      "location": {
+        "displayName": ""
+      },
+      "isAllDay": false,
+      "isCancelled": false,
+      "sensitivity": "normal",
+      "showAs": "busy"
+    },
+    {
+      "@odata.etag": "W/\"DwAAABYAAABExampleSeriesKey01\"",
+      "id": "AAMkADExampleSeries0001AAABExampleOccurrence20261012",
+      "changeKey": "DwAAABYAAABExampleSeriesKey01",
+      "type": "occurrence",
+      "seriesMasterId": "AAMkADExampleSeries0001AAA=",
+      "originalStart": "2026-10-12T08:00:00Z",
+      "subject": "Weekly planning",
+      "body": {
+        "contentType": "text",
+        "content": "Plan the support week."
+      },
+      "start": {
+        "dateTime": "2026-10-12T08:00:00.0000000",
+        "timeZone": "UTC"
+      },
+      "end": {
+        "dateTime": "2026-10-12T09:00:00.0000000",
+        "timeZone": "UTC"
+      },
+      "location": {
+        "displayName": ""
+      },
+      "isAllDay": false,
+      "isCancelled": false,
+      "sensitivity": "normal",
+      "showAs": "busy"
+    },
+    {
+      "@odata.etag": "W/\"DwAAABYAAABExampleSeriesKey01\"",
+      "id": "AAMkADExampleSeries0001AAABExampleException20261026",
+      "changeKey": "DwAAABYAAABExampleSeriesKey01",
+      "type": "exception",
+      "seriesMasterId": "AAMkADExampleSeries0001AAA=",
+      "originalStart": "2026-10-26T09:00:00Z",
+      "subject": "Weekly planning (moved)",
+      "body": {
+        "contentType": "html",
+        "content": "<html><head></head><body><div>Moved to the afternoon.</div></body></html>"
+      },
+      "start": {
+        "dateTime": "2026-10-26T13:00:00.0000000",
+        "timeZone": "UTC"
+      },
+      "end": {
+        "dateTime": "2026-10-26T14:00:00.0000000",
+        "timeZone": "UTC"
+      },
+      "location": {
+        "displayName": "Room 3"
+      },
+      "isAllDay": false,
+      "isCancelled": false,
+      "sensitivity": "normal",
+      "showAs": "busy"
+    },
+    {
+      "@odata.etag": "W/\"DwAAABYAAABExampleSeriesKey01\"",
+      "id": "AAMkADExampleSeries0001AAABExampleOccurrence20261102",
+      "changeKey": "DwAAABYAAABExampleSeriesKey01",
+      "type": "occurrence",
+      "seriesMasterId": "AAMkADExampleSeries0001AAA=",
+      "originalStart": "2026-11-02T09:00:00Z",
+      "subject": "Weekly planning",
+      "body": {
+        "contentType": "text",
+        "content": "Plan the support week."
+      },
+      "start": {
+        "dateTime": "2026-11-02T09:00:00.0000000",
+        "timeZone": "UTC"
+      },
+      "end": {
+        "dateTime": "2026-11-02T10:00:00.0000000",
+        "timeZone": "UTC"
+      },
+      "location": {
+        "displayName": ""
+      },
+      "isAllDay": false,
+      "isCancelled": false,
+      "sensitivity": "normal",
+      "showAs": "busy"
+    },
+    {
+      "@odata.etag": "W/\"DwAAABYAAABExampleSeriesKey01\"",
+      "id": "AAMkADExampleSeries0001AAABExampleOccurrence20261109",
+      "changeKey": "DwAAABYAAABExampleSeriesKey01",
+      "type": "occurrence",
+      "seriesMasterId": "AAMkADExampleSeries0001AAA=",
+      "originalStart": "2026-11-09T09:00:00Z",
+      "subject": "Weekly planning",
+      "body": {
+        "contentType": "text",
+        "content": "Plan the support week."
+      },
+      "start": {
+        "dateTime": "2026-11-09T09:00:00.0000000",
+        "timeZone": "UTC"
+      },
+      "end": {
+        "dateTime": "2026-11-09T10:00:00.0000000",
+        "timeZone": "UTC"
+      },
+      "location": {
+        "displayName": ""
+      },
+      "isAllDay": false,
+      "isCancelled": false,
+      "sensitivity": "normal",
+      "showAs": "busy"
+    }
+  ]
+}

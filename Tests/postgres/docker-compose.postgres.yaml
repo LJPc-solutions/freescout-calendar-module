@@ -1,0 +1,19 @@
+# PostgreSQL for the migration rehearsal on PostgreSQL (Tests/rehearse-migration.sh <dump> pgsql): local development
+# only, never shipped. Copy this file into FreeScout's .ddev folder and run "ddev restart". Inside ddev the server is
+# postgres:5432 (user and password rehearsal). Its data lives in memory and is gone after a restart.
+services:
+  postgres:
+    container_name: ddev-${DDEV_SITENAME}-postgres
+    image: postgres:16.10-alpine
+    restart: "no"
+    expose:
+      - "5432"
+    environment:
+      - POSTGRES_USER=rehearsal
+      - POSTGRES_PASSWORD=rehearsal
+      - POSTGRES_DB=rehearsal
+    labels:
+      com.ddev.site-name: ${DDEV_SITENAME}
+      com.ddev.approot: $DDEV_APPROOT
+    tmpfs:
+      - /var/lib/postgresql/data

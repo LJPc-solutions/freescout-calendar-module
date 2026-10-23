@@ -1,0 +1,2 @@
+var e={code:`hu`,week:{dow:1,doy:4},prevText:`Vissza`,nextText:`Előre`,todayText:`Ma`,yearText:`Év`,monthText:`Hónap`,weekTextLong:`Hét`,dayText:`Nap`,listText:`Lista`,allDayText:`Egész
+nap`,moreLinkText:`további`,noEventsText:`Nincs megjeleníthető esemény`};export{e as default};

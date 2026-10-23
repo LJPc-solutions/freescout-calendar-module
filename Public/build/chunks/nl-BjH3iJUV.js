@@ -1,0 +1,1 @@
+var e={code:`nl`,week:{dow:1,doy:4},prevText:`Vorige`,nextText:`Volgende`,todayText:`Vandaag`,yearText:`Jaar`,monthText:`Maand`,weekTextLong:`Week`,dayText:`Dag`,listText:`Lijst`,allDayText:`Hele dag`,moreLinkText:`extra`,noEventsText:`Geen evenementen om te laten zien`};export{e as default};

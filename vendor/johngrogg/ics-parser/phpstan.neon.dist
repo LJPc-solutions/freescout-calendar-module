@@ -1,9 +1,0 @@
-parameters:
-    paths:
-        - src
-
-    level: max
-
-    ignoreErrors:
-        -
-            identifier: missingType.iterableValue

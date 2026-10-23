@@ -1,0 +1,1 @@
+var e={code:`ar`,week:{dow:6,doy:12},direction:`rtl`,prevText:`السابق`,nextText:`التالي`,todayText:`اليوم`,yearText:`سنة`,monthText:`شهر`,weekTextLong:`أسبوع`,dayText:`يوم`,listText:`أجندة`,allDayText:`اليوم كله`,moreLinkText:`أخرى`,noEventsText:`أي أحداث لعرض`};export{e as default};

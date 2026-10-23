@@ -1,0 +1,2 @@
+var e={code:`pl`,week:{dow:1,doy:4},prevText:`Poprzedni`,nextText:`Następny`,todayText:`Dziś`,yearText:`Rok`,monthText:`Miesiąc`,weekTextLong:`Tydzień`,weekTextShort:`Tydz`,dayText:`Dzień`,listText:`Plan dnia`,allDayText:`Cały
+dzień`,moreLinkText:`więcej`,noEventsText:`Brak wydarzeń do wyświetlenia`};export{e as default};

@@ -1,0 +1,185 @@
+@import '../shared/shared.css';
+
+/* FreeScout's palette on FullCalendar's classic theme. FullCalendar 7 hashes its class names, so it is styled
+   only through its --fc-classic-* variables and our own class hooks (eventClass, popoverClass). The variables sit on
+   :root because the "+N more" popover is portaled to <body>; this stylesheet loads only on the calendar page. */
+:root {
+  --fc-classic-button: #fff;
+  --fc-classic-button-border: #c4c8cc;
+  --fc-classic-button-strong: #deecf9;
+  --fc-classic-button-strong-border: #0078d7;
+  --fc-classic-button-outline: #0078d766;
+  --fc-classic-button-foreground: #253540;
+  --fc-classic-primary: #0078d7;
+  --fc-classic-primary-foreground: #fff;
+  --fc-classic-highlight: #deecf9aa;
+  --fc-classic-today: #deecf966;
+  --fc-classic-now: #e74c3c;
+  --fc-classic-foreground: #253540;
+  --fc-classic-muted-foreground: #4f5d6b;
+  --fc-classic-faint-foreground: #93a1af;
+  --fc-classic-border: #d6dde3;
+  --fc-classic-strong-border: #a5b2bd;
+}
+
+.ljpc-page {
+  box-sizing: border-box;
+  display: flex;
+  height: calc(100vh - 54px);
+  padding: 16px;
+}
+
+.ljpc-page.is-mobile {
+  display: block;
+  height: auto;
+  padding: 8px 16px;
+}
+
+/* The calendars in FreeScout's sidebar column (core's .sidebar-title, .sidebar-menu and .sidebar-buttons). A calendar's
+   swatch takes the place of a mailbox folder's icon; a switched-off calendar is muted with a hollow swatch. */
+.ljpc-sidebar .ljpc-sidebar-new {
+  display: block;
+  width: calc(100% - 40px);
+  margin: 12px 20px 10px;
+}
+
+.ljpc-calendar-menu > li > a {
+  padding-right: 40px;
+}
+
+.ljpc-calendar-menu .ljpc-swatch {
+  position: absolute;
+  top: 12px;
+  left: 22px;
+  border: 2px solid;
+  box-sizing: border-box;
+}
+
+.ljpc-calendar-name {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ljpc-calendar-menu .ljpc-read-only {
+  top: 11px;
+  right: 20px;
+  left: auto;
+  font-size: 12px;
+}
+
+/* Only the buttons a screen shows are rendered, so the pill rounds its outer ends. */
+.ljpc-sidebar .ljpc-sidebar-buttons .btn {
+  border-radius: 0;
+}
+
+.ljpc-sidebar .ljpc-sidebar-buttons .btn:first-child {
+  border-radius: 14px 0 0 14px;
+}
+
+.ljpc-sidebar .ljpc-sidebar-buttons .btn:last-child {
+  border-radius: 0 14px 14px 0;
+}
+
+.ljpc-sidebar .ljpc-sidebar-buttons .btn:only-child {
+  border-radius: 14px;
+}
+
+.ljpc-spin {
+  animation: ljpc-spin 1s linear infinite;
+}
+
+@keyframes ljpc-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ljpc-spin {
+    animation: none;
+  }
+}
+
+@media (min-width: 992px) {
+  .ljpc-calendar-menu {
+    max-height: calc(100vh - 250px);
+    overflow-y: auto;
+  }
+}
+
+/* Below 992px core turns the column into a bar: menu button, title, and the buttons at the right. */
+@media (max-width: 991px) {
+  .ljpc-sidebar .ljpc-sidebar-new {
+    display: none;
+  }
+
+  .ljpc-sidebar .ljpc-sidebar-buttons {
+    width: calc(50px * var(--ljpc-buttons));
+  }
+
+  /* The bar takes 51px above the page. */
+  .ljpc-page {
+    height: calc(100vh - 54px - 51px);
+  }
+}
+
+.ljpc-main {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ljpc-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+  transition: opacity 0.15s;
+}
+
+.is-busy .ljpc-grid,
+.ljpc-grid.is-loading {
+  opacity: 0.7;
+}
+
+/* Fetching dims the grid only when it takes a moment, so re-filtering a loaded range never flickers. */
+.ljpc-grid.is-loading {
+  transition-delay: 0.2s;
+}
+
+/* FullCalendar's 24px title crowds the phone toolbar. */
+.is-mobile .ljpc-toolbar-title {
+  font-size: 18px;
+}
+
+.ljpc-banner {
+  margin-bottom: 8px;
+}
+
+/* The administrator's problems: one link per problem under a short heading. */
+.ljpc-health p {
+  margin-bottom: 4px;
+}
+
+.ljpc-health ul {
+  margin-bottom: 0;
+  padding-left: 20px;
+}
+
+.ljpc-state {
+  max-width: 560px;
+  margin: 48px auto;
+  text-align: center;
+}
+
+.ljpc-event-cancelled {
+  opacity: 0.6;
+  text-decoration: line-through;
+}
+
+/* "+N more": the popover grows with its events and only scrolls beyond the viewport (2.7.x behavior). */
+.ljpc-popover {
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}

@@ -1,0 +1,1 @@
+var e={code:`sl`,week:{dow:1,doy:7},prevText:`Prejšnji`,nextText:`Naslednji`,todayText:`Trenutni`,yearText:`Leto`,monthText:`Mesec`,weekTextLong:`Teden`,dayText:`Dan`,listText:`Dnevni red`,allDayText:`Ves dan`,moreLinkText:`več`,noEventsText:`Ni dogodkov za prikaz`};export{e as default};

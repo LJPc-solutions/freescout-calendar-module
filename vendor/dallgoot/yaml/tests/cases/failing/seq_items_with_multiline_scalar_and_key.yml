@@ -1,4 +1,0 @@
-foo:
-    - bar
-"missing colon"
-    foo: bar

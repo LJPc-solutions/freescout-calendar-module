@@ -1,0 +1,2 @@
+var e={code:`pt`,week:{dow:1,doy:4},prevText:`Anterior`,nextText:`Seguinte`,todayText:`Hoje`,yearText:`Ano`,monthText:`Mês`,weekTextLong:`Semana`,weekTextShort:`Sem`,dayText:`Dia`,listText:`Agenda`,allDayText:`Todo
+o dia`,moreLinkText:`mais`,noEventsText:`Não há eventos para mostrar`};export{e as default};

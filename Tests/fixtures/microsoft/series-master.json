@@ -1,0 +1,60 @@
+{
+  "@odata.etag": "W/\"DwAAABYAAABExampleSeriesKey01\"",
+  "id": "AAMkADExampleSeries0001AAA=",
+  "lastModifiedDateTime": "2026-10-02T12:00:00.0000000Z",
+  "changeKey": "DwAAABYAAABExampleSeriesKey01",
+  "originalStartTimeZone": "W. Europe Standard Time",
+  "originalEndTimeZone": "W. Europe Standard Time",
+  "iCalUId": "040000008200E00074C5B7101A82E00800000000000000000000000000000000000000000000000000000000000003",
+  "subject": "Weekly planning",
+  "body": {
+    "contentType": "text",
+    "content": "Plan the support week."
+  },
+  "start": {
+    "dateTime": "2026-10-05T08:00:00.0000000",
+    "timeZone": "UTC"
+  },
+  "end": {
+    "dateTime": "2026-10-05T09:00:00.0000000",
+    "timeZone": "UTC"
+  },
+  "location": {
+    "displayName": "",
+    "locationType": "default"
+  },
+  "isAllDay": false,
+  "isCancelled": false,
+  "isOrganizer": true,
+  "sensitivity": "normal",
+  "showAs": "busy",
+  "type": "seriesMaster",
+  "seriesMasterId": null,
+  "recurrence": {
+    "pattern": {
+      "type": "weekly",
+      "interval": 1,
+      "month": 0,
+      "dayOfMonth": 0,
+      "daysOfWeek": [
+        "monday"
+      ],
+      "firstDayOfWeek": "sunday",
+      "index": "first"
+    },
+    "range": {
+      "type": "numbered",
+      "startDate": "2026-10-05",
+      "endDate": "0001-01-01",
+      "recurrenceTimeZone": "W. Europe Standard Time",
+      "numberOfOccurrences": 6
+    }
+  },
+  "organizer": {
+    "emailAddress": {
+      "name": "Support Agent",
+      "address": "agent@example.com"
+    }
+  },
+  "attendees": []
+}

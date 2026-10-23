@@ -1,0 +1,15 @@
+/.git
+/.github
+/.gitignore
+/.phpunit.result.cache
+/.claude
+/CLAUDE.md
+/README.md
+/Tests
+/docs
+/phpunit.xml
+/Resources/frontend
+/node_modules
+/dist
+/*.zip
+/version.txt
