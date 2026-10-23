@@ -2,15 +2,11 @@
 
 ## Branches and plans
 
-- `main` holds the released 2.x line, currently 2.6.4.
-- `v3` holds the 3.0 rewrite.
-  - **Never push `v3` to the public `origin` before 3.0.0 is released.** Its diff reveals the 2.6.4 security fixes.
-  - A local pre-push hook blocks it.
-  - For backup and CI, use a private mirror.
-  - Design: `docs/superpowers/specs/2026-10-05-calendar-module-v3-design.md`.
-  - Research, with sources: `docs/superpowers/specs/2026-10-05-calendar-module-v3-research.md`.
-  - Read both before working on v3; the design's decision log is final unless Lars reopens a decision.
-  - W3's live test of Google, Microsoft and real CalDAV servers: `docs/w3-manual-test.md`; W4's live test of invites with real mail services: `docs/w4-manual-test.md`. Wiki drafts for W5 to publish: `docs/wiki/`.
+- `main` holds the released line: 3.0.0 since 2026-10-23, released as one squashed commit on top of 2.6.4.
+- The local branch `v3` keeps the rewrite's 218 commits; it was squashed into `main`, not pushed (a local pre-push hook still blocks it).
+- Design: `docs/superpowers/specs/2026-10-05-calendar-module-v3-design.md`. Research, with sources: `docs/superpowers/specs/2026-10-05-calendar-module-v3-research.md`. The design's decision log is final unless Lars reopens a decision.
+- Live tests with real accounts: `docs/w3-manual-test.md` (Google, Microsoft, CalDAV servers) and `docs/w4-manual-test.md` (invites with real mail services).
+- The wiki is published from `docs/wiki/`: clone `https://github.com/LJPc-solutions/freescout-calendar-module.wiki.git`, copy the pages in, commit and push.
 
 ## Local development
 
@@ -152,6 +148,9 @@
 - **Calendar invites arrive as attachments.** FreeScout stores incoming `text/calendar` parts as attachments named `calendar.ics`, and the MIME `method=` parameter is lost. Gmail also adds `invite.ics`, so the same invite shows up twice.
 - **Read attachment content with `Attachment::getFileContents()`.** Since 1.8.242 attachments may live on S3, so don't use local paths.
 - **Every pushed tag ships to all users.** `.github/workflows/release.yml` zips the repo for each tag pushed and uploads `latest.zip` and `version.txt`, which every install auto-updates from. Don't push test tags.
+  - The upload goes over FTP to `resources.ljpc.network` (the `FTP_SERVER` secret since 2026-10-23; the old host stopped resolving). The workflow does not create the GitHub release: `gh release create <tag> --notes-file ...`.
+  - Docker Hub sometimes answers 500 when the PHP 7.1 lint pulls `php:7.1-cli`. Nothing is uploaded then; rerun with `gh run rerun <id> --failed`.
+  - A release candidate is built locally in a clean clone with the same checks (lint, `check-shared-packages.php`, frontend build compared, `build-release.sh <tag>`) and tested on Lars's own install.
 - **Core views throw in module tests on PHP 8.3, unless FreeScout's null-safe `e()` is loaded.** The conversation page passes `null` to Laravel's `e()`, and the test error handler turns that deprecation into an exception. Production defines a null-safe `e()` (`$value ?? ''`, `doubleEncode = false`) in `public/index.php` and `artisan` before the autoloader, but PHPUnit's own autoloader defines Laravel's first, so `Tests/bootstrap.php` can't replace it. `Tests/null-safe-e.php` holds production's version; run `ddev exec 'cd Modules/freescout-calendar-module && php -d auto_prepend_file=/var/www/html/Modules/freescout-calendar-module/Tests/null-safe-e.php ../../vendor/bin/phpunit'` to render core views like production does (checked 2026-10-06: the conversation page then renders with status 200 for its agent). The plain command still works for everything else; a plain run keeps throwing on core views that print `null`, so write module views null-safe anyway (`SettingsPage::oldString()`).
 - **Core's `\Helper::checkUrlHost()` refuses every URL with a port or a username** (its `normalizeIPv6InUrl()` wraps `host:port` in brackets). `HttpClientFactory::assertAllowed()` checks `scheme://host/` instead. Never use `\Helper::getRemoteFileContents()`: it logs the full URL, and an ICS URL can be a secret.
 - **Guzzle 8** rejects string timeouts (`.env` values are strings, so cast them to float), and does digest authentication itself (curl's `CURLAUTH_DIGEST` option doesn't work through it).
