@@ -2,7 +2,7 @@
   "name": "LJPc calendar module",
   "alias": "ljpccalendarmodule",
   "description": "Calendars in FreeScout: FreeScout calendars, Google Calendar, Microsoft 365, CalDAV and ICS feeds, with invites and reminders. Back up your database before upgrading to version 3.",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "detailsUrl": "",
   "author": "LJPc",
   "authorUrl": "https://ljpc.nl",
