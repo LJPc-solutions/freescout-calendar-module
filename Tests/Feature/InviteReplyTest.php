@@ -95,6 +95,22 @@ class InviteReplyTest extends TestCase
         $this->assertStringContainsString(e(__('This answer is recorded with the event.')), (string) ob_get_clean());
     }
 
+    public function test_an_answer_that_starts_a_conversation_is_recorded(): void
+    {
+        // FetchEmails asks for the status of a new conversation before saving it, so it has no id yet (issue #94).
+        $conversation = factory(Conversation::class)->make([
+            'mailbox_id' => $this->mailbox->id, 'customer_email' => 'dana@example.com', 'customer_id' => $this->conversation->customer_id,
+        ]);
+        $conversation->status = \Eventy::filter('conversation.status_changing', Conversation::STATUS_ACTIVE, $conversation);
+        $conversation->save();
+        $ics = strtr(self::inviteFixture('reply-accepted.ics'), ['freescout-intake-381@example.org' => $this->event->uid]);
+        $thread = $this->inviteThread($conversation, ['invite.ics' => $ics], 'dana@example.com');
+        \Eventy::filter('conversation.created_by_customer', $conversation, $thread, Customer::getByEmail('dana@example.com'))->save();
+
+        $this->assertSame('ACCEPTED', $this->event->fresh()->attendees[0]['partstat']);
+        $this->assertSame(Conversation::STATUS_ACTIVE, (int) $conversation->fresh()->status, 'a new conversation has no status to keep');
+    }
+
     public function test_an_answer_from_another_address_or_to_someone_elses_event_changes_nothing(): void
     {
         $this->arrives('mallory@example.net', ['mailto:dana@example.com' => 'mailto:mallory@example.net']);

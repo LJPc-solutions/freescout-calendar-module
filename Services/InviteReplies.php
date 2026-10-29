@@ -34,6 +34,10 @@ class InviteReplies
     /** conversation.status_changing: runs before core makes the conversation active, while it still has its status. */
     public static function rememberStatus(Conversation $conversation): void
     {
+        // A new conversation has no id yet, and no status to keep (PHP 8.5 deprecates null as an array key, issue #94).
+        if ($conversation->id === null) {
+            return;
+        }
         self::$statusBefore[$conversation->id] = (int) $conversation->status;
     }
 

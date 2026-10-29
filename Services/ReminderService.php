@@ -92,7 +92,9 @@ final class ReminderService
         $users = User::whereIn('id', array_merge(array_column($due, 'author_id'), $assignees->values()->all()))->get()->keyBy('id');
         $queued = 0;
         foreach ($due as $row) {
-            $ids = array_unique(array_filter([(int) $row->author_id, (int) ($assignees[$row->conversation_id] ?? 0)]));
+            // An event without a conversation has no assignee (PHP 8.5 deprecates null as an array key).
+            $assignee = $row->conversation_id === null ? 0 : (int) ($assignees[$row->conversation_id] ?? 0);
+            $ids = array_unique(array_filter([(int) $row->author_id, $assignee]));
             foreach ($ids as $id) {
                 $user = $users[$id] ?? null;
                 if (!$user || !$user->isActive() || !$user->can('view', $calendars[$row->calendar_id]) || !self::claim($row, $id, $now)) {
