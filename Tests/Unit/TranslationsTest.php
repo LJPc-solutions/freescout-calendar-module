@@ -7,34 +7,37 @@ use Modules\LJPcCalendarModule\Http\SettingsPage;
 use Modules\LJPcCalendarModule\Tests\TestCase;
 
 /**
- * Dutch, German, French and Spanish translate every string; the other languages fall back to English (decision
- * 2026-10-23). The strings are the __() literals in the module's PHP and Blade files, the frontend's keys, the
- * provider labels and the migration report's messages, which are translated when the report is shown.
+ * Every language FreeScout offers translates every string (decision 2026-10-29). The strings are the __() literals in
+ * the module's PHP and Blade files, the frontend's keys, the provider labels and the migration report's messages,
+ * which are translated when the report is shown.
  */
 class TranslationsTest extends TestCase
 {
-    private const COMPLETE = ['nl', 'de', 'fr', 'es'];
-
-    public function test_dutch_german_french_and_spanish_translate_every_string(): void
+    public function test_every_language_translates_every_string(): void
     {
         $keys = self::keys();
-        foreach (self::COMPLETE as $locale) {
+        foreach (self::locales() as $locale) {
             $this->assertSame([], array_values(array_diff($keys, array_keys(self::language($locale)))), $locale);
         }
+    }
+
+    public function test_every_language_of_freescout_has_a_file(): void
+    {
+        $locales = array_diff(config('app.locales'), ['en']);
+        $this->assertSame([], array_values(array_diff($locales, self::locales())));
     }
 
     public function test_no_language_keeps_strings_the_module_no_longer_uses(): void
     {
         $keys = self::keys();
-        foreach (glob(self::root() . '/Resources/lang/*.json') as $path) {
-            $locale = basename($path, '.json');
+        foreach (self::locales() as $locale) {
             $this->assertSame([], array_values(array_diff(array_keys(self::language($locale)), $keys)), $locale);
         }
     }
 
     public function test_translations_keep_every_placeholder(): void
     {
-        foreach (self::COMPLETE as $locale) {
+        foreach (self::locales() as $locale) {
             foreach (self::language($locale) as $english => $translated) {
                 preg_match_all('/:[a-z_]+/', $english, $expected);
                 preg_match_all('/:[a-z_]+/', $translated, $actual);
@@ -48,6 +51,14 @@ class TranslationsTest extends TestCase
     private static function root(): string
     {
         return dirname(__DIR__, 2);
+    }
+
+    /** @return string[] */
+    private static function locales(): array
+    {
+        return array_map(function ($path) {
+            return basename($path, '.json');
+        }, glob(self::root() . '/Resources/lang/*.json'));
     }
 
     private static function language(string $locale): array
