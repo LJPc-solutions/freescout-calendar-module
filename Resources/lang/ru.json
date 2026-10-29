@@ -394,7 +394,7 @@
     "The CalDAV server refused this request (HTTP :status).": "Сервер CalDAV отклонил этот запрос (HTTP :status).",
     "The CalDAV server sent an answer FreeScout can't read.": "Сервер CalDAV отправил ответ, который FreeScout не может прочитать.",
     "The CalDAV server sent an answer over 50 MB.": "Сервер CalDAV отправил ответ размером более 50 МБ.",
-    "The ICS or webcal link the other app shares, starting with https:\/\/ or webcal:\/\/ Anyone with the link can read the calendar, so only administrators see it here.": "Ссылка ICS или webcal, которой поделилось другое приложение, начинающаяся с https:\/\/ или webcal:\/\/ Любой, у кого есть ссылка, может читать календарь, поэтому здесь её видят только администраторы.",
+    "The ICS or webcal link the other app shares, starting with https:\/\/ or webcal:\/\/. Anyone with the link can read the calendar, so only administrators see it here.": "Ссылка ICS или webcal, которой поделилось другое приложение, начинающаяся с https:\/\/ или webcal:\/\/. Любой, у кого есть ссылка, может читать календарь, поэтому здесь её видят только администраторы.",
     "The account may only read this calendar, so its events can't be changed from FreeScout.": "Учётная запись может только читать этот календарь, поэтому его события нельзя изменить из FreeScout.",
     "The account must be connected again.": "Учётную запись необходимо подключить заново.",
     "The account of this calendar must be connected again before it can sync.": "Учётную запись этого календаря необходимо подключить заново, прежде чем он сможет синхронизироваться.",
