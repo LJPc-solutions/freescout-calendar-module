@@ -2,7 +2,7 @@
 
 ## Branches and plans
 
-- `main` holds the released line: 3.0.0 since 2026-10-23, released as one squashed commit on top of 2.6.4.
+- `main` holds the released line: 3.0.0 since 2026-10-23, released as one squashed commit on top of 2.6.4. 3.0.1 (2026-10-29) fixes two PHP 8.5 crashes (#94).
 - The local branch `v3` keeps the rewrite's 218 commits; it was squashed into `main`, not pushed (a local pre-push hook still blocks it).
 - Design: `docs/superpowers/specs/2026-10-05-calendar-module-v3-design.md`. Research, with sources: `docs/superpowers/specs/2026-10-05-calendar-module-v3-research.md`. The design's decision log is final unless Lars reopens a decision.
 - Live tests with real accounts: `docs/w3-manual-test.md` (Google, Microsoft, CalDAV servers) and `docs/w4-manual-test.md` (invites with real mail services).
@@ -66,6 +66,7 @@
   - The CalDAV integration tests (`@group caldav-server`) skip without Radicale; the suite's counts in the plans assume it runs.
   - Never run two phpunit processes at once: the migration tests run DDL on the shared test database.
   - `ddev exec` without a TTY prints PHPUnit's output on stderr. Capture both streams (`2>&1`) in scripts.
+  - On PHP 8.5: set `php_version: "8.5"` in FreeScout's `.ddev/config.yaml`, `ddev restart`, and run phpunit with `php -d auto_prepend_file=/var/www/html/Modules/freescout-calendar-module/Tests/php85-prepend.php` (core's PHPUnit 9.5 and Mockery break on 8.5's deprecations otherwise). On 2026-10-29 four errors remained, all in test code: `setAccessible()` in `MigrationItemsTest` and Laravel's `TestResponse` in `AgentApiTest`. Set 8.3 back afterwards.
 - Test support in `Tests/Support`:
   - `FakeHttp::install()` replaces `HttpClientFactory`: queue responses, read the request history. Install it before anything resolves a provider.
     - Queue a new Response object for every request. Clients built with a body limit (ICS, CalDAV) give every request a capped `sink`, which Guzzle's `MockHandler` fills from the queued body, and Guzzle closes the body of a digest challenge it answers, so a Response queued twice fails with "Stream is detached".
@@ -151,6 +152,7 @@
   - The upload goes over FTP to `resources.ljpc.network` (the `FTP_SERVER` secret since 2026-10-23; the old host stopped resolving). The workflow does not create the GitHub release: `gh release create <tag> --notes-file ...`.
   - Docker Hub sometimes answers 500 when the PHP 7.1 lint pulls `php:7.1-cli`. Nothing is uploaded then; rerun with `gh run rerun <id> --failed`.
   - A release candidate is built locally in a clean clone with the same checks (lint, `check-shared-packages.php`, frontend build compared, `build-release.sh <tag>`) and tested on Lars's own install.
+- **PHP 8.5 deprecates `null` as an array key** (writing, reading with `??`, `isset()`, `array_key_exists()` and Collection offsets; `unset()` is fine), and Laravel turns the deprecation into an exception. Check a key that may be null first: a new conversation's id in core's hooks (issue #94), an event's `conversation_id`.
 - **Core views throw in module tests on PHP 8.3, unless FreeScout's null-safe `e()` is loaded.** The conversation page passes `null` to Laravel's `e()`, and the test error handler turns that deprecation into an exception. Production defines a null-safe `e()` (`$value ?? ''`, `doubleEncode = false`) in `public/index.php` and `artisan` before the autoloader, but PHPUnit's own autoloader defines Laravel's first, so `Tests/bootstrap.php` can't replace it. `Tests/null-safe-e.php` holds production's version; run `ddev exec 'cd Modules/freescout-calendar-module && php -d auto_prepend_file=/var/www/html/Modules/freescout-calendar-module/Tests/null-safe-e.php ../../vendor/bin/phpunit'` to render core views like production does (checked 2026-10-06: the conversation page then renders with status 200 for its agent). The plain command still works for everything else; a plain run keeps throwing on core views that print `null`, so write module views null-safe anyway (`SettingsPage::oldString()`).
 - **Core's `\Helper::checkUrlHost()` refuses every URL with a port or a username** (its `normalizeIPv6InUrl()` wraps `host:port` in brackets). `HttpClientFactory::assertAllowed()` checks `scheme://host/` instead. Never use `\Helper::getRemoteFileContents()`: it logs the full URL, and an ICS URL can be a secret.
 - **Guzzle 8** rejects string timeouts (`.env` values are strings, so cast them to float), and does digest authentication itself (curl's `CURLAUTH_DIGEST` option doesn't work through it).
